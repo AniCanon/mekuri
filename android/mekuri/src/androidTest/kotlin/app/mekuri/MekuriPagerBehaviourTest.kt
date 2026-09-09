@@ -256,12 +256,12 @@ class MekuriPagerBehaviourTest {
         this.rule.waitForIdle()
         paging = false
         this.rule.waitForIdle()
-        paging = true
-        this.rule.waitForIdle()
         this.rule.onNodeWithTag(SCENE_TAG).performTouchInput { up() }
         this.rule.waitForIdle()
         assertEquals(3, state.currentPage)
 
+        paging = true
+        this.rule.waitForIdle()
         this.rule.onNodeWithTag(SCENE_TAG).performTouchInput {
             click(Offset(this.width * 0.95f, this.height / 2f))
         }
@@ -293,6 +293,34 @@ class MekuriPagerBehaviourTest {
         this.rule.mainClock.autoAdvance = true
         this.rule.waitForIdle()
         assertEquals(2, state.currentPage)
+    }
+
+    /** The later of two animations owns the turn; the dropped one lets go. */
+    @Test
+    fun aSecondAnimationLandsOverTheFirst() {
+        val state = MekuriPagerState(pageCount = 6, initialPage = 2)
+        var first by mutableStateOf(false)
+        var second by mutableStateOf(false)
+        this.rule.mainClock.autoAdvance = false
+        this.rule.setContent {
+            Scene {
+                MekuriPager(
+                    state = state,
+                    configuration = MekuriConfiguration(reducedMotionOverride = false),
+                    spread = MekuriSpread.Single,
+                ) { page -> MekuriBookPage(page) }
+                if (first) LaunchedEffect(Unit) { state.animateToPage(3) }
+                if (second) LaunchedEffect(Unit) { state.animateToPage(1) }
+            }
+        }
+        this.rule.mainClock.advanceTimeByFrame()
+        first = true
+        repeat(FRAMES_AFTER_A_TAP) { this.rule.mainClock.advanceTimeByFrame() }
+        second = true
+        repeat(FRAMES_AFTER_A_TAP) { this.rule.mainClock.advanceTimeByFrame() }
+        this.rule.mainClock.autoAdvance = true
+        this.rule.waitForIdle()
+        assertEquals(1, state.currentPage)
     }
 
     @Composable
