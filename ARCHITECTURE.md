@@ -136,11 +136,14 @@ constructions.
 | `Shader` values | 0 | 1 per frame | 3 per frame (front, back, shadow) |
 
 A `Shader` value is necessarily rebuilt every frame because progress is one of
-its arguments; the shader function itself is resolved once. Mid-turn the heap
-holds fewer live objects than at rest, since the leaf's faces are frozen
-while two live pages rest, and what a turn keeps alive beyond the settled
-tree is the leaf's view tree and its faces' text runs, under ten kilobytes
-across named classes. Before this was measured, the leaf's back face was
+its arguments; the shader function itself is resolved once. What a turn keeps
+live, measured by heap snapshots of the demo's cover turn on an iPad, is the
+two pages the leaf brings into existence — their text runs, display lists and
+attribute-graph storage — plus the flattened layers for the three shader
+passes: about 1.9 MB over the cover at rest, released when the leaf lands.
+The first turn of a process also pays the Metal function objects and Swift
+metadata once. Further turns leave the rest heap within 9 KB of where it was,
+so nothing accumulates. Before this was measured, the leaf's back face was
 handed to the animatable modifier as a closure and rebuilt every frame of a
 spread turn (one `content` call per frame, about 170 over a four-second
 turn); it is now built once with the other faces, outside the modifier.
