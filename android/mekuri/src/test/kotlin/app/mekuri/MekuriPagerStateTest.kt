@@ -26,6 +26,15 @@ class MekuriPagerStateTest {
     }
 
     @Test
+    fun `a book that is still loading does not discard the page`() {
+        val state = MekuriPagerState(pageCount = 6, initialPage = 5)
+        state.pageCount = 0
+        assertEquals(0, state.currentPage)
+        state.pageCount = 6
+        assertEquals(5, state.currentPage)
+    }
+
+    @Test
     fun `a scroll cuts to the page without a driver`() = runBlocking {
         val state = MekuriPagerState(pageCount = 6, initialPage = 0)
         state.scrollToPage(4)

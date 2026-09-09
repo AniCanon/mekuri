@@ -26,7 +26,7 @@ internal interface MekuriTurnDriver {
 }
 
 /**
- * Selection and turn control for a [MekuriPager]. Create one with
+ * Selection and turn control for a Mekuri pager. Create one with
  * [rememberMekuriPagerState] and read [currentPage] to follow the page on
  * screen; [animateToPage] and [scrollToPage] are the only ways to move it from
  * outside.
@@ -54,16 +54,19 @@ public class MekuriPagerState(
         get() = this.pageCountState
         internal set(value) {
             this.pageCountState = value.coerceAtLeast(0)
-            this.currentPageState = coerce(this.currentPageState, this.pageCountState)
         }
 
     /** Spine placement and sweep direction. */
     public var direction: MekuriDirection = direction
         internal set
 
-    /** Page settled on screen. In a spread this is the leading page of the pair. */
+    /**
+     * Page settled on screen. In a spread this is the leading page of the pair.
+     * Clamped on read, so a page count that momentarily drops to zero — a book
+     * whose contents are still loading — does not discard the page.
+     */
     public var currentPage: Int
-        get() = this.currentPageState
+        get() = coerce(this.currentPageState, this.pageCountState)
         internal set(value) {
             this.currentPageState = coerce(value, this.pageCountState)
         }
