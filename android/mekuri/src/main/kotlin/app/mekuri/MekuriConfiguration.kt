@@ -7,7 +7,7 @@ import androidx.compose.animation.core.spring
  * Fold and gesture tuning shared by every page turn.
  *
  * Every numeric member is held in parity with the iOS type. [settleAnimation]
- * is not: the two animation systems have no shared representation.
+ * is not.
  */
 data class MekuriConfiguration(
     /** Cylinder radius at the held end of the fold as a ratio of the page width. */
