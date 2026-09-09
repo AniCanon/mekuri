@@ -10,6 +10,15 @@ internal enum class MekuriTurn {
 
     ;
 
+    /**
+     * Progress handed to the fold renderer. A backward turn starts fully folded
+     * and unfolds into place.
+     */
+    internal fun fold(progress: Float): Float = when (this) {
+        Forward -> progress
+        Backward -> 1f - progress
+    }
+
     /** Null when the turn would leave `0 until pageCount`. */
     internal fun targetIndex(from: Int, pageCount: Int): Int? {
         val target = when (this) {

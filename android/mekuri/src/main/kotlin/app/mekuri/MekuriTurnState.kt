@@ -54,10 +54,7 @@ internal data class MekuriTurnState(
      * and unfolds into place.
      */
     val foldProgress: Float
-        get() = when (this.turn) {
-            MekuriTurn.Forward -> this.progress
-            MekuriTurn.Backward -> 1f - this.progress
-        }
+        get() = this.turn.fold(this.progress)
 
     internal companion object {
         /**

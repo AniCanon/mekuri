@@ -47,6 +47,7 @@ dependencies {
     api(libs.androidx.compose.ui.geometry)
     api(libs.androidx.compose.animation.core)
     implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.compose.ui.graphics)
 
