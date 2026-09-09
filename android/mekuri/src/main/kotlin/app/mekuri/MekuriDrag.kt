@@ -9,9 +9,6 @@ import kotlin.math.abs
  * before they reach [MekuriTurnDecision].
  */
 internal object MekuriDrag {
-    /** Dp a drag must travel before it reports. */
-    const val MinimumDistance: Float = 10f
-
     /**
      * Horizontal travel must exceed vertical travel times this before a drag
      * locks a turn; a tie does not lock.

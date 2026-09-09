@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 
@@ -34,13 +35,11 @@ internal interface MekuriTurnDriver {
  * screen; [animateToPage] and [scrollToPage] are the only ways to move it from
  * outside.
  *
- * [animateToPage] suspends until a pager is composed with this state, and
- * cancelling the calling coroutine releases it.
- *
- * Two departures from Compose's own `PagerState`, both deliberate:
- * a turn the user grabs and pushes back returns from [animateToPage] normally
- * with the settled page, where `PagerState` throws a cancellation; and a
- * [scrollToPage] arriving mid-turn cancels the pending [animateToPage].
+ * [animateToPage] suspends until a pager is composed with this state over a
+ * non-empty book, and cancelling the calling coroutine releases it. A turn the
+ * user grabs and pushes back returns from [animateToPage] normally with the
+ * settled page. A [scrollToPage] arriving mid-turn cancels the pending
+ * [animateToPage].
  *
  * @param pageCount number of pages in the book.
  * @param direction spine placement and sweep direction.
@@ -55,6 +54,11 @@ public class MekuriPagerState(
 
     private var pageCountState by mutableIntStateOf(pageCount.coerceAtLeast(0))
 
+    private val pageCountFlow = MutableStateFlow(pageCount.coerceAtLeast(0))
+
+    /** Bumped whenever a scroll drops a turn; a dropped turn may not settle. */
+    private var dropGeneration = 0
+
     private var currentPageState by mutableIntStateOf(initialPage)
 
     /** Number of pages in the book. Shrinking it clamps [currentPage]. */
@@ -62,6 +66,7 @@ public class MekuriPagerState(
         get() = this.pageCountState
         internal set(value) {
             this.pageCountState = value.coerceAtLeast(0)
+            this.pageCountFlow.value = this.pageCountState
         }
 
     /** Spine placement and sweep direction. */
@@ -80,17 +85,23 @@ public class MekuriPagerState(
         }
 
     /**
-     * Turns to [page] with a fold and returns once the turn has settled. The
-     * target is clamped against the page count only once a pager has attached.
+     * Turns to [page] with a fold and returns once the turn has settled. Waits
+     * for a pager over a non-empty book, then clamps the target against the page
+     * count. A turn a [scrollToPage] dropped meanwhile leaves the page alone.
      */
     public suspend fun animateToPage(page: Int) {
-        val driver = this.driver.filterNotNull().first()
+        val driver = combine(this.driver, this.pageCountFlow) { driver, count ->
+            driver.takeIf { count > 0 }
+        }.filterNotNull().first()
+        val generation = this.dropGeneration
         val settled = driver.turnTo(coerce(page, this.pageCountState))
+        if (generation != this.dropGeneration) return
         this.currentPageState = settled
     }
 
     /** Shows [page] with no fold, dropping any turn in flight. */
     public suspend fun scrollToPage(page: Int) {
+        this.dropGeneration += 1
         this.driver.value?.dropTurn()
         this.currentPageState = page
     }

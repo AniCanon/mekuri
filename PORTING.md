@@ -313,7 +313,7 @@ Fold and gesture tuning, with the value and what each does:
 | `minimumDoublePageWidth` | 320 pt | Narrowest single page at which two pages are shown automatically |
 | `landingFraction` | 0.12 | Share of a spread turn over which a hinged leaf's roll flattens |
 | `landingFloor` | 0.01 | Smallest radius scale during landing; the contact shadow divides by the radius, so it cannot be 0 |
-| drag `minimumDistance` | 10 pt | Travel before a drag reports at all |
+| drag `minimumDistance` | 10 pt | **iOS only.** Travel before a drag reports at all. Android uses the platform's touch slop instead; see §7 |
 | `horizontalDominance` | 1 | Horizontal travel must exceed vertical travel times this before a drag locks a turn; a tie does not lock |
 | `blockedDamping` | 1/3 | Fraction of drag travel kept when the turn is blocked at either end |
 
@@ -491,7 +491,8 @@ velocity.
 
 ### 4.6 Drags
 
-A drag reports after 10 pt of travel. Before a turn locks, every sample's
+A drag reports after 10 pt of travel on iOS and after the platform's touch slop
+on Android (§7). Before a turn locks, every sample's
 cumulative translation is checked for horizontal dominance,
 `|dx| > |dy| × horizontalDominance` with the constant at 1, so a drag within
 45 degrees of horizontal locks and a tie does not. Curl drags are commonly
@@ -675,3 +676,53 @@ expectation rather than evidence.
 > page width of 400 is already about 3e-5, so exact equality is unreachable and a tighter tolerance
 > would only be provable against a double-precision shadow of arithmetic the shader never runs.
 > 1e-3 of a point is far below a pixel and is what the two platforms must genuinely agree to.
+
+## 7. Android departures
+
+Where the Android port deliberately does not match iOS, and where this guide had
+nothing to say and a choice had to be made. Each entry is a rule, not a
+suggestion; changing one changes behaviour a consumer can see.
+
+**Touch slop instead of the 10 pt drag distance.** iOS gates a drag on
+`minimumDistance: 10`. Android gates it on `ViewConfiguration`'s touch slop,
+which is a device value and is not 10 dp. Gesture feel matches the device in the
+user's hand rather than the other platform. The constant stays in §4.1 as an iOS
+value and has no Kotlin counterpart. Everything downstream of the gate — the
+dominance check, the axis, the progress arithmetic, the release decision — is
+held in parity as usual.
+
+**`MekuriPagerState` is not `PagerState`.** Two rules a consumer relies on:
+a turn the user grabs and pushes back returns from `animateToPage` normally with
+the settled page, where `PagerState` throws a cancellation; and a `scrollToPage`
+arriving mid-turn cancels the pending `animateToPage`.
+
+**A dropped turn cannot write the page back.** `MekuriTurnDriver.dropTurn`
+requires a `turnTo` in flight to be cancelled, not to return. A driver that
+returns instead is exactly what a turn the user reverts does legitimately, so the
+contract is enforced rather than trusted: `scrollToPage` bumps a generation
+counter, `animateToPage` snapshots it before the suspending call and writes the
+settled page only if it has not moved.
+
+**`animateToPage` waits for a book with pages in it.** The target is coerced
+against the page count, so a pager attaching while the book is still empty would
+clamp every request to page zero. The wait is on a driver *and* a non-zero page
+count. A genuinely empty book therefore suspends `animateToPage` until the caller
+is cancelled, which is the same shape as the wait for a pager to compose.
+
+**The state holder saves across a configuration change.** iOS keeps the settled
+page in view state and the guide never mentions restoration. On Android a reader
+that forgets its page on rotation is a defect, so `rememberMekuriPagerState` uses
+`rememberSaveable` with a `Saver`. The saved value is the page as stored, never
+the clamped read, and the composable writes the real page count immediately
+after restoring, so a book still loading does not discard the page.
+
+**Progress lives in an `Animatable`, not in the turn state.** iOS animates
+`MekuriTurnState.progress` through `animatableData` and records the presented
+value in a side object. In Compose the turn state carries faces, target, phase
+and the drag's start progress only; the progress itself is an
+`Animatable<Float>` read inside the layer block. Takeover reads its value, and a
+`snapTo` from a drag cancels a running settle through the animatable's own mutex.
+
+**A page turn is one composition local.** `LocalMekuriPageMode` replaces the
+cascading environment values of §5; every other knob is a parameter with a
+default.

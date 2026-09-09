@@ -2,6 +2,7 @@ package app.mekuri
 
 import androidx.compose.runtime.saveable.SaverScope
 import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
@@ -101,7 +102,7 @@ class MekuriPagerStateTest {
         val state = MekuriPagerState(pageCount = 6, initialPage = 0)
         val driver = RecordingDriver(settlesOn = 1)
         val turn = async { state.animateToPage(1) }
-        yield()
+        yieldUntil { false }
         assertTrue(turn.isActive)
         assertEquals(0, state.currentPage)
         state.attach(driver)
@@ -131,7 +132,7 @@ class MekuriPagerStateTest {
         val state = MekuriPagerState(pageCount = 0, initialPage = 0)
         val driver = RecordingDriver(settlesOn = 4)
         val turn = async { state.animateToPage(4) }
-        yield()
+        yieldUntil { false }
         state.pageCount = 6
         state.attach(driver)
         turn.await()
@@ -157,12 +158,65 @@ class MekuriPagerStateTest {
         val state = MekuriPagerState(pageCount = 6, initialPage = 0)
         state.attach(driver)
         val turn = async { state.animateToPage(5) }
-        yield()
+        yieldUntil { driver.isParked }
         assertTrue(driver.isParked)
         state.scrollToPage(2)
         val outcome = runCatching { turn.await() }
         assertTrue(outcome.exceptionOrNull() is CancellationException)
         assertEquals(2, state.currentPage)
+    }
+
+    @Test
+    fun `a dropped turn that returns instead of cancelling does not clobber the scroll`() = runBlocking {
+        val driver = ReturningDriver(returnsOn = 5)
+        val state = MekuriPagerState(pageCount = 6, initialPage = 0)
+        state.attach(driver)
+        val turn = async { state.animateToPage(5) }
+        yieldUntil { driver.isParked }
+        assertTrue(driver.isParked)
+        state.scrollToPage(2)
+        turn.await()
+        assertEquals(2, state.currentPage)
+    }
+
+    @Test
+    fun `an animation waits for a book with pages in it`() = runBlocking {
+        val state = MekuriPagerState(pageCount = 0, initialPage = 0)
+        val driver = RecordingDriver(settlesOn = 5)
+        state.attach(driver)
+        val turn = async { state.animateToPage(5) }
+        yieldUntil { false }
+        assertTrue(turn.isActive)
+        assertEquals(emptyList<Int>(), driver.requests)
+        state.pageCount = 10
+        turn.await()
+        assertEquals(listOf(5), driver.requests)
+        assertEquals(5, state.currentPage)
+    }
+
+    /** Runs the scheduler until [ready], or [YIELDS] times. */
+    private suspend fun yieldUntil(ready: () -> Boolean) {
+        repeat(YIELDS) {
+            if (ready()) return
+            yield()
+        }
+    }
+
+    /** Returns from a dropped turn rather than cancelling, against the contract. */
+    private class ReturningDriver(private val returnsOn: Int) : MekuriTurnDriver {
+        private val parked = CompletableDeferred<Int>()
+
+        var isParked = false
+            private set
+
+        override suspend fun turnTo(page: Int): Int {
+            this.isParked = true
+            return this.parked.await()
+        }
+
+        override fun dropTurn() {
+            this.parked.complete(this.returnsOn)
+        }
     }
 
     private class SuspendingDriver : MekuriTurnDriver {
@@ -177,6 +231,10 @@ class MekuriPagerStateTest {
             this.parked?.cancel()
             this.parked = null
         }
+    }
+
+    private companion object {
+        private const val YIELDS = 32
     }
 
     private class RecordingDriver(private val settlesOn: Int) : MekuriTurnDriver {
