@@ -8,6 +8,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -15,7 +16,10 @@ import androidx.compose.ui.test.click
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlin.math.pow
+import kotlin.math.sqrt
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -145,6 +149,38 @@ class MekuriPagerScreenshotTest {
         this.rule.onNodeWithTag(SCENE_TAG).captureToImage().saveScene("05-after-an-edge-tap")
     }
 
+    /**
+     * A blocked turn has no base, so the ground behind the pager is the
+     * end-of-book cue. Past the crease the capture must be that ground and not
+     * the page, which is what a base falling back to the settled page would
+     * draw there.
+     */
+    @Test
+    fun aBlockedTurnLiftsThePageOverTheGround() {
+        val state = MekuriPagerState(pageCount = 6, initialPage = 5)
+        this.rule.setContent {
+            MekuriPagerScene(width = SINGLE_WIDTH, height = SINGLE_HEIGHT) {
+                MekuriPager(
+                    state = state,
+                    configuration = this.configuration,
+                    spread = MekuriSpread.Single,
+                ) { page -> MekuriBookPage(page) }
+            }
+        }
+        this.rule.onNodeWithTag(SCENE_TAG).performTouchInput {
+            down(Offset(this.width * 0.94f, this.height / 2f))
+            moveBy(Offset(-this.width * 0.85f, 0f))
+        }
+        this.rule.waitForIdle()
+        val image = this.rule.onNodeWithTag(SCENE_TAG).captureToImage()
+        image.saveScene("06-blocked-at-the-end")
+        val pixels = image.toPixelMap()
+        val sampled = pixels[(pixels.width * SAMPLE_X).toInt(), pixels.height / 2]
+        assertEquals(5, state.currentPage)
+        assertTrue("past the crease reads $sampled", sampled.distanceTo(SCENE_GROUND) < NEAR)
+        assertTrue("past the crease reads $sampled", sampled.distanceTo(LAST_PAGE_GROUND) > NEAR)
+    }
+
     @Composable
     private fun MekuriPagerScene(width: Int, height: Int, content: @Composable () -> Unit) {
         Box(
@@ -162,8 +198,17 @@ class MekuriPagerScreenshotTest {
         private const val SINGLE_HEIGHT = 540
         private const val SPREAD_WIDTH = 400
         private const val SPREAD_HEIGHT = 270
+        private const val SAMPLE_X = 0.97f
+        private const val NEAR = 0.08f
+        private val SCENE_GROUND = Color(0xFF1A1614)
+        private val LAST_PAGE_GROUND = Color(0xFF6B3C7A)
     }
 }
+
+/** Straight-line distance in unpremultiplied RGB, alpha ignored. */
+internal fun Color.distanceTo(other: Color): Float = sqrt(
+    (this.red - other.red).pow(2) + (this.green - other.green).pow(2) + (this.blue - other.blue).pow(2),
+)
 
 /** A page whose number and colour make its slot and its face unmistakable. */
 @Composable

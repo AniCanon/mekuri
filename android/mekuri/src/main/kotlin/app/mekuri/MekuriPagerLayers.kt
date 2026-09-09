@@ -15,7 +15,9 @@ import androidx.compose.ui.unit.dp
 
 /**
  * Single-page mode: the base page fills the container and the leaf folds across
- * the whole of it, its reverse the front mirrored.
+ * the whole of it, its reverse the front mirrored. A turn with no base draws
+ * none: a blocked turn lifts its page over whatever is behind the pager, never
+ * over a live copy of itself.
  */
 @Composable
 internal fun MekuriSingleLayers(
@@ -23,9 +25,9 @@ internal fun MekuriSingleLayers(
     content: @Composable (Int) -> Unit,
 ) {
     val turn = controller.turn
-    val base = turn?.baseIndex ?: controller.settledPage
+    val base = if (turn != null) turn.baseIndex else controller.settledPage
     Box(Modifier.fillMaxSize()) {
-        MekuriPage(base, MekuriPageMode.Live, controller.arrangement, content)
+        base?.let { MekuriPage(it, MekuriPageMode.Live, controller.arrangement, content) }
         MekuriCrossfadeOverlay(controller) { page ->
             MekuriPage(page, MekuriPageMode.Live, controller.arrangement, content)
         }
@@ -147,7 +149,11 @@ private fun MekuriCrossfadeOverlay(
     }
 }
 
-/** Nothing outside the book is ever built. */
+/**
+ * Nothing outside the book is ever built. The page index is the content's
+ * identity: a slot that changes page must tear the old page's state down rather
+ * than hand it to its successor.
+ */
 @Composable
 private fun MekuriPage(
     page: Int,
@@ -162,7 +168,7 @@ private fun MekuriPage(
     if (page !in 0 until pageCount) return
     Box(Modifier.fillMaxSize()) {
         CompositionLocalProvider(LocalMekuriPageMode provides mode) {
-            content(page)
+            key(page) { content(page) }
         }
     }
 }
