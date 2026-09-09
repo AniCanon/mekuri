@@ -9,9 +9,6 @@ import androidx.compose.animation.core.spring
  * The public constructor carries the tuning knobs; every other member keeps its
  * tuned value and is not reachable from outside the module. Every numeric
  * member is held in parity with the iOS type. [settleAnimation] is not.
- *
- * Not a data class: `componentN` would expose the internal members through
- * destructuring.
  */
 public class MekuriConfiguration internal constructor(
     internal val cylinderRadiusRatio: Float,
@@ -65,16 +62,16 @@ public class MekuriConfiguration internal constructor(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is MekuriConfiguration) return false
-        return this.cylinderRadiusRatio == other.cylinderRadiusRatio &&
-            this.radiusOpening == other.radiusOpening &&
-            this.creaseBow == other.creaseBow &&
-            this.cornerShear == other.cornerShear &&
-            this.backFaceDim == other.backFaceDim &&
-            this.creaseShadowWidthRatio == other.creaseShadowWidthRatio &&
-            this.creaseShadowOpacity == other.creaseShadowOpacity &&
-            this.snapThreshold == other.snapThreshold &&
-            this.flingVelocity == other.flingVelocity &&
-            this.tapZoneRatio == other.tapZoneRatio &&
+        return this.cylinderRadiusRatio.equals(other.cylinderRadiusRatio) &&
+            this.radiusOpening.equals(other.radiusOpening) &&
+            this.creaseBow.equals(other.creaseBow) &&
+            this.cornerShear.equals(other.cornerShear) &&
+            this.backFaceDim.equals(other.backFaceDim) &&
+            this.creaseShadowWidthRatio.equals(other.creaseShadowWidthRatio) &&
+            this.creaseShadowOpacity.equals(other.creaseShadowOpacity) &&
+            this.snapThreshold.equals(other.snapThreshold) &&
+            this.flingVelocity.equals(other.flingVelocity) &&
+            this.tapZoneRatio.equals(other.tapZoneRatio) &&
             this.settleAnimation == other.settleAnimation &&
             this.reducedMotionOverride == other.reducedMotionOverride
     }
