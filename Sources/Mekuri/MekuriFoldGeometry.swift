@@ -51,6 +51,19 @@ struct MekuriFoldGeometry: Equatable, Sendable {
         progress <= 0
     }
 
+    /// Share of the turn over which a hinged leaf's roll flattens.
+    static let landingFraction: CGFloat = 0.12
+
+    /// Smallest radius scale; the contact shadow divides by the radius.
+    static let landingFloor: CGFloat = 0.01
+
+    /// Scale on the cylinder radius and corner shear of a hinged leaf: 1
+    /// until the landing begins, `landingFloor` at progress 1.
+    func landingRadiusScale(progress: CGFloat) -> CGFloat {
+        let remaining = 1 - self.clamped(progress)
+        return max(min(remaining / Self.landingFraction, 1), Self.landingFloor)
+    }
+
     /// Full-height band centred on the fold axis.
     func creaseShadowRect(progress: CGFloat, pageSize: CGSize) -> CGRect {
         let width = self.pageWidth * self.configuration.creaseShadowWidthRatio

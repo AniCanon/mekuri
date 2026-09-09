@@ -22,18 +22,20 @@ static half4 mekuriContactShadow(float d, float radius, float heldRadius, float 
 }
 
 // Shadow the crease casts on the page beneath the leaf, `d` (negative) short
-// of the crease. Same ramp as the whole-leaf dimming of the flat front.
+// of the crease. Same ramp as the whole-face dimming of the flat front.
 static half4 mekuriCreaseShadow(float d, float width, float opacity) {
     half reach = half(saturate(1.0 + d / width));
     return half4(0.0h, 0.0h, 0.0h, half(opacity) * reach * reach);
 }
 
-// Which face of the leaf a pass draws. 0 samples one layer for both faces;
-// `front` and `back` each return transparent where their face is not
-// visible, so two passes over different layers stack into one leaf. Only the
-// front pass carries the shadows, so they composite once.
+// Which face of the leaf a pass draws. 0 samples one layer for both faces
+// and carries both shadows. `front` and `back` each return transparent where
+// their face is not visible, so two passes over different layers stack into
+// one leaf; neither carries a shadow. `shadow` returns only the shadows, for
+// a layer beneath the leaf, so each shadow composites exactly once.
 constant float mekuriFaceFront = 1.0;
 constant float mekuriFaceBack = 2.0;
+constant float mekuriFaceShadow = 3.0;
 constant half4 mekuriClear = half4(0.0h);
 
 // Folds the layer around a cylinder whose axis sweeps from the trailing edge
@@ -66,7 +68,7 @@ constant half4 mekuriClear = half4(0.0h);
     float halfTurn = M_PI_F * radius;
 
     if (d > radius) {
-        if (face == mekuriFaceBack) {
+        if (face == mekuriFaceFront || face == mekuriFaceBack) {
             return mekuriClear;
         }
         return mekuriContactShadow(d, radius, heldRadius, shadowOpacity);
@@ -76,7 +78,7 @@ constant half4 mekuriClear = half4(0.0h);
         float front = radius * asin(clamp(d / radius, -1.0, 1.0));
         float back = halfTurn - front;
         if (back <= flap) {
-            if (face == mekuriFaceFront) {
+            if (face == mekuriFaceFront || face == mekuriFaceShadow) {
                 return mekuriClear;
             }
             half4 color = layer.sample(float2(axis + back, position.y));
@@ -88,14 +90,20 @@ constant half4 mekuriClear = half4(0.0h);
             return mekuriClear;
         }
         if (front <= flap) {
+            if (face == mekuriFaceShadow) {
+                return mekuriClear;
+            }
             return layer.sample(float2(axis + front, position.y));
+        }
+        if (face == mekuriFaceFront) {
+            return mekuriClear;
         }
         return mekuriContactShadow(d, radius, heldRadius, shadowOpacity);
     }
 
     float behind = halfTurn - d;
     if (behind <= flap) {
-        if (face == mekuriFaceFront) {
+        if (face == mekuriFaceFront || face == mekuriFaceShadow) {
             return mekuriClear;
         }
         half4 color = layer.sample(float2(axis + behind, position.y));
@@ -105,8 +113,11 @@ constant half4 mekuriClear = half4(0.0h);
     if (face == mekuriFaceBack) {
         return mekuriClear;
     }
-    if (face == mekuriFaceFront) {
+    if (face == mekuriFaceShadow) {
         return mekuriCreaseShadow(d, shadowWidth, shadowOpacity);
+    }
+    if (face == mekuriFaceFront) {
+        return layer.sample(position);
     }
 
     half4 flat = layer.sample(position);

@@ -70,3 +70,54 @@ extension MekuriFoldGeometryTests {
         }
     }
 }
+
+extension MekuriFoldGeometryTests {
+    /// A hinged leaf keeps its radius until the landing, then flattens to
+    /// the floor at progress 1 without ever reaching zero.
+    @Test func aHingedLeafFlattensAsItLands() {
+        let geometry = MekuriFoldGeometry(pageWidth: 400, configuration: .default)
+        let landingStart = 1 - MekuriFoldGeometry.landingFraction
+        #expect(geometry.landingRadiusScale(progress: 0) == 1)
+        #expect(geometry.landingRadiusScale(progress: 0.5) == 1)
+        #expect(geometry.landingRadiusScale(progress: landingStart) == 1)
+        #expect(geometry.landingRadiusScale(progress: 1) == MekuriFoldGeometry.landingFloor)
+        #expect(geometry.landingRadiusScale(progress: 2) == MekuriFoldGeometry.landingFloor)
+
+        let samples = stride(from: 0.0, through: 1.0, by: 0.02)
+            .map { geometry.landingRadiusScale(progress: $0) }
+        #expect(zip(samples, samples.dropFirst()).allSatisfy { $0 >= $1 })
+        #expect(samples.allSatisfy { $0 > 0 })
+    }
+}
+
+extension MekuriFoldGeometryTests {
+    /// A leaf hinged at the centre of a two-page layer sweeps at half the
+    /// shader's rate and its bow is gone when it lands.
+    @Test func aHingedSweepStopsAtTheSpine() {
+        let start = MekuriHingedSweep(progress: 0, creaseBow: 0.35, spine: 400, layerWidth: 800)
+        #expect(start.shaderProgress == 0)
+        #expect(start.creaseBow == 0.35)
+
+        let end = MekuriHingedSweep(progress: 1, creaseBow: 0.35, spine: 400, layerWidth: 800)
+        #expect(end.shaderProgress == 0.5)
+        #expect(end.creaseBow == 0)
+
+        let past = MekuriHingedSweep(progress: 1.5, creaseBow: 0.35, spine: 400, layerWidth: 800)
+        #expect(past == end)
+    }
+
+    /// The remapped sweep over the whole layer draws the crease exactly where
+    /// the page's own geometry puts it, shifted by the spine, at every row.
+    @Test func aHingedSweepMatchesThePageGeometryPastTheSpine() {
+        let page = MekuriFoldGeometry(pageWidth: 400, configuration: .default)
+        for progress: CGFloat in [0.1, 0.25, 0.5, 0.75, 0.9, 1] {
+            let sweep = MekuriHingedSweep(progress: progress, creaseBow: 0.35, spine: 400, layerWidth: 800)
+            let layer = MekuriFoldGeometry(pageWidth: 800, configuration: MekuriConfiguration(creaseBow: sweep.creaseBow))
+            for y: CGFloat in [0, 200, 400, 600, 800] {
+                let expected = 400 + page.foldAxisOffset(progress: progress, y: y, pageHeight: 800)
+                let actual = layer.foldAxisOffset(progress: sweep.shaderProgress, y: y, pageHeight: 800)
+                #expect(abs(actual - expected) < 1e-9)
+            }
+        }
+    }
+}

@@ -47,3 +47,26 @@ extension MekuriFoldedPageTests {
         #expect(!showThrough.hasDistinctBackFace)
     }
 }
+
+extension MekuriFoldedPageTests {
+    @MainActor @Test func theShadowLayerFoldsThroughTheDirectionalPass() {
+        let atRest = MekuriLeafShadow(progress: 0, direction: .leftToRight, configuration: .default)
+        #expect(atRest.isFolded == false)
+
+        let backward = MekuriLeafShadow(progress: 0.4, direction: .rightToLeft, configuration: .default)
+        #expect(backward.isFolded == true)
+        #expect(backward.foldPass.isMirrored == true)
+        #expect(backward.foldPass.shaderProgress == 0.4)
+    }
+
+    @Test func eachFaceHasItsOwnShaderArgument() {
+        #expect(MekuriFace.whole.rawValue == 0)
+        #expect(MekuriFace.front.rawValue == 1)
+        #expect(MekuriFace.back.rawValue == 2)
+        #expect(MekuriFace.shadow.rawValue == 3)
+    }
+
+    @Test func aLeafHingesAtTheCentreOfItsSpread() {
+        #expect(MekuriFoldShader.hinge(in: CGSize(width: 800, height: 600)) == 400)
+    }
+}
