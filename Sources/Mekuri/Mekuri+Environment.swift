@@ -12,6 +12,7 @@ extension EnvironmentValues {
     @Entry var mekuriOnCenterTap: (() -> Void)? = nil
     @Entry var mekuriFoldRadius: CGFloat = MekuriConfiguration.default.cylinderRadiusRatio
     @Entry var mekuriCornerLift: CGFloat = MekuriConfiguration.default.cornerShear
+    @Entry var mekuriCreaseBow: CGFloat = MekuriConfiguration.default.creaseBow
     @Entry var mekuriTapZone: CGFloat = MekuriConfiguration.default.tapZoneRatio
     @Entry var mekuriSnapThreshold: CGFloat = MekuriConfiguration.default.snapThreshold
     @Entry var mekuriSettleAnimation: Animation? = nil

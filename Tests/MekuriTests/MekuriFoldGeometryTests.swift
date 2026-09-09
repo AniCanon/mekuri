@@ -29,3 +29,22 @@ import SwiftUI
         #expect(shadow.height == 800)
     }
 }
+
+extension MekuriFoldGeometryTests {
+    @Test func aStraightCreaseIsTheOldBehaviour() {
+        let straight = MekuriFoldGeometry(pageWidth: 400, configuration: .straightCrease)
+        #expect(straight.foldAxisOffset(progress: 0.5, y: 0, pageHeight: 800) == straight.foldAxisOffset(progress: 0.5, y: 800, pageHeight: 800))
+    }
+
+    @Test func aBowedCreaseLeadsWithTheFreeCorner() {
+        let bowed = MekuriFoldGeometry(pageWidth: 400, configuration: .default)
+        let atCorner = bowed.foldAxisOffset(progress: 0.5, y: 0, pageHeight: 800)
+        let atMiddle = bowed.foldAxisOffset(progress: 0.5, y: 400, pageHeight: 800)
+        #expect(atCorner < atMiddle)
+    }
+
+    @Test func theRadiusOpensTowardTheFreeCorner() {
+        let geometry = MekuriFoldGeometry(pageWidth: 400, configuration: .default)
+        #expect(geometry.radius(atFoldDistance: 0) < geometry.radius(atFoldDistance: 800))
+    }
+}

@@ -29,6 +29,12 @@ public extension View {
         self.environment(\.mekuriCornerLift, ratio)
     }
 
+    /// How far the free corner runs ahead of a straight crease, 0...1. 0 is a
+    /// straight crease. Defaults to 0.35.
+    func mekuriCreaseBow(_ amount: CGFloat) -> some View {
+        self.environment(\.mekuriCreaseBow, amount)
+    }
+
     /// Width of each tap-to-turn edge zone as a ratio of the page width.
     /// Defaults to 0.25.
     func mekuriTapZone(_ ratio: CGFloat) -> some View {

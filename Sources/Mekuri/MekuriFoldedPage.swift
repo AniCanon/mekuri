@@ -1,7 +1,9 @@
 import SwiftUI
 
 /// Renders `content` folded by `progress`, 0 (flat) to 1 (turned). The crease
-/// shadow is drawn by the shader; no further shadow may be layered on top.
+/// and contact shadows are drawn by the shader; no further shadow may be
+/// layered on top. The content is flattened into one layer before the shader
+/// runs; the shader's translucent output composites exactly once.
 struct MekuriFoldedPage<Content: View>: View {
     private let progress: CGFloat
     private let direction: MekuriDirection
@@ -41,6 +43,7 @@ struct MekuriFoldedPage<Content: View>: View {
         let pass = self.foldPass
         self.content()
             .scaleEffect(x: pass.mirrorScale, y: 1)
+            .compositingGroup()
             .layerEffect(self.fold(size: size, progress: pass.shaderProgress), maxSampleOffset: size)
             .scaleEffect(x: pass.mirrorScale, y: 1)
     }
@@ -51,8 +54,10 @@ struct MekuriFoldedPage<Content: View>: View {
         return ShaderLibrary.bundle(.module).mekuriFold(
             .float2(size),
             .float(progress),
-            .float(size.width * self.configuration.cylinderRadiusRatio),
+            .float(geometry.heldRadius),
+            .float(geometry.radiusSlope),
             .float(self.configuration.cornerShear),
+            .float(self.configuration.creaseBow),
             .float(self.configuration.backFaceDim),
             .float(shadow.width),
             .float(self.configuration.creaseShadowOpacity)

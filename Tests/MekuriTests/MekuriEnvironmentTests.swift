@@ -8,6 +8,7 @@ import Testing
         #expect(values.mekuriDirection == .leftToRight)
         #expect(values.mekuriFoldRadius == 0.04)
         #expect(values.mekuriCornerLift == 0.10)
+        #expect(values.mekuriCreaseBow == 0.35)
         #expect(values.mekuriTapZone == 0.25)
         #expect(values.mekuriSnapThreshold == 0.35)
         #expect(values.mekuriPageMode == .live)

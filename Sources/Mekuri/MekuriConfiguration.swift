@@ -4,14 +4,25 @@ import SwiftUI
 /// ``MekuriPager`` from the environment; members without a modifier keep
 /// their defaults.
 struct MekuriConfiguration: Equatable, Sendable {
-    /// Cylinder radius of the fold as a ratio of the page width.
+    /// Cylinder radius at the held end of the fold as a ratio of the page
+    /// width.
     var cylinderRadiusRatio: CGFloat
+
+    /// Growth of the cylinder radius per page width of fold distance from the
+    /// held end, as a multiple of `cylinderRadiusRatio`. 0 keeps the radius
+    /// constant along the fold.
+    var radiusOpening: CGFloat
+
+    /// How far the free corner runs ahead of a straight crease, 0...1. 0 is a
+    /// straight crease.
+    var creaseBow: CGFloat
 
     /// Horizontal travel of the fold line per unit of vertical distance from
     /// the page centre. A ratio, not an angle.
     var cornerShear: CGFloat
 
-    /// Brightness multiplier applied to the back face, 0...1.
+    /// Darkest brightness of the lit back face, 0...1, reached where the
+    /// surface has turned fully away from the light.
     var backFaceDim: CGFloat
 
     /// Width of the crease shadow as a ratio of the page width.
@@ -38,6 +49,8 @@ struct MekuriConfiguration: Equatable, Sendable {
 
     init(
         cylinderRadiusRatio: CGFloat = 0.04,
+        radiusOpening: CGFloat = 1.0,
+        creaseBow: CGFloat = 0.35,
         cornerShear: CGFloat = 0.10,
         backFaceDim: CGFloat = 0.86,
         creaseShadowWidthRatio: CGFloat = 0.10,
@@ -49,6 +62,8 @@ struct MekuriConfiguration: Equatable, Sendable {
         reducedMotionOverride: Bool? = nil
     ) {
         self.cylinderRadiusRatio = cylinderRadiusRatio
+        self.radiusOpening = radiusOpening
+        self.creaseBow = creaseBow
         self.cornerShear = cornerShear
         self.backFaceDim = backFaceDim
         self.creaseShadowWidthRatio = creaseShadowWidthRatio
@@ -61,4 +76,7 @@ struct MekuriConfiguration: Equatable, Sendable {
     }
 
     static let `default` = MekuriConfiguration()
+
+    /// A vertical straight crease with a constant radius.
+    static let straightCrease = MekuriConfiguration(radiusOpening: 0, creaseBow: 0, cornerShear: 0)
 }

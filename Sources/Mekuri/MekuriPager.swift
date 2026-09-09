@@ -12,6 +12,7 @@ public struct MekuriPager<Content: View>: View {
     @Environment(\.mekuriOnCenterTap) var onCenterTap
     @Environment(\.mekuriFoldRadius) private var foldRadius
     @Environment(\.mekuriCornerLift) private var cornerLift
+    @Environment(\.mekuriCreaseBow) private var creaseBow
     @Environment(\.mekuriTapZone) private var tapZone
     @Environment(\.mekuriSnapThreshold) private var snapThreshold
     @Environment(\.mekuriSettleAnimation) private var settleAnimation
@@ -43,6 +44,7 @@ public struct MekuriPager<Content: View>: View {
     var configuration: MekuriConfiguration {
         MekuriConfiguration(
             cylinderRadiusRatio: self.foldRadius,
+            creaseBow: self.creaseBow,
             cornerShear: self.cornerLift,
             snapThreshold: self.snapThreshold,
             tapZoneRatio: self.tapZone,
