@@ -17,4 +17,7 @@ extension EnvironmentValues {
     @Entry var mekuriSnapThreshold: CGFloat = MekuriConfiguration.default.snapThreshold
     @Entry var mekuriSettleAnimation: Animation? = nil
     @Entry var mekuriReducedMotion: Bool? = MekuriConfiguration.default.reducedMotionOverride
+    @Entry var mekuriSpread: MekuriSpread = .automatic
+    @Entry var mekuriCoverStandsAlone: Bool = true
+    @Entry var mekuriPageAspectRatio: CGFloat = 2.0 / 3.0
 }

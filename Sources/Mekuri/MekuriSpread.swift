@@ -1,7 +1,8 @@
 import CoreGraphics
 
-/// Whether one or two pages share the container.
-enum MekuriSpread: Equatable, Sendable {
+/// Whether one or two pages share the container. `automatic` shows two when
+/// they fit the container at the page aspect and each stays readable.
+public enum MekuriSpread: Equatable, Sendable {
     case automatic
     case single
     case double
@@ -20,6 +21,13 @@ enum MekuriSpread: Equatable, Sendable {
             let pageWidth = containerSize.height * pageAspectRatio
             return containerSize.width >= 2 * pageWidth && pageWidth >= Self.minimumDoublePageWidth
         }
+    }
+
+    /// Largest page at `pageAspectRatio` such that two of them, side by
+    /// side, fit the container. `pageAspectRatio` must be positive.
+    static func pageSize(fitting containerSize: CGSize, pageAspectRatio: CGFloat) -> CGSize {
+        let height = min(containerSize.height, containerSize.width / (2 * pageAspectRatio))
+        return CGSize(width: height * pageAspectRatio, height: height)
     }
 }
 

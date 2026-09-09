@@ -26,3 +26,13 @@ import Testing
         #expect(resolved == .spring(response: 0.35, dampingFraction: 0.86))
     }
 }
+
+extension MekuriEnvironmentTests {
+    @Test func theSpreadSettingsCarryTheirDefaults() {
+        let values = EnvironmentValues()
+        let twoThirds: CGFloat = 2.0 / 3.0
+        #expect(values.mekuriSpread == .automatic)
+        #expect(values.mekuriCoverStandsAlone == true)
+        #expect(values.mekuriPageAspectRatio == twoThirds)
+    }
+}

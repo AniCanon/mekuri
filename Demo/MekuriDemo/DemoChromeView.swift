@@ -8,6 +8,8 @@ struct DemoChromeView: View {
     @Binding var direction: MekuriDirection
     @Binding var pagingEnabled: Bool
     @Binding var slowTurns: Bool
+    @Binding var spread: MekuriSpread
+    @Binding var coverStandsAlone: Bool
     let pageCount: Int
 
     var body: some View {
@@ -47,23 +49,51 @@ struct DemoChromeView: View {
             self.switchRow("Slow turns", isOn: self.slowTurns) {
                 self.slowTurns.toggle()
             }
+            self.pillRow("Spread", label: self.spreadLabel, isOn: self.spread != .single) {
+                self.spread = self.nextSpread
+            }
+            self.switchRow("Cover stands alone", isOn: self.coverStandsAlone) {
+                self.coverStandsAlone.toggle()
+            }
         }
         .font(.system(.body, design: .rounded, weight: .medium))
         .padding(20)
         .background(.ultraThinMaterial)
     }
 
+    private var spreadLabel: String {
+        switch self.spread {
+        case .automatic: "AUTO"
+        case .single: "SINGLE"
+        case .double: "DOUBLE"
+        }
+    }
+
+    private var nextSpread: MekuriSpread {
+        switch self.spread {
+        case .automatic: .single
+        case .single: .double
+        case .double: .automatic
+        }
+    }
+
     /// A button rather than a Toggle: a UISwitch ignores synthesised taps, which
     /// makes the demo undriveable from a script.
     private func switchRow(_ title: String, isOn: Bool, action: @escaping () -> Void) -> some View {
+        self.pillRow(title, label: isOn ? "ON" : "OFF", isOn: isOn, action: action)
+    }
+
+    private func pillRow(_ title: String, label: String, isOn: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack {
                 Text(title)
                 Spacer()
-                Text(isOn ? "ON" : "OFF")
+                Text(label)
                     .font(.system(.footnote, design: .rounded, weight: .heavy))
                     .foregroundStyle(isOn ? Color.black : Color.white)
-                    .frame(width: 54, height: 30)
+                    .frame(minWidth: 54)
+                    .frame(height: 30)
+                    .padding(.horizontal, 8)
                     .background(isOn ? Color.green : Color.secondary, in: Capsule())
             }
             .contentShape(Rectangle())

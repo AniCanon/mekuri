@@ -6,6 +6,8 @@ struct DemoReaderView: View {
     @State private var direction: MekuriDirection = .leftToRight
     @State private var pagingEnabled = true
     @State private var slowTurns = false
+    @State private var spread: MekuriSpread = .automatic
+    @State private var coverStandsAlone = true
     @State private var chromeVisible = true
     /// Keyed by page index; page views are recreated across turns.
     @State private var tapCounts: [Int: Int] = [:]
@@ -30,6 +32,9 @@ struct DemoReaderView: View {
             .mekuriDirection(self.direction)
             .mekuriPagingEnabled(self.pagingEnabled)
             .mekuriSettleAnimation(self.settleAnimation)
+            .mekuriSpread(self.spread)
+            .mekuriCoverStandsAlone(self.coverStandsAlone)
+            .mekuriPageAspectRatio(2.0 / 3.0)
             .mekuriOnCenterTap {
                 withAnimation(.easeInOut(duration: 0.2)) {
                     self.chromeVisible.toggle()
@@ -42,6 +47,8 @@ struct DemoReaderView: View {
                     direction: self.$direction,
                     pagingEnabled: self.$pagingEnabled,
                     slowTurns: self.$slowTurns,
+                    spread: self.$spread,
+                    coverStandsAlone: self.$coverStandsAlone,
                     pageCount: self.pageCount
                 )
                 .transition(.opacity)

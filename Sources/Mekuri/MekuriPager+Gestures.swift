@@ -1,53 +1,55 @@
 import SwiftUI
 
 extension MekuriPager {
-    func dragGesture(width: CGFloat) -> some Gesture {
+    /// `width` is the distance a drag travels to complete a turn.
+    func dragGesture(width: CGFloat, arrangement: MekuriArrangement) -> some Gesture {
         DragGesture(minimumDistance: MekuriDrag.minimumDistance, coordinateSpace: .local)
             .onChanged { value in
-                self.dragChanged(translation: value.translation, width: width)
+                self.dragChanged(translation: value.translation, width: width, in: arrangement)
             }
             .onEnded { value in
                 self.dragEnded(
                     translation: value.translation,
                     velocity: value.velocity.width,
-                    width: width
+                    width: width,
+                    in: arrangement
                 )
             }
     }
 
-    func tapGesture(width: CGFloat) -> some Gesture {
+    func tapGesture(width: CGFloat, arrangement: MekuriArrangement) -> some Gesture {
         SpatialTapGesture(coordinateSpace: .local)
             .onEnded { value in
-                self.tapped(x: value.location.x, width: width)
+                self.tapped(x: value.location.x, width: width, in: arrangement)
             }
     }
 
-    func tapped(x: CGFloat, width: CGFloat) {
+    func tapped(x: CGFloat, width: CGFloat, in arrangement: MekuriArrangement) {
         let zone = MekuriZone.resolve(x: x, width: width, configuration: self.configuration)
         guard let turn = MekuriTurn.from(zone: zone, direction: self.direction) else {
             self.onCenterTap?()
             return
         }
         guard self.pagingEnabled else { return }
-        self.perform(turn)
+        self.perform(turn, in: arrangement)
     }
 
-    /// Turns one page with a full animated curl. Does nothing at the ends or
-    /// while another turn is in flight.
-    func perform(_ turn: MekuriTurn) {
-        guard self.turn == nil,
-              let target = turn.targetIndex(from: self.settledPage, pageCount: self.pageCount)
-        else { return }
+    /// Turns one page or spread with a full animated curl. Does nothing at
+    /// the ends or while another turn is in flight.
+    func perform(_ turn: MekuriTurn, in arrangement: MekuriArrangement) {
+        guard self.turn == nil else { return }
+        let state = self.beginTurn(turn, in: arrangement)
+        guard let target = state.targetIndex else { return }
         if self.reducesMotion {
             self.commit(to: target)
         } else {
-            self.arm(turn, decision: .commit)
+            self.arm(state, decision: .commit)
         }
     }
 
     /// A drag that is not horizontally dominant neither locks nor takes over
     /// a turn; a locked turn follows every later sample.
-    func dragChanged(translation: CGSize, width: CGFloat) {
+    func dragChanged(translation: CGSize, width: CGFloat, in arrangement: MekuriArrangement) {
         guard !self.ignoresCurrentDrag, !self.reducesMotion else { return }
         if var turn = self.turn {
             if turn.isSettling {
@@ -66,8 +68,8 @@ extension MekuriPager {
             return
         }
         guard let direction = MekuriDrag.turn(translation: translation, direction: self.direction) else { return }
-        var turn = self.beginTurn(direction)
-        guard turn.turningIndex != nil else { return }
+        var turn = self.beginTurn(direction, in: arrangement)
+        guard turn.hasLeaf else { return }
         turn.progress = MekuriDrag.progress(
             start: 0,
             translation: translation.width,
@@ -79,11 +81,11 @@ extension MekuriPager {
         self.turn = turn
     }
 
-    func dragEnded(translation: CGSize, velocity: CGFloat, width: CGFloat) {
+    func dragEnded(translation: CGSize, velocity: CGFloat, width: CGFloat, in arrangement: MekuriArrangement) {
         defer { self.ignoresCurrentDrag = false }
         guard !self.ignoresCurrentDrag else { return }
         if self.reducesMotion {
-            self.commitReducedMotionDrag(translation: translation, velocity: velocity, width: width)
+            self.commitReducedMotionDrag(translation: translation, velocity: velocity, width: width, in: arrangement)
             return
         }
         guard let turn = self.turn, turn.phase == .dragging else { return }
@@ -100,9 +102,9 @@ extension MekuriPager {
         self.settle(decision: decision)
     }
 
-    private func commitReducedMotionDrag(translation: CGSize, velocity: CGFloat, width: CGFloat) {
+    private func commitReducedMotionDrag(translation: CGSize, velocity: CGFloat, width: CGFloat, in arrangement: MekuriArrangement) {
         guard let direction = MekuriDrag.turn(translation: translation, direction: self.direction),
-              let target = direction.targetIndex(from: self.settledPage, pageCount: self.pageCount)
+              let target = arrangement.turnState(id: 0, turn: direction, from: self.settledPage).targetIndex
         else { return }
         let axis = MekuriDrag.axis(turn: direction, direction: self.direction)
         let progress = MekuriDrag.progress(start: 0, translation: translation.width, width: width, axis: axis, isBlocked: false)
@@ -116,16 +118,16 @@ extension MekuriPager {
         }
     }
 
-    private func beginTurn(_ turn: MekuriTurn) -> MekuriTurnState {
+    func beginTurn(_ turn: MekuriTurn, in arrangement: MekuriArrangement) -> MekuriTurnState {
         self.nextTurnID += 1
         self.presented.value = 0
-        return MekuriTurnState.begin(id: self.nextTurnID, turn: turn, from: self.settledPage, pageCount: self.pageCount)
+        return arrangement.turnState(id: self.nextTurnID, turn: turn, from: self.settledPage)
     }
 
     /// Inserts the fold at rest, never animated; the layer's appearance
     /// starts the settle.
-    func arm(_ turn: MekuriTurn, decision: MekuriTurnDecision) {
-        var state = self.beginTurn(turn)
+    func arm(_ turn: MekuriTurnState, decision: MekuriTurnDecision) {
+        var state = turn
         state.phase = .armed(decision)
         self.withoutAnimation {
             self.turn = state
