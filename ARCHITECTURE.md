@@ -136,11 +136,14 @@ constructions.
 | `Shader` values | 0 | 1 per frame | 3 per frame (front, back, shadow) |
 
 A `Shader` value is necessarily rebuilt every frame because progress is one of
-its arguments; the shader function itself is resolved once. Before this was
-measured, the leaf's back face was handed to the animatable modifier as a
-closure and rebuilt every frame of a spread turn (one `content` call per
-frame, about 170 over a four-second turn); it is now built once with the
-other faces, outside the modifier.
+its arguments; the shader function itself is resolved once. Mid-turn the heap
+holds fewer live objects than at rest, since the leaf's faces are frozen
+while two live pages rest, and what a turn keeps alive beyond the settled
+tree is the leaf's view tree and its faces' text runs, under ten kilobytes
+across named classes. Before this was measured, the leaf's back face was
+handed to the animatable modifier as a closure and rebuilt every frame of a
+spread turn (one `content` call per frame, about 170 over a four-second
+turn); it is now built once with the other faces, outside the modifier.
 
 ## Layout
 
