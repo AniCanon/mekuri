@@ -132,7 +132,8 @@ internal class MekuriPagerController(
         return try {
             landing.await()
         } catch (cancellation: CancellationException) {
-            this.dropTurn()
+            // A landing cancelled by a drop belongs to a turn already dropped.
+            if (!landing.isCancelled) this.dropTurn()
             throw cancellation
         }
     }
