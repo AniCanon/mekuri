@@ -2,6 +2,10 @@ import SwiftUI
 
 /// Builds the `mekuriFold` shader for one pass from the fold geometry.
 enum MekuriFoldShader {
+    /// Resolved once; a `Shader` value is built per call because progress is
+    /// one of its arguments.
+    private static let mekuriFold = ShaderLibrary.bundle(.module).mekuriFold
+
     /// `progress` is the shader's own, never negative. `hinge` is the
     /// distance from the layer's leading edge to the spine a leaf turns on,
     /// nil for a page folded across the whole layer. A hinged leaf's page is
@@ -21,7 +25,7 @@ enum MekuriFoldShader {
         let geometry = MekuriFoldGeometry(pageWidth: size.width - (hinge ?? 0), configuration: configuration)
         let shadow = geometry.creaseShadowRect(progress: progress, pageSize: size)
         let landing = hinge == nil ? 1 : geometry.landingRadiusScale(progress: progress)
-        return ShaderLibrary.bundle(.module).mekuriFold(
+        return Self.mekuriFold(
             .float2(size),
             .float(sweep?.shaderProgress ?? progress),
             .float(geometry.heldRadius * landing),

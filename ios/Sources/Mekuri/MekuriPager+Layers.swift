@@ -101,9 +101,8 @@ extension MekuriPager {
             turn: turn,
             direction: self.direction,
             configuration: self.configuration,
-            presented: self.presented
-        ) {
-            self.face(back)
-        }
+            presented: self.presented,
+            back: self.face(back)
+        )
     }
 }
