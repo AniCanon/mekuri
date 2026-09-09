@@ -1,4 +1,4 @@
-import SwiftUI
+import CoreGraphics
 
 /// Horizontal shift of the whole spread stack. A spread holding one page is
 /// shifted so that page sits centred in the container; a full spread is not
@@ -54,22 +54,5 @@ enum MekuriSpreadShift {
             start: self.atRest(inSpreadContaining: turn.fromIndex, layout: layout, pageWidth: pageWidth, direction: direction),
             end: self.atRest(inSpreadContaining: turn.targetIndex ?? turn.fromIndex, layout: layout, pageWidth: pageWidth, direction: direction)
         )
-    }
-}
-
-/// Shifts the spread stack by the span's value at the animated progress.
-/// The offset must be computed from the interpolated progress: an animated
-/// offset above a layer effect leaves the effect at the model placement.
-nonisolated struct MekuriSpreadShiftModifier: ViewModifier, Animatable {
-    var progress: CGFloat
-    let span: MekuriSpreadShift.Span
-
-    var animatableData: CGFloat {
-        get { self.progress }
-        set { self.progress = newValue }
-    }
-
-    @MainActor func body(content: Content) -> some View {
-        content.offset(x: self.span.value(at: self.progress))
     }
 }

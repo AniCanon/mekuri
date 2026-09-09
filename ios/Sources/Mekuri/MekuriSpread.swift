@@ -30,18 +30,3 @@ public enum MekuriSpread: Equatable, Sendable {
         return CGSize(width: height * pageAspectRatio, height: height)
     }
 }
-
-/// One half of a spread, named in reading order.
-enum MekuriSlot: Equatable, Sendable {
-    case leading
-    case trailing
-}
-
-/// The two-sided page a turn moves. `revealed` is the page uncovered in the
-/// slot the leaf departs from; nil when that slot ends up absent.
-struct MekuriLeaf: Equatable, Sendable {
-    let front: Int
-    let back: Int?
-    let revealed: Int?
-    let landsIn: MekuriSlot
-}
