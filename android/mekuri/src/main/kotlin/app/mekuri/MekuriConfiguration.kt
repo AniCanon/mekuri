@@ -6,76 +6,129 @@ import androidx.compose.animation.core.spring
 /**
  * Fold and gesture tuning shared by every page turn.
  *
- * Every numeric member is held in parity with the iOS type. [settleAnimation]
- * is not.
+ * The public constructor carries the tuning knobs; every other member keeps its
+ * tuned value and is not reachable from outside the module. Every numeric
+ * member is held in parity with the iOS type. [settleAnimation] is not.
+ *
+ * Not a data class: `componentN` would expose the internal members through
+ * destructuring.
  */
-data class MekuriConfiguration(
-    /** Cylinder radius at the held end of the fold as a ratio of the page width. */
-    val cylinderRadiusRatio: Float = 0.04f,
-
-    /**
-     * Growth of the cylinder radius per page width of fold distance from the
-     * held end, as a multiple of [cylinderRadiusRatio]. 0 keeps the radius
-     * constant along the fold.
-     */
-    val radiusOpening: Float = 1.0f,
-
-    /**
-     * How far the free corner runs ahead of a straight crease, 0..1. 0 is a
-     * straight crease.
-     */
-    val creaseBow: Float = 0.35f,
-
-    /**
-     * Horizontal travel of the fold line per unit of vertical distance from the
-     * page centre. A ratio, not an angle.
-     */
-    val cornerShear: Float = 0.10f,
-
-    /**
-     * Darkest brightness of the lit back face, 0..1, reached where the surface
-     * has turned fully away from the light.
-     */
-    val backFaceDim: Float = 0.86f,
-
-    /** Width of the crease shadow as a ratio of the page width. */
-    val creaseShadowWidthRatio: Float = 0.10f,
-
-    /** Peak opacity of the crease shadow, 0..1. */
-    val creaseShadowOpacity: Float = 0.35f,
-
-    /** Turn progress, 0..1, past which a released drag completes the turn. */
-    val snapThreshold: Float = 0.35f,
-
-    /**
-     * Drag velocity in dp per second, projected onto the turn's axis, at which
-     * a release completes the turn regardless of progress.
-     */
-    val flingVelocity: Float = 600f,
-
-    /** Width of each tap-to-turn edge zone as a ratio of the container width. */
-    val tapZoneRatio: Float = 0.25f,
-
-    /** Animation used to settle a released turn. */
-    val settleAnimation: AnimationSpec<Float> = DefaultSettleAnimation,
-
-    /** Overrides the system reduce-motion setting when non-null. */
-    val reducedMotionOverride: Boolean? = null,
+public class MekuriConfiguration internal constructor(
+    internal val cylinderRadiusRatio: Float,
+    internal val radiusOpening: Float,
+    internal val creaseBow: Float,
+    internal val cornerShear: Float,
+    internal val backFaceDim: Float,
+    internal val creaseShadowWidthRatio: Float,
+    internal val creaseShadowOpacity: Float,
+    internal val snapThreshold: Float,
+    internal val flingVelocity: Float,
+    internal val tapZoneRatio: Float,
+    internal val settleAnimation: AnimationSpec<Float>,
+    internal val reducedMotionOverride: Boolean?,
 ) {
-    companion object {
+    /**
+     * @param foldRadius cylinder radius at the held end of the fold as a ratio
+     *   of the page width.
+     * @param cornerLift horizontal travel of the fold line per unit of vertical
+     *   distance from the page centre. A ratio, not an angle.
+     * @param tapZone width of each tap-to-turn edge zone as a ratio of the
+     *   container width.
+     * @param snapThreshold turn progress, 0..1, past which a released drag
+     *   completes the turn.
+     * @param settleAnimation animation used to settle a released turn.
+     * @param reducedMotionOverride overrides the system reduce-motion setting
+     *   when non-null.
+     */
+    public constructor(
+        foldRadius: Float = DEFAULT_CYLINDER_RADIUS_RATIO,
+        cornerLift: Float = DEFAULT_CORNER_SHEAR,
+        tapZone: Float = DEFAULT_TAP_ZONE_RATIO,
+        snapThreshold: Float = DEFAULT_SNAP_THRESHOLD,
+        settleAnimation: AnimationSpec<Float> = DefaultSettleAnimation,
+        reducedMotionOverride: Boolean? = null,
+    ) : this(
+        cylinderRadiusRatio = foldRadius,
+        radiusOpening = DEFAULT_RADIUS_OPENING,
+        creaseBow = DEFAULT_CREASE_BOW,
+        cornerShear = cornerLift,
+        backFaceDim = DEFAULT_BACK_FACE_DIM,
+        creaseShadowWidthRatio = DEFAULT_CREASE_SHADOW_WIDTH_RATIO,
+        creaseShadowOpacity = DEFAULT_CREASE_SHADOW_OPACITY,
+        snapThreshold = snapThreshold,
+        flingVelocity = DEFAULT_FLING_VELOCITY,
+        tapZoneRatio = tapZone,
+        settleAnimation = settleAnimation,
+        reducedMotionOverride = reducedMotionOverride,
+    )
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is MekuriConfiguration) return false
+        return this.cylinderRadiusRatio == other.cylinderRadiusRatio &&
+            this.radiusOpening == other.radiusOpening &&
+            this.creaseBow == other.creaseBow &&
+            this.cornerShear == other.cornerShear &&
+            this.backFaceDim == other.backFaceDim &&
+            this.creaseShadowWidthRatio == other.creaseShadowWidthRatio &&
+            this.creaseShadowOpacity == other.creaseShadowOpacity &&
+            this.snapThreshold == other.snapThreshold &&
+            this.flingVelocity == other.flingVelocity &&
+            this.tapZoneRatio == other.tapZoneRatio &&
+            this.settleAnimation == other.settleAnimation &&
+            this.reducedMotionOverride == other.reducedMotionOverride
+    }
+
+    override fun hashCode(): Int {
+        var result = this.cylinderRadiusRatio.hashCode()
+        result = 31 * result + this.radiusOpening.hashCode()
+        result = 31 * result + this.creaseBow.hashCode()
+        result = 31 * result + this.cornerShear.hashCode()
+        result = 31 * result + this.backFaceDim.hashCode()
+        result = 31 * result + this.creaseShadowWidthRatio.hashCode()
+        result = 31 * result + this.creaseShadowOpacity.hashCode()
+        result = 31 * result + this.snapThreshold.hashCode()
+        result = 31 * result + this.flingVelocity.hashCode()
+        result = 31 * result + this.tapZoneRatio.hashCode()
+        result = 31 * result + this.settleAnimation.hashCode()
+        result = 31 * result + this.reducedMotionOverride.hashCode()
+        return result
+    }
+
+    internal companion object {
+        private const val DEFAULT_CYLINDER_RADIUS_RATIO = 0.04f
+        private const val DEFAULT_RADIUS_OPENING = 1.0f
+        private const val DEFAULT_CREASE_BOW = 0.35f
+        private const val DEFAULT_CORNER_SHEAR = 0.10f
+        private const val DEFAULT_BACK_FACE_DIM = 0.86f
+        private const val DEFAULT_CREASE_SHADOW_WIDTH_RATIO = 0.10f
+        private const val DEFAULT_CREASE_SHADOW_OPACITY = 0.35f
+        private const val DEFAULT_SNAP_THRESHOLD = 0.35f
+        private const val DEFAULT_FLING_VELOCITY = 600f
+        private const val DEFAULT_TAP_ZONE_RATIO = 0.25f
+
         /** Not held in numeric parity with the iOS settle spring. */
-        val DefaultSettleAnimation: AnimationSpec<Float> = spring(
+        internal val DefaultSettleAnimation: AnimationSpec<Float> = spring(
             dampingRatio = 0.86f,
             stiffness = 320f,
         )
 
-        val Default = MekuriConfiguration()
+        internal val Default: MekuriConfiguration = MekuriConfiguration()
 
         /** A vertical straight crease with a constant radius. */
-        val StraightCrease = MekuriConfiguration(
+        internal val StraightCrease: MekuriConfiguration = MekuriConfiguration(
+            cylinderRadiusRatio = DEFAULT_CYLINDER_RADIUS_RATIO,
             radiusOpening = 0f,
             creaseBow = 0f,
             cornerShear = 0f,
+            backFaceDim = DEFAULT_BACK_FACE_DIM,
+            creaseShadowWidthRatio = DEFAULT_CREASE_SHADOW_WIDTH_RATIO,
+            creaseShadowOpacity = DEFAULT_CREASE_SHADOW_OPACITY,
+            snapThreshold = DEFAULT_SNAP_THRESHOLD,
+            flingVelocity = DEFAULT_FLING_VELOCITY,
+            tapZoneRatio = DEFAULT_TAP_ZONE_RATIO,
+            settleAnimation = DefaultSettleAnimation,
+            reducedMotionOverride = null,
         )
     }
 }

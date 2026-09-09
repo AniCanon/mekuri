@@ -1,6 +1,5 @@
 package app.mekuri
 
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -24,6 +23,20 @@ class MekuriFoldGeometryTest {
     fun `axis is monotonic`() {
         val samples = (0..10).map { geometry.foldAxisOffset(it / 10f) }
         assertTrue(samples.zipWithNext().all { (a, b) -> a >= b })
+    }
+
+    @Test
+    fun `bowed axis is monotonic in progress at every row`() {
+        for (row in 0..8) {
+            val y = row * pageSize.height / 8
+            val samples = (0..20).map {
+                geometry.foldAxisOffset(it / 20f, y = y, pageHeight = pageSize.height)
+            }
+            assertTrue(
+                "row y=$y",
+                samples.zipWithNext().all { (a, b) -> a > b },
+            )
+        }
     }
 
     @Test
@@ -66,10 +79,11 @@ class MekuriFoldGeometryTest {
 
     @Test
     fun `crease shadow is a full height band centred on the straight axis`() {
-        assertEquals(
-            Rect(180f, 0f, 220f, 800f),
-            geometry.creaseShadowRect(0.5f, pageSize),
-        )
+        val band = geometry.creaseShadowRect(0.5f, pageSize)
+        assertEquals(180f, band.left, TOLERANCE)
+        assertEquals(0f, band.top, TOLERANCE)
+        assertEquals(220f, band.right, TOLERANCE)
+        assertEquals(800f, band.bottom, TOLERANCE)
     }
 
     @Test

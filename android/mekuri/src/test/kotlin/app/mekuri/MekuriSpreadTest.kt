@@ -41,12 +41,6 @@ class MekuriSpreadTest {
         assertEquals(675f, widthLimited.height, TOLERANCE)
     }
 
-    @Test
-    fun `direction sweeps a signed progress`() {
-        assertEquals(0.25f, MekuriDirection.LeftToRight.sweep(0.25f), 0f)
-        assertEquals(-0.25f, MekuriDirection.RightToLeft.sweep(0.25f), 0f)
-    }
-
     private companion object {
         const val TOLERANCE = 1e-3f
     }

@@ -14,7 +14,7 @@ import kotlin.math.min
  * These formulas are mirrored in the fold shader and are held in numeric parity
  * with the iOS geometry.
  */
-data class MekuriFoldGeometry(
+internal data class MekuriFoldGeometry(
     val pageWidth: Float,
     val configuration: MekuriConfiguration = MekuriConfiguration.Default,
 ) {

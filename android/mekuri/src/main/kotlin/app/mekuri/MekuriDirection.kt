@@ -4,7 +4,7 @@ package app.mekuri
  * Spine placement and sweep direction. Page indices stay in reading order
  * regardless of direction.
  */
-enum class MekuriDirection {
+public enum class MekuriDirection {
     /** The spine is the left edge; a forward turn lifts the right edge. */
     LeftToRight,
 
@@ -17,7 +17,7 @@ enum class MekuriDirection {
      * Signed fold travel. Positive sweeps the flap from the right edge toward
      * the left; negative mirrors it so the spine sits on the opposite edge.
      */
-    fun sweep(progress: Float): Float = when (this) {
+    internal fun sweep(progress: Float): Float = when (this) {
         LeftToRight -> progress
         RightToLeft -> -progress
     }
