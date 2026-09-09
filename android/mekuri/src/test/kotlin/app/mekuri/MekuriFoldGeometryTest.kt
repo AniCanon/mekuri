@@ -40,6 +40,20 @@ class MekuriFoldGeometryTest {
     }
 
     @Test
+    fun `bow offsets the crease by bow lead times held squared`() {
+        // 400 x (1 - 0.25) + 0.10 x (y - 400) - 0.35 x 400 x 0.25 x 0.75 x (1 - y / 800)^2
+        assertEquals(265.234375f, geometry.foldAxisOffset(0.25f, y = 200f, pageHeight = 800f), TOLERANCE)
+        assertEquals(318.359375f, geometry.foldAxisOffset(0.25f, y = 600f, pageHeight = 800f), TOLERANCE)
+    }
+
+    @Test
+    fun `a straight crease differs from a bowed one by the bow term alone`() {
+        val straight = MekuriFoldGeometry(pageSize.width, MekuriConfiguration(creaseBow = 0f))
+        assertEquals(280f, straight.foldAxisOffset(0.25f, y = 200f, pageHeight = 800f), TOLERANCE)
+        assertEquals(320f, straight.foldAxisOffset(0.25f, y = 600f, pageHeight = 800f), TOLERANCE)
+    }
+
+    @Test
     fun `progress clamps outside zero to one`() {
         assertEquals(geometry.foldAxisOffset(0f), geometry.foldAxisOffset(-2f), TOLERANCE)
         assertEquals(geometry.foldAxisOffset(1f), geometry.foldAxisOffset(3f), TOLERANCE)

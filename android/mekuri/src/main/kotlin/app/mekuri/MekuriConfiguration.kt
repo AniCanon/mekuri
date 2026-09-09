@@ -29,6 +29,8 @@ public class MekuriConfiguration internal constructor(
      *   of the page width.
      * @param cornerLift horizontal travel of the fold line per unit of vertical
      *   distance from the page centre. A ratio, not an angle.
+     * @param creaseBow how far the free corner runs ahead of a straight crease,
+     *   0..1. The crease is straight again at both ends of the turn.
      * @param tapZone width of each tap-to-turn edge zone as a ratio of the
      *   container width.
      * @param snapThreshold turn progress, 0..1, past which a released drag
@@ -40,6 +42,7 @@ public class MekuriConfiguration internal constructor(
     public constructor(
         foldRadius: Float = DEFAULT_CYLINDER_RADIUS_RATIO,
         cornerLift: Float = DEFAULT_CORNER_SHEAR,
+        creaseBow: Float = DEFAULT_CREASE_BOW,
         tapZone: Float = DEFAULT_TAP_ZONE_RATIO,
         snapThreshold: Float = DEFAULT_SNAP_THRESHOLD,
         settleAnimation: AnimationSpec<Float> = DefaultSettleAnimation,
@@ -47,7 +50,7 @@ public class MekuriConfiguration internal constructor(
     ) : this(
         cylinderRadiusRatio = foldRadius,
         radiusOpening = DEFAULT_RADIUS_OPENING,
-        creaseBow = DEFAULT_CREASE_BOW,
+        creaseBow = creaseBow,
         cornerShear = cornerLift,
         backFaceDim = DEFAULT_BACK_FACE_DIM,
         creaseShadowWidthRatio = DEFAULT_CREASE_SHADOW_WIDTH_RATIO,
