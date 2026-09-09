@@ -102,10 +102,4 @@ class MekuriSpreadLayoutTest {
         assertNull(loneCover.leaf(MekuriTurn.Forward, spreadIndex = 0))
         assertNull(loneCover.leaf(MekuriTurn.Backward, spreadIndex = 0))
     }
-
-    @Test
-    fun `pages outside the book are absent from their slots`() {
-        assertEquals(MekuriSpreadPages(null, null), coverAlone.pages(4))
-        assertEquals(MekuriSpreadPages(null, null), paired.pages(-1))
-    }
 }

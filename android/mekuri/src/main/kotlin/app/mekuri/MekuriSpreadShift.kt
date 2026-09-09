@@ -8,7 +8,7 @@ internal data class MekuriShiftSpan(
     val start: Float,
     val end: Float,
 ) {
-    /** Progress clamps to 0..1 so a spring's overshoot never slides the book. */
+    /** Progress clamps to 0..1; overshoot never slides the book. */
     fun value(progress: Float): Float =
         this.start + (this.end - this.start) * progress.coerceIn(0f, 1f)
 
@@ -19,10 +19,9 @@ internal data class MekuriShiftSpan(
 
 /**
  * Horizontal shift of the whole spread stack. A spread holding one page is
- * shifted so that page sits centred in the container; a full spread is not
- * shifted. During a turn the shift runs from the departing spread's to the
- * landing spread's with the turn's progress, so slots and leaf slide as one
- * piece and the lone page reaches its slot as the turn lands.
+ * shifted to centre that page in the container; a full spread is not shifted.
+ * During a turn the shift runs from the departing spread's to the landing
+ * spread's with the turn's progress.
  */
 internal object MekuriSpreadShift {
     fun atRest(

@@ -22,9 +22,7 @@ internal object MekuriDrag {
     const val BlockedDamping: Float = 1f / 3f
 
     /**
-     * Re-evaluated on every sample until a turn locks; never latched, because a
-     * drag cancelled by a consumer's scroll container delivers no end event and
-     * a latched verdict would outlive the gesture.
+     * Re-evaluated on every sample until a turn locks; never latched.
      */
     fun isHorizontallyDominant(translation: Offset): Boolean =
         abs(translation.x) > abs(translation.y) * HorizontalDominance
