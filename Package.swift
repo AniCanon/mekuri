@@ -11,7 +11,7 @@ let package = Package(
         .library(name: "Mekuri", targets: ["Mekuri"]),
     ],
     targets: [
-        .target(name: "Mekuri"),
+        .target(name: "Mekuri", resources: [.process("MekuriFold.metal")]),
         .testTarget(name: "MekuriTests", dependencies: ["Mekuri"]),
     ]
 )
