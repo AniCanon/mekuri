@@ -23,7 +23,7 @@ import org.junit.runner.RunWith
 
 /**
  * Renders the fold at a fixed progress with nothing animating and saves the
- * result. The mesh the shader draws needs a device, so these run instrumented.
+ * result. The shader needs a device, so these run instrumented.
  */
 @RunWith(AndroidJUnit4::class)
 class MekuriFoldScreenshotTest {
@@ -92,7 +92,7 @@ class MekuriFoldScreenshotTest {
     }
 
     @Test
-    fun aRightToLeafTurnMirrorsTheSameFold() {
+    fun aRightToLeftTurnMirrorsTheSameFold() {
         rule.setContent {
             MekuriScene(width = LEAF_WIDTH, height = PAGE_HEIGHT) {
                 MekuriFoldedLeaf(
