@@ -31,3 +31,19 @@ extension MekuriFoldedPageTests {
         #expect(backward.foldPass.shaderProgress == 0.4)
     }
 }
+
+extension MekuriFoldedPageTests {
+    @MainActor @Test func aLeafWithABackFaceDrawsTwoPasses() {
+        let mirrored = MekuriFoldedLeaf(progress: 0.4, direction: .leftToRight, configuration: .default) {
+            Color.red
+        } back: {
+            Color.blue
+        }
+        #expect(mirrored.hasDistinctBackFace)
+
+        let showThrough = MekuriFoldedLeaf(progress: 0.4, direction: .leftToRight, configuration: .default) {
+            Color.red
+        }
+        #expect(!showThrough.hasDistinctBackFace)
+    }
+}

@@ -49,18 +49,40 @@ struct MekuriFoldedPage<Content: View>: View {
     }
 
     private func fold(size: CGSize, progress: CGFloat) -> Shader {
-        let geometry = MekuriFoldGeometry(pageWidth: size.width, configuration: self.configuration)
+        MekuriFoldShader.make(size: size, progress: progress, configuration: self.configuration, face: .whole)
+    }
+}
+
+/// Which face of the leaf one `mekuriFold` pass draws. The raw value is the
+/// shader's `face` argument.
+enum MekuriFace: Float {
+    case whole = 0
+    case front = 1
+    case back = 2
+}
+
+enum MekuriFoldShader {
+    /// `progress` is the shader's own, never negative; `size` is the layer
+    /// size and the page width.
+    static func make(
+        size: CGSize,
+        progress: CGFloat,
+        configuration: MekuriConfiguration,
+        face: MekuriFace
+    ) -> Shader {
+        let geometry = MekuriFoldGeometry(pageWidth: size.width, configuration: configuration)
         let shadow = geometry.creaseShadowRect(progress: progress, pageSize: size)
         return ShaderLibrary.bundle(.module).mekuriFold(
             .float2(size),
             .float(progress),
             .float(geometry.heldRadius),
             .float(geometry.radiusSlope),
-            .float(self.configuration.cornerShear),
-            .float(self.configuration.creaseBow),
-            .float(self.configuration.backFaceDim),
+            .float(configuration.cornerShear),
+            .float(configuration.creaseBow),
+            .float(configuration.backFaceDim),
             .float(shadow.width),
-            .float(self.configuration.creaseShadowOpacity)
+            .float(configuration.creaseShadowOpacity),
+            .float(CGFloat(face.rawValue))
         )
     }
 }
