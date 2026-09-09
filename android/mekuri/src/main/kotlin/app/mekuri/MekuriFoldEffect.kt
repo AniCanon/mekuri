@@ -17,11 +17,9 @@ internal fun rememberMekuriFoldShader(): RuntimeShader = remember { RuntimeShade
  * Folds the content this modifier is applied to. The shader folds a flap
  * entering from the right only, so a right-to-left pass mirrors the content
  * into the effect and mirrors the result back out; the mirror is spatial, never
- * a negated progress. The effect layer is a single render node, so translucent
- * output composites exactly once whatever the content is made of.
+ * a negated progress.
  *
- * [progress] is read inside the layer block, which is the per-frame path;
- * reading it in composition would rebuild the subtree every animation frame.
+ * [progress] must be read inside the layer block, not in composition.
  */
 internal fun Modifier.mekuriFold(
     shader: RuntimeShader,

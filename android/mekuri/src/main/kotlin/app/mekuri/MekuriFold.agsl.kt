@@ -1,14 +1,24 @@
 package app.mekuri
 
 /**
- * The fold shader, a term-for-term transliteration of the Metal source.
+ * The fold shader, a term-for-term transliteration of `MekuriFold.metal`.
  *
- * The axis and lead expressions are frozen text: the compiler reassociates the
- * product chains, so an arithmetically neutral term still changes rendered
- * pixels. New behaviour is a transformation of the uniforms, never a new term
- * here. The whole-mode statement sequence (sample, reach, shade, return) is
- * frozen for the same reason, and each face branch has its own helper rather
- * than sharing a converted value.
+ * Frozen text. New behaviour is a transformation of the uniforms, never a new
+ * or reassociated term here, and no branch shares a converted value with
+ * another. Every departure from the Metal source is listed below and the list
+ * must stay complete:
+ *
+ * 1. `layer.sample(p)` is `layer.eval(p)` — forced, AGSL's sampler API.
+ * 2. The whole-mode local `flat` is `sheet` — forced, `flat` is reserved in
+ *    SkSL (`error: 108: expected ';', but found 'flat'`).
+ * 3. `M_PI_F` is `mekuriPi` — the substitution is forced, AGSL declares no such
+ *    constant; the named-constant form rather than an inline literal is chosen.
+ *    3.14159265 rounds to the same float as `M_PI_F`.
+ * 4. The `h` suffix on half literals (`0.0h`, `1.0h`) is dropped — forced, AGSL
+ *    has no such suffix.
+ * 5. The declaration frame — `main` for the `[[stitchable]]` entry point, a
+ *    uniform block for its arguments, `const` for `constant`, no `static` — is
+ *    forced by the language.
  */
 internal const val MEKURI_FOLD_AGSL: String = """
 uniform shader layer;
@@ -42,9 +52,9 @@ half mekuriBackShade(float nx, float nz, float dim) {
 
 // Shadow the lifted sheet casts on the page beneath, `d` past the crease.
 // Darkest where the roll is tightest; reaches two radii past the rim.
-half4 mekuriContactShadow(float d, float radius, float heldR, float opacity) {
+half4 mekuriContactShadow(float d, float radius, float heldRadius, float opacity) {
     float reach = 1.0 - saturate((d - radius) / (2.0 * radius));
-    float alpha = opacity * (heldR / radius) * reach * reach;
+    float alpha = opacity * (heldRadius / radius) * reach * reach;
     return half4(0.0, 0.0, 0.0, half(alpha));
 }
 
