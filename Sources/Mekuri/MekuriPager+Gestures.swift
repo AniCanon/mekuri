@@ -1,16 +1,14 @@
 import SwiftUI
 
 extension MekuriPager {
-    static var dragMinimumDistance: CGFloat { 10 }
-
     func dragGesture(width: CGFloat) -> some Gesture {
-        DragGesture(minimumDistance: Self.dragMinimumDistance, coordinateSpace: .local)
+        DragGesture(minimumDistance: MekuriDrag.minimumDistance, coordinateSpace: .local)
             .onChanged { value in
-                self.dragChanged(translation: value.translation.width, width: width)
+                self.dragChanged(translation: value.translation, width: width)
             }
             .onEnded { value in
                 self.dragEnded(
-                    translation: value.translation.width,
+                    translation: value.translation,
                     velocity: value.velocity.width,
                     width: width
                 )
@@ -47,15 +45,18 @@ extension MekuriPager {
         }
     }
 
-    func dragChanged(translation: CGFloat, width: CGFloat) {
+    /// A drag that is not horizontally dominant neither locks nor takes over
+    /// a turn; a locked turn follows every later sample.
+    func dragChanged(translation: CGSize, width: CGFloat) {
         guard !self.ignoresCurrentDrag, !self.reducesMotion else { return }
         if var turn = self.turn {
             if turn.isSettling {
+                guard MekuriDrag.turn(translation: translation, direction: self.direction) != nil else { return }
                 self.takeOver(&turn)
             }
             turn.progress = MekuriDrag.progress(
                 start: turn.startProgress,
-                translation: translation,
+                translation: translation.width,
                 width: width,
                 axis: MekuriDrag.axis(turn: turn.turn, direction: self.direction),
                 isBlocked: turn.isBlocked
@@ -69,7 +70,7 @@ extension MekuriPager {
         guard turn.turningIndex != nil else { return }
         turn.progress = MekuriDrag.progress(
             start: 0,
-            translation: translation,
+            translation: translation.width,
             width: width,
             axis: MekuriDrag.axis(turn: direction, direction: self.direction),
             isBlocked: turn.isBlocked
@@ -78,7 +79,7 @@ extension MekuriPager {
         self.turn = turn
     }
 
-    func dragEnded(translation: CGFloat, velocity: CGFloat, width: CGFloat) {
+    func dragEnded(translation: CGSize, velocity: CGFloat, width: CGFloat) {
         defer { self.ignoresCurrentDrag = false }
         guard !self.ignoresCurrentDrag else { return }
         if self.reducesMotion {
@@ -99,12 +100,12 @@ extension MekuriPager {
         self.settle(decision: decision)
     }
 
-    private func commitReducedMotionDrag(translation: CGFloat, velocity: CGFloat, width: CGFloat) {
+    private func commitReducedMotionDrag(translation: CGSize, velocity: CGFloat, width: CGFloat) {
         guard let direction = MekuriDrag.turn(translation: translation, direction: self.direction),
               let target = direction.targetIndex(from: self.settledPage, pageCount: self.pageCount)
         else { return }
         let axis = MekuriDrag.axis(turn: direction, direction: self.direction)
-        let progress = MekuriDrag.progress(start: 0, translation: translation, width: width, axis: axis, isBlocked: false)
+        let progress = MekuriDrag.progress(start: 0, translation: translation.width, width: width, axis: axis, isBlocked: false)
         let decision = MekuriTurnDecision.resolve(
             progress: progress,
             velocity: MekuriDrag.projectedVelocity(velocity, axis: axis),

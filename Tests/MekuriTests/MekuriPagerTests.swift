@@ -1,3 +1,4 @@
+import CoreGraphics
 import Testing
 @testable import Mekuri
 
@@ -25,6 +26,25 @@ extension MekuriPagerTests {
         #expect(projected == -900)
         #expect(MekuriTurnDecision.resolve(progress: 0.1, velocity: projected, configuration: .default) == .revert)
         #expect(MekuriDrag.projectedVelocity(-900, axis: axis) == 900)
+    }
+
+    @Test func aFlickAgainstTheTurnProjectsNegativeAndRevertsRightToLeft() {
+        let axis = MekuriDrag.axis(turn: .forward, direction: .rightToLeft)
+        let projected = MekuriDrag.projectedVelocity(-900, axis: axis)
+        #expect(axis == 1)
+        #expect(projected == -900)
+        #expect(MekuriTurnDecision.resolve(progress: 0.1, velocity: projected, configuration: .default) == .revert)
+        #expect(MekuriDrag.projectedVelocity(900, axis: axis) == 900)
+        #expect(MekuriTurnDecision.resolve(progress: 0.1, velocity: 900, configuration: .default) == .commit)
+    }
+
+    @Test func aDragLocksATurnOnlyWhenHorizontallyDominant() {
+        #expect(MekuriDrag.turn(translation: CGSize(width: -40, height: 12), direction: .leftToRight) == .forward)
+        #expect(MekuriDrag.turn(translation: CGSize(width: 40, height: 12), direction: .rightToLeft) == .forward)
+        #expect(MekuriDrag.turn(translation: CGSize(width: -12, height: 40), direction: .leftToRight) == nil)
+        #expect(MekuriDrag.turn(translation: CGSize(width: 12, height: -40), direction: .rightToLeft) == nil)
+        #expect(MekuriDrag.turn(translation: CGSize(width: -30, height: 30), direction: .leftToRight) == nil)
+        #expect(MekuriDrag.turn(translation: CGSize(width: 0, height: 0), direction: .leftToRight) == nil)
     }
 
     @Test func aBlockedDragKeepsAThirdOfItsTravel() {

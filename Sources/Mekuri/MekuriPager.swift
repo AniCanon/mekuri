@@ -87,8 +87,7 @@ public struct MekuriPager<Content: View>: View {
 
     private func foldModifier(for turn: MekuriTurnState) -> MekuriFoldModifier {
         MekuriFoldModifier(
-            progress: turn.progress,
-            isReversed: turn.turn == .backward,
+            turn: turn,
             direction: self.direction,
             configuration: self.configuration,
             presented: self.presented

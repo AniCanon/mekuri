@@ -6,26 +6,25 @@ final class MekuriPresentedProgress: @unchecked Sendable {
     var value: CGFloat = 0
 }
 
-/// Folds the turning page by an animatable progress. `progress` is turn
-/// progress; the reversal for backward turns happens here.
+/// Folds the turning page. Animates and mirrors turn progress; the fold is
+/// drawn from `turn.foldProgress`.
 nonisolated struct MekuriFoldModifier: ViewModifier, Animatable {
-    var progress: CGFloat
-    let isReversed: Bool
+    var turn: MekuriTurnState
     let direction: MekuriDirection
     let configuration: MekuriConfiguration
     let presented: MekuriPresentedProgress
 
     var animatableData: CGFloat {
-        get { self.progress }
+        get { self.turn.progress }
         set {
-            self.progress = newValue
+            self.turn.progress = newValue
             self.presented.value = newValue
         }
     }
 
     @MainActor func body(content: Content) -> some View {
         MekuriFoldedPage(
-            progress: self.isReversed ? 1 - self.progress : self.progress,
+            progress: self.turn.foldProgress,
             direction: self.direction,
             configuration: self.configuration
         ) {
