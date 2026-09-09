@@ -24,11 +24,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * The shader's translucent output must composite once however many nodes the
- * page holds. The same fold is measured over a page of N draw-modifier nodes
- * and over a page of N children that each carry their own graphics layer; both
- * must differ by zero pixels between N = 1 and N = 8. A control that stacks two
- * shadow passes must differ by more than zero, or the measurement is vacuous.
+ * The same fold over a page of N draw-modifier nodes, and over a page of N
+ * children that each carry their own graphics layer, must differ by zero pixels
+ * between N = 1 and N = 8. The control that stacks two shadow passes must
+ * differ by more than zero.
  */
 @RunWith(AndroidJUnit4::class)
 class MekuriCompositingProbeTest {

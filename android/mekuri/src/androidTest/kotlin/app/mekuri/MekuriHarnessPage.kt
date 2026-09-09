@@ -55,8 +55,8 @@ fun MekuriStackedPage(count: Int, ground: Color) {
 
 /**
  * The same page with each child on its own offscreen, clipped graphics layer.
- * The children stay opaque and the same colour, so the drawn pixels are
- * invariant in [count] while the render node count is not.
+ * The children must stay opaque and one colour: the drawn pixels are invariant
+ * in [count], the render node count is not.
  */
 @Composable
 fun MekuriLayeredStackedPage(count: Int, ground: Color) {
