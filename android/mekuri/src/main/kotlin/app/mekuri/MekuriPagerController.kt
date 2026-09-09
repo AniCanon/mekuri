@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -120,6 +121,7 @@ internal class MekuriPagerController(
         this.pending = null
     }
 
+    /** Cancelling the caller drops the curl; it may not land the page anyway. */
     private suspend fun curlTo(page: Int, turn: MekuriTurn): Int {
         this.dropTurn()
         val begun = this.begin(turn)
@@ -127,7 +129,12 @@ internal class MekuriPagerController(
         val landing = CompletableDeferred<Int>()
         this.pending = landing
         this.arm(begun.copy(targetIndex = page), MekuriTurnDecision.Commit)
-        return landing.await()
+        return try {
+            landing.await()
+        } catch (cancellation: CancellationException) {
+            this.dropTurn()
+            throw cancellation
+        }
     }
 
     private suspend fun crossfadeTo(page: Int) {
