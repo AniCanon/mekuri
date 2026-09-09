@@ -8,7 +8,7 @@ public enum MekuriDirection: Equatable, Sendable {
 
     /// Signed fold travel. Positive sweeps the flap from the right edge toward
     /// the left; negative mirrors it so the spine sits on the opposite edge.
-    public func sweep(progress: CGFloat) -> CGFloat {
+    func sweep(progress: CGFloat) -> CGFloat {
         switch self {
         case .leftToRight: progress
         case .rightToLeft: -progress

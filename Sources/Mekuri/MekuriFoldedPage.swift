@@ -2,13 +2,13 @@ import SwiftUI
 
 /// Renders `content` folded by `progress`, 0 (flat) to 1 (turned). The crease
 /// shadow is drawn by the shader; no further shadow may be layered on top.
-public struct MekuriFoldedPage<Content: View>: View {
+struct MekuriFoldedPage<Content: View>: View {
     private let progress: CGFloat
     private let direction: MekuriDirection
     private let configuration: MekuriConfiguration
     private let content: () -> Content
 
-    public init(
+    init(
         progress: CGFloat,
         direction: MekuriDirection,
         configuration: MekuriConfiguration,
@@ -26,7 +26,7 @@ public struct MekuriFoldedPage<Content: View>: View {
         MekuriFoldPass(direction: self.direction, progress: self.progress)
     }
 
-    public var body: some View {
+    var body: some View {
         GeometryReader { proxy in
             if self.isFolded {
                 self.foldedContent(size: proxy.size)
