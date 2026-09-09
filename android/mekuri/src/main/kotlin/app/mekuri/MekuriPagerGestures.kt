@@ -19,10 +19,9 @@ import androidx.compose.ui.input.pointer.util.VelocityTracker
  * move. Paging disabled drives no turn and consumes no movement; a centre tap
  * still reports.
  *
- * The pointer loop is keyed on the controller alone, so no recomposition can
- * restart it mid-gesture and strand a turn; the paging flag is sampled once per
- * gesture and holds for that gesture, and a loop that is cancelled anyway
- * reverts whatever it was dragging.
+ * The pointer loop is keyed on the controller alone; the paging flag is sampled
+ * once per gesture and holds for that gesture; a cancelled loop reverts what it
+ * was dragging.
  */
 @Composable
 internal fun Modifier.mekuriGestures(

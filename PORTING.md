@@ -740,7 +740,7 @@ page it was heading for.
 
 **Reduced motion is read once per context.** iOS reads
 `accessibilityReduceMotion` as a live environment value. `ANIMATOR_DURATION_SCALE`
-has no change notification, so `rememberMekuriReducesMotion` reads it once per
+is not observed; `rememberMekuriReducesMotion` reads it once per
 `Context`: a user who changes the setting while the pager is composed keeps the
 old behaviour until it recomposes with a new context. The
 `reducedMotionOverride` parameter is unaffected and is live.
