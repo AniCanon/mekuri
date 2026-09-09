@@ -6,17 +6,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -108,12 +112,14 @@ class MekuriFoldScreenshotTest {
         rule.onNodeWithTag(SCENE_TAG).captureToImage().saveScene("04-right-to-left")
     }
 
+    /** The progress must move and come back, or nothing redraws between captures. */
     @Test
-    fun theSameSceneRendersIdenticallyTwice() {
+    fun theSameSceneRendersIdenticallyAfterATurnAndBack() {
+        val progress = mutableFloatStateOf(SETTLED_PROGRESS)
         rule.setContent {
             MekuriScene(width = PAGE_WIDTH, height = PAGE_HEIGHT) {
                 MekuriFoldedPage(
-                    progress = { 0.15f },
+                    progress = { progress.floatValue },
                     direction = MekuriDirection.LeftToRight,
                     configuration = MekuriConfiguration(),
                     modifier = Modifier.fillMaxSize(),
@@ -123,7 +129,9 @@ class MekuriFoldScreenshotTest {
             }
         }
         val first = rule.onNodeWithTag(SCENE_TAG).captureToImage().pixels()
-        val second = rule.onNodeWithTag(SCENE_TAG).captureToImage().pixels()
+        val moved = rule.captureAt(progress, 0.62f)
+        assertNotEquals(0, countDifferences(first, moved))
+        val second = rule.captureAt(progress, SETTLED_PROGRESS)
         assertEquals(0, countDifferences(first, second))
     }
 }
@@ -147,6 +155,13 @@ private fun MekuriScene(
     }
 }
 
+private fun ComposeContentTestRule.captureAt(progress: MutableFloatState, value: Float): IntArray {
+    runOnIdle { progress.floatValue = value }
+    waitForIdle()
+    return onNodeWithTag(SCENE_TAG).captureToImage().pixels()
+}
+
+private const val SETTLED_PROGRESS = 0.15f
 private val PAGE_WIDTH = 240.dp
 private val LEAF_WIDTH = 340.dp
 private val PAGE_HEIGHT = 420.dp
