@@ -23,8 +23,7 @@ internal interface MekuriTurnDriver {
 
     /**
      * Drops any turn in flight without animating it. A [turnTo] call in flight
-     * must be cancelled rather than allowed to return, so a page written after
-     * the drop is not overwritten by the dropped turn's settled page.
+     * must be cancelled, not allowed to return.
      */
     fun dropTurn()
 }
