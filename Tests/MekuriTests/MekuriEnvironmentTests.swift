@@ -12,5 +12,16 @@ import Testing
         #expect(values.mekuriSnapThreshold == 0.35)
         #expect(values.mekuriPageMode == .live)
         #expect(values.mekuriReducedMotion == nil)
+        #expect(values.mekuriSettleAnimation == nil)
+    }
+
+    @Test func aNilSettleAnimationFallsBackToThePackageSpring() {
+        var values = EnvironmentValues()
+        values.mekuriSettleAnimation = .linear(duration: 4)
+        #expect(values.mekuriSettleAnimation == .linear(duration: 4))
+        values.mekuriSettleAnimation = nil
+        #expect(values.mekuriSettleAnimation == nil)
+        let resolved = values.mekuriSettleAnimation ?? MekuriConfiguration.default.settleAnimation
+        #expect(resolved == .spring(response: 0.35, dampingFraction: 0.86))
     }
 }

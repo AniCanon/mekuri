@@ -14,6 +14,6 @@ extension EnvironmentValues {
     @Entry var mekuriCornerLift: CGFloat = MekuriConfiguration.default.cornerShear
     @Entry var mekuriTapZone: CGFloat = MekuriConfiguration.default.tapZoneRatio
     @Entry var mekuriSnapThreshold: CGFloat = MekuriConfiguration.default.snapThreshold
-    @Entry var mekuriSettleAnimation: Animation = MekuriConfiguration.default.settleAnimation
+    @Entry var mekuriSettleAnimation: Animation? = nil
     @Entry var mekuriReducedMotion: Bool? = MekuriConfiguration.default.reducedMotionOverride
 }

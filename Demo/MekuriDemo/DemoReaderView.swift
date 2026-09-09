@@ -12,12 +12,8 @@ struct DemoReaderView: View {
 
     private let pageCount = DemoPageStyle.count
 
-    /// Applied unconditionally so the pager keeps its identity when the
-    /// toggle flips.
-    private var settleAnimation: Animation {
-        self.slowTurns
-            ? .linear(duration: 4)
-            : .spring(response: 0.35, dampingFraction: 0.86)
+    private var settleAnimation: Animation? {
+        self.slowTurns ? .linear(duration: 4) : nil
     }
 
     var body: some View {

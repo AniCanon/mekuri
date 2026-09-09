@@ -41,9 +41,9 @@ public extension View {
         self.environment(\.mekuriSnapThreshold, progress)
     }
 
-    /// Animation used to settle a released turn. Defaults to a spring with
-    /// response 0.35 and damping fraction 0.86.
-    func mekuriSettleAnimation(_ animation: Animation) -> some View {
+    /// Animation used to settle a released turn. Defaults to nil, which uses
+    /// the package spring with response 0.35 and damping fraction 0.86.
+    func mekuriSettleAnimation(_ animation: Animation?) -> some View {
         self.environment(\.mekuriSettleAnimation, animation)
     }
 

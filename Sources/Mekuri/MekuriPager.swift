@@ -46,7 +46,7 @@ public struct MekuriPager<Content: View>: View {
             cornerShear: self.cornerLift,
             snapThreshold: self.snapThreshold,
             tapZoneRatio: self.tapZone,
-            settleAnimation: self.settleAnimation,
+            settleAnimation: self.settleAnimation ?? MekuriConfiguration.default.settleAnimation,
             reducedMotionOverride: self.reducedMotionOverride
         )
     }
