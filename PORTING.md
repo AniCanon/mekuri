@@ -716,12 +716,15 @@ that forgets its page on rotation is a defect, so `rememberMekuriPagerState` use
 the clamped read, and the composable writes the real page count immediately
 after restoring, so a book still loading does not discard the page.
 
-**Progress lives in an `Animatable`, not in the turn state.** iOS animates
+**Progress lives outside the turn state.** iOS animates
 `MekuriTurnState.progress` through `animatableData` and records the presented
-value in a side object. In Compose the turn state carries faces, target, phase
-and the drag's start progress only; the progress itself is an
-`Animatable<Float>` read inside the layer block. Takeover reads its value, and a
-`snapTo` from a drag cancels a running settle through the animatable's own mutex.
+value in a side object. On Android the turn state carries faces, target, phase
+and the drag's start progress only. The presented progress is a snapshot float on
+the pager's controller, read inside layer blocks and never in composition: a drag
+writes it synchronously, so no suspension sits in the pointer loop, and a settle
+drives it from an `Animatable<Float>` through the per-frame block of `animateTo`.
+A settle is interrupted by cancelling its job, and a takeover reads the presented
+value the way iOS reads its side object.
 
 **A page turn is one composition local.** `LocalMekuriPageMode` replaces the
 cascading environment values of §5; every other knob is a parameter with a

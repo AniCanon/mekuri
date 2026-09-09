@@ -49,8 +49,7 @@ internal fun MekuriSingleLayers(
 /**
  * Spread mode, drawn in order: the two live slots, then the leaf's shadow and
  * the leaf, both at the full two-slot width. The whole stack is shifted as one
- * piece so a lone page sits centred at rest and slides to its slot with the
- * turn. [pageSize] is in dp.
+ * piece. [pageSize] is in dp.
  */
 @Composable
 internal fun MekuriSpreadLayers(
@@ -100,9 +99,8 @@ internal fun MekuriSpreadLayers(
 }
 
 /**
- * Placement is a geometry transform, never layout alignment: the layout
- * direction must not move a slot, and an offset would round the seam to a whole
- * pixel where the crease does not.
+ * Placement is a geometry transform, never layout alignment and never an offset:
+ * the layout direction must not move a slot.
  */
 @Composable
 private fun MekuriSlotLayer(
@@ -144,7 +142,7 @@ private fun MekuriCrossfadeOverlay(
     content: @Composable (Int) -> Unit,
 ) {
     val from = controller.crossfadeFrom ?: return
-    Box(Modifier.fillMaxSize().graphicsLayer { alpha = controller.crossfadeAlpha.value }) {
+    Box(Modifier.fillMaxSize().graphicsLayer { alpha = controller.crossfadeAlpha.value.coerceIn(0f, 1f) }) {
         content(from)
     }
 }

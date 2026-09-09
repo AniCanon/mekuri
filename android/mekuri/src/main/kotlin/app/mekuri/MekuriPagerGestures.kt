@@ -9,8 +9,8 @@ import androidx.compose.ui.input.pointer.util.VelocityTracker
 
 /**
  * One detector for both gestures: a pointer that lifts before the platform's
- * touch slop is a tap, and one that passes it is a drag. Taps and drags must not
- * be two detectors, because the first of them to see the down consumes it.
+ * touch slop is a tap, and one that passes it is a drag. Taps and drags are one
+ * detector; a second `pointerInput` on this node is not permitted.
  *
  * The down is taken only when no descendant has consumed it, so a control inside
  * a page keeps its touches, and a drag stops the moment a descendant consumes a

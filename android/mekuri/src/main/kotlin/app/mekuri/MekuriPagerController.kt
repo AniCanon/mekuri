@@ -122,11 +122,11 @@ internal class MekuriPagerController(
 
     private suspend fun curlTo(page: Int, turn: MekuriTurn): Int {
         this.dropTurn()
-        val begun = this.begin(turn).copy(targetIndex = page)
+        val begun = this.begin(turn)
         if (this.reducesMotion || begun.isBlocked || !begun.hasLeaf) return page
         val landing = CompletableDeferred<Int>()
         this.pending = landing
-        this.arm(begun, MekuriTurnDecision.Commit)
+        this.arm(begun.copy(targetIndex = page), MekuriTurnDecision.Commit)
         return landing.await()
     }
 
