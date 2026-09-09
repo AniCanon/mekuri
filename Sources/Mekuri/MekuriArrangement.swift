@@ -59,4 +59,19 @@ enum MekuriArrangement: Equatable {
             layout.pages(inSpread: layout.spreadIndex(containing: page))
         }
     }
+
+    /// Shift of the spread stack at rest with `page` selected, or across
+    /// `turn`. Always zero in single mode.
+    func shiftSpan(showing page: Int, turn: MekuriTurnState?, direction: MekuriDirection) -> MekuriSpreadShift.Span {
+        switch self {
+        case .single:
+            return MekuriSpreadShift.Span.zero
+        case .spread(let layout, let pageSize):
+            if let turn {
+                return MekuriSpreadShift.span(of: turn, layout: layout, pageWidth: pageSize.width, direction: direction)
+            }
+            let rest = MekuriSpreadShift.atRest(inSpreadContaining: page, layout: layout, pageWidth: pageSize.width, direction: direction)
+            return MekuriSpreadShift.Span(start: rest, end: rest)
+        }
+    }
 }

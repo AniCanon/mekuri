@@ -37,10 +37,12 @@ extension MekuriPager {
 
     /// Spread mode, drawn in order: the two live slots, then the leaf's
     /// shadow and the leaf, all at the full two-slot width. An absent slot
-    /// draws nothing.
+    /// draws nothing. The whole stack is shifted as one piece so a lone page
+    /// sits centred at rest and slides to its slot with the turn.
     private func spreadLayers(size: CGSize, pageSize: CGSize, arrangement: MekuriArrangement) -> some View {
         let slots = self.turn.map { ($0.leading, $0.trailing) } ?? arrangement.slots(showing: self.settledPage)
         let spreadSize = CGSize(width: pageSize.width * 2, height: pageSize.height)
+        let shift = arrangement.shiftSpan(showing: self.settledPage, turn: self.turn, direction: self.direction)
         return ZStack {
             if let leading = slots.0 {
                 self.slot(leading, in: .leading, pageSize: pageSize)
@@ -57,6 +59,7 @@ extension MekuriPager {
             }
         }
         .frame(width: spreadSize.width, height: spreadSize.height)
+        .modifier(MekuriSpreadShiftModifier(progress: self.turn?.progress ?? 0, span: shift))
         .frame(width: size.width, height: size.height)
     }
 
