@@ -137,13 +137,15 @@ constructions.
 
 A `Shader` value is necessarily rebuilt every frame because progress is one of
 its arguments; the shader function itself is resolved once. What a turn keeps
-live, measured by heap snapshots of the demo's cover turn on an iPad, is the
-two pages the leaf brings into existence — their text runs, display lists and
-attribute-graph storage — plus the flattened layers for the three shader
-passes: about 1.9 MB over the cover at rest, released when the leaf lands.
-The first turn of a process also pays the Metal function objects and Swift
-metadata once. Further turns leave the rest heap within 9 KB of where it was,
-so nothing accumulates. Before this was measured, the leaf's back face was
+live, measured by heap snapshots of the demo on an iPad, is the leaf's two
+faces — their text runs, display lists and attribute-graph storage — plus the
+flattened layers for the three shader passes: about 5,000 objects and 0.6 MB
+above the landed spread at rest, released when the leaf lands. A landed
+spread itself rests about 1.3 MB above a lone cover because two pages are
+live rather than one; that is the pages, not the turn. The first turn of a
+process also pays the Metal function objects and Swift metadata once.
+Further turns leave the rest heap within 9 KB of where it was, so nothing
+accumulates. Before this was measured, the leaf's back face was
 handed to the animatable modifier as a closure and rebuilt every frame of a
 spread turn (one `content` call per frame, about 170 over a four-second
 turn); it is now built once with the other faces, outside the modifier.
