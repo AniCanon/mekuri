@@ -1,8 +1,8 @@
 import Mekuri
 import SwiftUI
 
-/// Counter and controls the centre tap shows and hides. The counter reads
-/// the same binding the pager writes.
+/// Floating control card the centre tap shows and hides. The counter reads
+/// the same binding the pager writes and goes away in presentation mode.
 struct DemoChromeView: View {
     @Binding var currentPage: Int
     @Binding var direction: MekuriDirection
@@ -10,32 +10,12 @@ struct DemoChromeView: View {
     @Binding var slowTurns: Bool
     @Binding var spread: MekuriSpread
     @Binding var coverStandsAlone: Bool
+    @Binding var presentation: Bool
     let pageCount: Int
 
     var body: some View {
-        VStack {
+        VStack(alignment: .leading, spacing: 10) {
             self.header
-            Spacer()
-            self.controls
-        }
-    }
-
-    private var header: some View {
-        HStack {
-            Text("Mekuri")
-                .font(.system(.title2, design: .rounded, weight: .bold))
-            Spacer()
-            Text("Page \(self.currentPage + 1) of \(self.pageCount)")
-                .font(.system(.title3, design: .rounded, weight: .semibold))
-                .monospacedDigit()
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 14)
-        .background(.ultraThinMaterial)
-    }
-
-    private var controls: some View {
-        VStack(spacing: 12) {
             Stepper(value: self.$currentPage, in: 0...(self.pageCount - 1)) {
                 Text("Page \(self.currentPage + 1)")
                     .monospacedDigit()
@@ -55,10 +35,32 @@ struct DemoChromeView: View {
             self.switchRow("Cover stands alone", isOn: self.coverStandsAlone) {
                 self.coverStandsAlone.toggle()
             }
+            self.switchRow("Presentation", isOn: self.presentation) {
+                self.presentation.toggle()
+            }
         }
         .font(.system(.body, design: .rounded, weight: .medium))
+        .padding(18)
+        .frame(width: 340)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(.white.opacity(0.18)))
+        .shadow(color: .black.opacity(0.35), radius: 24, y: 10)
         .padding(20)
-        .background(.ultraThinMaterial)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+    }
+
+    private var header: some View {
+        HStack {
+            Text("Mekuri")
+                .font(.system(.title3, design: .rounded, weight: .bold))
+            Spacer()
+            if !self.presentation {
+                Text("Page \(self.currentPage + 1) of \(self.pageCount)")
+                    .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                    .monospacedDigit()
+            }
+        }
+        .padding(.bottom, 4)
     }
 
     private var spreadLabel: String {
@@ -99,12 +101,5 @@ struct DemoChromeView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-    }
-
-    private var isRightToLeft: Binding<Bool> {
-        Binding(
-            get: { self.direction == .rightToLeft },
-            set: { self.direction = $0 ? .rightToLeft : .leftToRight }
-        )
     }
 }

@@ -5,6 +5,12 @@
   </picture>
 </p>
 
+<p align="center">
+  <img src="assets/mekuri-turn.gif" alt="A two-page spread turning forward, a drag released short of the threshold springing back, a backward turn, and a right-to-left turn" width="720">
+  <br>
+  <a href="assets/mekuri-turn.mp4">mp4</a> — recorded from the demo on an iPad in landscape
+</p>
+
 # Mekuri
 
 A page-curl pager for SwiftUI and Jetpack Compose. Pages turn the way paper does — the corner lifts, the sheet peels under the finger, the back face shows through — and the library knows nothing about what is drawn on those pages.
@@ -143,7 +149,9 @@ Six of these are the modifiers above: `cylinderRadius`, `cornerShear`, `creaseBo
 
 ## Demo
 
-`ios/Demo/MekuriDemo.xcodeproj` is a six-page reader with every modifier on a control. Build it for an iPhone to see single pages and for an iPad in landscape to see spreads.
+`ios/Demo/MekuriDemo.xcodeproj` is a six-page comic drawn in code, with every modifier on a control. Build it for an iPhone to see single pages and for an iPad in landscape to see spreads; the fourth and fifth pages are one composition that runs across the spine. Each page carries a clock that keeps ticking on a settled page and freezes on the face being turned.
+
+The controls float over the page and a tap in the centre zone shows or hides them. **Presentation** turns off the harness affordances — the edge letters, the per-page button and the counter — and hides the status bar, leaving the page edge to edge; the centre tap still brings the controls back. It is off by default because those affordances are how the gesture-precedence checks are driven.
 
 ## Tests
 

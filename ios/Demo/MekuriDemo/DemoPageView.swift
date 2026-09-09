@@ -1,90 +1,62 @@
 import Mekuri
 import SwiftUI
 
-/// One demo page. The mode comes from the pager's environment; the number,
-/// glyph and edge markers are identical in both modes and only the indicator
-/// strip and the button differ. The vertical insets keep the indicator and
-/// the button clear of the reader's chrome.
+/// One page: a drawn composition chosen by index, a folio, and the harness
+/// affordances when presentation mode is off. `spreadPairStart` is the
+/// first of the two pages that share the spanning composition; under
+/// right-to-left reading that page sits on the right.
 struct DemoPageView: View {
-    @Environment(\.mekuriPageMode) private var mode
-
     let index: Int
+    let pageCount: Int
+    let direction: MekuriDirection
+    let spreadPairStart: Int
+    let presentation: Bool
     let tapCount: Int
     let onButtonTap: () -> Void
 
-    private var style: DemoPageStyle { DemoPageStyle.style(for: self.index) }
+    private enum Kind {
+        case title
+        case spread(DemoSpreadHalf)
+        case grid(DemoPageLayout)
+    }
 
     var body: some View {
-        ZStack {
-            self.style.paper
-            self.edgeMarkers
-            VStack(spacing: 16) {
-                Image(systemName: self.style.glyph)
-                    .font(.system(size: 64))
-                    .foregroundStyle(self.style.ink.opacity(0.35))
-                Text("\(self.index + 1)")
-                    .font(.system(size: 160, weight: .black, design: .rounded))
-                    .foregroundStyle(self.style.ink)
-                Text(self.style.name)
-                    .font(.system(size: 28, weight: .semibold, design: .serif))
-                    .foregroundStyle(self.style.ink)
+        GeometryReader { proxy in
+            let scale = min(proxy.size.width, proxy.size.height) / 400
+            ZStack {
+                DemoInk.paper
+                self.composition(scale: scale)
+                Text("— \(self.index + 1) —")
+                    .font(DemoInk.narration(11 * scale))
+                    .foregroundStyle(DemoInk.ink)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .padding(.bottom, 2)
+                if !self.presentation {
+                    DemoHarnessOverlay(tapCount: self.tapCount, onButtonTap: self.onButtonTap)
+                }
             }
-            self.indicator
-                .frame(maxHeight: .infinity, alignment: .top)
-                .padding(.top, 124)
-            self.button
-                .frame(maxHeight: .infinity, alignment: .bottom)
-                .padding(.bottom, 244)
         }
     }
 
     @ViewBuilder
-    private var indicator: some View {
-        switch self.mode {
-        case .live:
-            DemoLiveIndicator(ink: self.style.ink)
-        case .turning:
-            DemoFrozenIndicator(ink: self.style.ink)
+    private func composition(scale: CGFloat) -> some View {
+        switch self.kind {
+        case .title:
+            DemoTitlePage(scale: scale)
+        case let .spread(half):
+            DemoSpreadPage(half: half, scale: scale)
+        case let .grid(layout):
+            DemoGridPage(layout: layout, scale: scale)
         }
     }
 
-    private var button: some View {
-        Button(action: self.onButtonTap) {
-            Text("Tap me · \(self.tapCount)")
-                .font(.system(size: 22, weight: .bold, design: .rounded))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 18)
-                .background(self.style.ink, in: Capsule())
-                .foregroundStyle(self.style.paper)
-        }
-        .padding(.horizontal, 40)
-        .disabled(self.mode == .turning)
-    }
-
-    /// Letters along each edge name which edge is lifting during a fold.
-    private var edgeMarkers: some View {
-        HStack {
-            DemoEdgeMarker(letter: "L", ink: self.style.ink)
-            Spacer()
-            DemoEdgeMarker(letter: "R", ink: self.style.ink)
-        }
-    }
-}
-
-struct DemoEdgeMarker: View {
-    let letter: String
-    let ink: Color
-
-    var body: some View {
-        VStack(spacing: 16) {
-            ForEach(0..<7, id: \.self) { _ in
-                Text(self.letter)
-                    .font(.system(size: 26, weight: .black, design: .monospaced))
-            }
-        }
-        .foregroundStyle(self.ink.opacity(0.45))
-        .frame(width: 44)
-        .frame(maxHeight: .infinity)
-        .background(self.ink.opacity(0.12))
+    private var kind: Kind {
+        let leadingHalf: DemoSpreadHalf = self.direction == .leftToRight ? .left : .right
+        let trailingHalf: DemoSpreadHalf = self.direction == .leftToRight ? .right : .left
+        if self.index == 0 { return .title }
+        if self.index == self.spreadPairStart { return .spread(leadingHalf) }
+        if self.index == self.spreadPairStart + 1 { return .spread(trailingHalf) }
+        if self.index == self.pageCount - 1 { return .grid(.ending) }
+        return .grid(self.index.isMultiple(of: 2) ? .threePanel : .fourGrid)
     }
 }
