@@ -726,6 +726,28 @@ drives it from an `Animatable<Float>` through the per-frame block of `animateTo`
 A settle is interrupted by cancelling its job, and a takeover reads the presented
 value the way iOS reads its side object.
 
-**A page turn is one composition local.** `LocalMekuriPageMode` replaces the
+**The page mode is one composition local.** `LocalMekuriPageMode` replaces the
 cascading environment values of §5; every other knob is a parameter with a
 default.
+
+**`animateToPage` curls a turn it dropped; iOS snaps it.** A call arriving while
+another turn is in flight drops that turn and then folds its own, where iOS drops
+the turn and cuts to the target with no animation. The explicit call is treated
+as a request to see the turn, not as a correction; a `scrollToPage` remains the
+way to move without one. Cancelling the caller, on the other hand, is held in
+parity with Compose's own `PagerState`: the curl is dropped and may not write the
+page it was heading for.
+
+**Reduced motion is read once per context.** iOS reads
+`accessibilityReduceMotion` as a live environment value. `ANIMATOR_DURATION_SCALE`
+has no change notification, so `rememberMekuriReducesMotion` reads it once per
+`Context`: a user who changes the setting while the pager is composed keeps the
+old behaviour until it recomposes with a new context. The
+`reducedMotionOverride` parameter is unaffected and is live.
+
+**The paging flag is sampled once per gesture.** The pointer loop is keyed on the
+controller alone, because a loop restarted mid-drag would end with neither a
+release nor a cancel and strand a turn that swallows every later tap. The flag
+and the centre-tap lambda are therefore read through the composition rather than
+through the key, and the flag a gesture began under holds for that whole gesture:
+standing paging down mid-drag still releases the turn the drag started.
