@@ -1,7 +1,11 @@
 package app.mekuri
 
+import androidx.compose.runtime.saveable.SaverScope
+import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -9,7 +13,7 @@ import org.junit.Test
 
 class MekuriPagerStateTest {
     @Test
-    fun `the initial page is coerced into the book`() {
+    fun `the initial page is clamped on read into the book`() {
         assertEquals(3, MekuriPagerState(pageCount = 6, initialPage = 3).currentPage)
         assertEquals(5, MekuriPagerState(pageCount = 6, initialPage = 99).currentPage)
         assertEquals(0, MekuriPagerState(pageCount = 6, initialPage = -1).currentPage)
@@ -103,6 +107,76 @@ class MekuriPagerStateTest {
         state.attach(driver)
         turn.await()
         assertEquals(1, state.currentPage)
+    }
+
+    @Test
+    fun `a state built while the book loads keeps its initial page`() {
+        val state = MekuriPagerState(pageCount = 0, initialPage = 5)
+        assertEquals(0, state.currentPage)
+        state.pageCount = 6
+        assertEquals(5, state.currentPage)
+    }
+
+    @Test
+    fun `a scroll while the book loads keeps its page`() = runBlocking {
+        val state = MekuriPagerState(pageCount = 0, initialPage = 0)
+        state.scrollToPage(4)
+        assertEquals(0, state.currentPage)
+        state.pageCount = 6
+        assertEquals(4, state.currentPage)
+    }
+
+    @Test
+    fun `an animation clamps its target only once the pager attaches`() = runBlocking {
+        val state = MekuriPagerState(pageCount = 0, initialPage = 0)
+        val driver = RecordingDriver(settlesOn = 4)
+        val turn = async { state.animateToPage(4) }
+        yield()
+        state.pageCount = 6
+        state.attach(driver)
+        turn.await()
+        assertEquals(listOf(4), driver.requests)
+        assertEquals(4, state.currentPage)
+    }
+
+    @Test
+    fun `saving while the book loads keeps the page`() {
+        val state = MekuriPagerState(pageCount = 6, initialPage = 5)
+        state.pageCount = 0
+        val saved = with(MekuriPagerState.Saver) { SaverScope { true }.save(state) }
+        assertEquals(5, saved)
+        val restored = MekuriPagerState.Saver.restore(saved!!)!!
+        assertEquals(0, restored.currentPage)
+        restored.pageCount = 6
+        assertEquals(5, restored.currentPage)
+    }
+
+    @Test
+    fun `a scroll that drops a turn is not clobbered by the dropped turn`() = runBlocking {
+        val driver = SuspendingDriver()
+        val state = MekuriPagerState(pageCount = 6, initialPage = 0)
+        state.attach(driver)
+        val turn = async { state.animateToPage(5) }
+        yield()
+        assertTrue(driver.isParked)
+        state.scrollToPage(2)
+        val outcome = runCatching { turn.await() }
+        assertTrue(outcome.exceptionOrNull() is CancellationException)
+        assertEquals(2, state.currentPage)
+    }
+
+    private class SuspendingDriver : MekuriTurnDriver {
+        private var parked: CancellableContinuation<Int>? = null
+
+        val isParked: Boolean get() = this.parked != null
+
+        override suspend fun turnTo(page: Int): Int =
+            suspendCancellableCoroutine { continuation -> this.parked = continuation }
+
+        override fun dropTurn() {
+            this.parked?.cancel()
+            this.parked = null
+        }
     }
 
     private class RecordingDriver(private val settlesOn: Int) : MekuriTurnDriver {

@@ -21,7 +21,11 @@ internal interface MekuriTurnDriver {
      */
     suspend fun turnTo(page: Int): Int
 
-    /** Drops any turn in flight without animating it. */
+    /**
+     * Drops any turn in flight without animating it. A [turnTo] call in flight
+     * must be cancelled rather than allowed to return, so a page written after
+     * the drop is not overwritten by the dropped turn's settled page.
+     */
     fun dropTurn()
 }
 
@@ -34,9 +38,14 @@ internal interface MekuriTurnDriver {
  * [animateToPage] suspends until a pager is composed with this state, and
  * cancelling the calling coroutine releases it.
  *
+ * Two departures from Compose's own `PagerState`, both deliberate:
+ * a turn the user grabs and pushes back returns from [animateToPage] normally
+ * with the settled page, where `PagerState` throws a cancellation; and a
+ * [scrollToPage] arriving mid-turn cancels the pending [animateToPage].
+ *
  * @param pageCount number of pages in the book.
  * @param direction spine placement and sweep direction.
- * @param initialPage page shown first; coerced into `0 until pageCount`.
+ * @param initialPage page shown first; clamped on read into `0 until pageCount`.
  */
 public class MekuriPagerState(
     pageCount: Int,
@@ -47,7 +56,7 @@ public class MekuriPagerState(
 
     private var pageCountState by mutableIntStateOf(pageCount.coerceAtLeast(0))
 
-    private var currentPageState by mutableIntStateOf(coerce(initialPage, pageCount))
+    private var currentPageState by mutableIntStateOf(initialPage)
 
     /** Number of pages in the book. Shrinking it clamps [currentPage]. */
     public var pageCount: Int
@@ -62,27 +71,29 @@ public class MekuriPagerState(
 
     /**
      * Page settled on screen. In a spread this is the leading page of the pair.
-     * Clamped on read, so a page count that momentarily drops to zero — a book
-     * whose contents are still loading — does not discard the page.
+     * The page is stored as given and clamped only on read; a page count that
+     * momentarily drops to zero must not discard it.
      */
     public var currentPage: Int
         get() = coerce(this.currentPageState, this.pageCountState)
         internal set(value) {
-            this.currentPageState = coerce(value, this.pageCountState)
+            this.currentPageState = value
         }
 
-    /** Turns to [page] with a fold and returns once the turn has settled. */
+    /**
+     * Turns to [page] with a fold and returns once the turn has settled. The
+     * target is clamped against the page count only once a pager has attached.
+     */
     public suspend fun animateToPage(page: Int) {
-        val target = coerce(page, this.pageCountState)
-        val settled = this.driver.filterNotNull().first().turnTo(target)
-        this.currentPageState = coerce(settled, this.pageCountState)
+        val driver = this.driver.filterNotNull().first()
+        val settled = driver.turnTo(coerce(page, this.pageCountState))
+        this.currentPageState = settled
     }
 
     /** Shows [page] with no fold, dropping any turn in flight. */
     public suspend fun scrollToPage(page: Int) {
-        val target = coerce(page, this.pageCountState)
         this.driver.value?.dropTurn()
-        this.currentPageState = target
+        this.currentPageState = page
     }
 
     internal fun attach(driver: MekuriTurnDriver) {
@@ -98,12 +109,12 @@ public class MekuriPagerState(
             if (pageCount <= 0) 0 else page.coerceIn(0, pageCount - 1)
 
         /**
-         * The restored count is the smallest that keeps the saved page; the
-         * composable writes the real one before the state is used.
+         * Saves the stored page rather than the clamped read; the composable
+         * writes the real page count after the state is restored.
          */
         internal val Saver: Saver<MekuriPagerState, Int> = Saver(
-            save = { it.currentPage },
-            restore = { MekuriPagerState(pageCount = it + 1, initialPage = it) },
+            save = { it.currentPageState },
+            restore = { MekuriPagerState(pageCount = 0, initialPage = it) },
         )
     }
 }
