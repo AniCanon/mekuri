@@ -38,13 +38,37 @@ struct DemoChromeView: View {
                 Text("Page \(self.currentPage + 1)")
                     .monospacedDigit()
             }
-            Toggle("Right to left", isOn: self.isRightToLeft)
-            Toggle("Paging enabled", isOn: self.$pagingEnabled)
-            Toggle("Slow turns", isOn: self.$slowTurns)
+            self.switchRow("Right to left", isOn: self.direction == .rightToLeft) {
+                self.direction = self.direction == .rightToLeft ? .leftToRight : .rightToLeft
+            }
+            self.switchRow("Paging enabled", isOn: self.pagingEnabled) {
+                self.pagingEnabled.toggle()
+            }
+            self.switchRow("Slow turns", isOn: self.slowTurns) {
+                self.slowTurns.toggle()
+            }
         }
         .font(.system(.body, design: .rounded, weight: .medium))
         .padding(20)
         .background(.ultraThinMaterial)
+    }
+
+    /// A button rather than a Toggle: a UISwitch ignores synthesised taps, which
+    /// makes the demo undriveable from a script.
+    private func switchRow(_ title: String, isOn: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack {
+                Text(title)
+                Spacer()
+                Text(isOn ? "ON" : "OFF")
+                    .font(.system(.footnote, design: .rounded, weight: .heavy))
+                    .foregroundStyle(isOn ? Color.black : Color.white)
+                    .frame(width: 54, height: 30)
+                    .background(isOn ? Color.green : Color.secondary, in: Capsule())
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     private var isRightToLeft: Binding<Bool> {
