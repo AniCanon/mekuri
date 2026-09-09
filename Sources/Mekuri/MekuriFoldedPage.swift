@@ -22,6 +22,10 @@ public struct MekuriFoldedPage<Content: View>: View {
 
     var isFolded: Bool { self.progress > 0 }
 
+    var foldPass: MekuriFoldPass {
+        MekuriFoldPass(direction: self.direction, progress: self.progress)
+    }
+
     public var body: some View {
         GeometryReader { proxy in
             if self.isFolded {
@@ -34,13 +38,11 @@ public struct MekuriFoldedPage<Content: View>: View {
 
     @ViewBuilder
     private func foldedContent(size: CGSize) -> some View {
-        let sweep = self.direction.sweep(progress: self.progress)
-        let mirrored = sweep < 0
-        let mirror: CGFloat = mirrored ? -1 : 1
+        let pass = self.foldPass
         self.content()
-            .scaleEffect(x: mirror, y: 1)
-            .layerEffect(self.fold(size: size, progress: abs(sweep)), maxSampleOffset: size)
-            .scaleEffect(x: mirror, y: 1)
+            .scaleEffect(x: pass.mirrorScale, y: 1)
+            .layerEffect(self.fold(size: size, progress: pass.shaderProgress), maxSampleOffset: size)
+            .scaleEffect(x: pass.mirrorScale, y: 1)
     }
 
     private func fold(size: CGSize, progress: CGFloat) -> Shader {
