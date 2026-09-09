@@ -370,7 +370,7 @@ is applied only when a hinge is given.
 The parity test worth copying: for progress in {0.1, 0.25, 0.5, 0.75, 0.9,
 1} and rows {0, 200, 400, 600, 800} on a 400-wide page in an 800-wide layer,
 the layer's axis at `shaderProgress` with `creaseBow'` equals 400 plus the
-page's axis at `p`, to 1e-9.
+page's axis at `p`, to 1e-3.
 
 ### 4.3 Spreads and the leaf table
 
@@ -664,3 +664,10 @@ single to spread and back (the arrangement switch was exercised through the
 forced-mode control instead). The drag path and the settle share the same
 progress and the same modifier, so no difference is expected, but it is
 expectation rather than evidence.
+
+
+> Parity is asserted at an absolute tolerance of 1e-3 at page scale, not at exact equality.
+> Compose geometry and the shader uniforms are single precision, where one unit in the last place at a
+> page width of 400 is already about 3e-5, so exact equality is unreachable and a tighter tolerance
+> would only be provable against a double-precision shadow of arithmetic the shader never runs.
+> 1e-3 of a point is far below a pixel and is what the two platforms must genuinely agree to.
