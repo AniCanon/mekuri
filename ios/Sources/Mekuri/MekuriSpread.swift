@@ -3,8 +3,12 @@ import CoreGraphics
 /// Whether one or two pages share the container. `automatic` shows two when
 /// they fit the container at the page aspect and each stays readable.
 public enum MekuriSpread: Equatable, Sendable {
+    /// Two pages when they fit the container at the page aspect and each is at
+    /// least `minimumDoublePageWidth` wide; otherwise one.
     case automatic
+    /// One page across the container, whatever its size.
     case single
+    /// Two pages side by side, scaled to fit the container.
     case double
 
     /// Narrowest single page, in points, at which two pages stay readable.

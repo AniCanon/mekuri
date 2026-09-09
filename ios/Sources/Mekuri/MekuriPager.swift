@@ -1,12 +1,40 @@
 import SwiftUI
 
-/// A page-curl pager over arbitrary content. Page indices are in reading
-/// order; the spine edge and every tuning value come from the environment.
-/// Shows one page across the container, or the two-page spread containing
-/// `currentPage` when the environment's spread setting and the container
-/// allow it. Each page reads its `\.mekuriPageMode`: the faces of the leaf
-/// being turned are drawn `.turning` and their `.live` views leave the
-/// hierarchy until the turn settles.
+/// A page-curl pager over any content.
+///
+/// Pages are addressed by index in reading order and `currentPage` is the
+/// selection, read and written by the consumer. A tap in an outer zone or a
+/// horizontal drag turns one page, or one spread when two pages share the
+/// container; the reading direction decides which edge is the spine and never
+/// touches the numbering. Everything beyond the page count, the selection and
+/// the content is an environment-backed modifier that cascades from any
+/// ancestor:
+///
+/// ```swift
+/// MekuriPager(pageCount: pages.count, currentPage: $index) { pageIndex in
+///     PageView(page: pages[pageIndex])   // reads @Environment(\.mekuriPageMode)
+/// }
+/// .mekuriDirection(.rightToLeft)        // spine on the right, indices unchanged
+/// .mekuriSpread(.automatic)             // two pages whenever they fit
+/// .mekuriCoverStandsAlone(true)         // page 0 opens alone, like a cover
+/// .mekuriPageAspectRatio(2.0 / 3.0)     // width over height of one page
+/// .mekuriPagingEnabled(!isZoomed)
+/// .mekuriOnCenterTap { chromeHidden.toggle() }
+/// ```
+///
+/// Each page reads `\.mekuriPageMode`. The faces of the leaf being turned are
+/// drawn `.turning` and rasterized by the fold shader; the pages beneath stay
+/// `.live`. Only the visible page or spread and the two faces of a turning
+/// leaf are ever built, and a settled pager evaluates nothing.
+///
+/// > Note: A `.turning` face must be drawable from what is already in memory.
+/// > The fold samples a flattened copy of the page each frame, so content that
+/// > arrives asynchronously turns as whatever is on screen when the turn
+/// > begins, and anything animating inside it is rasterized as it plays. Stand
+/// > live playback down in `.turning` and draw the last frame you have.
+///
+/// A blocked turn at either end lifts the page over the pager's own
+/// background, so give the pager one.
 public struct MekuriPager<Content: View>: View {
     @Environment(\.accessibilityReduceMotion) private var systemReducesMotion
     @Environment(\.mekuriDirection) var direction
@@ -36,6 +64,14 @@ public struct MekuriPager<Content: View>: View {
     @State var settleCount = 0
     @State var ignoresCurrentDrag = false
 
+    /// - Parameters:
+    ///   - pageCount: Number of pages, in reading order.
+    ///   - currentPage: The selected page. Written when a turn lands. A change
+    ///     from outside curls to a neighbouring page or spread and crossfades
+    ///     to anything further; a change within the shown spread moves
+    ///     nothing.
+    ///   - content: Builds the page at an index. Called for the visible page or
+    ///     spread and for the faces of a turning leaf, never for any other.
     public init(
         pageCount: Int,
         currentPage: Binding<Int>,
