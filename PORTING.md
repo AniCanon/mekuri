@@ -666,6 +666,10 @@ progress and the same modifier, so no difference is expected, but it is
 expectation rather than evidence.
 
 
+> The public tuning knobs number seven, not six: fold radius, corner lift, crease bow, tap zone,
+> snap threshold, settle animation and the reduced-motion override. Everything else the fold uses
+> stays internal on both platforms.
+
 > Parity is asserted at an absolute tolerance of 1e-3 at page scale, not at exact equality.
 > Compose geometry and the shader uniforms are single precision, where one unit in the last place at a
 > page width of 400 is already about 3e-5, so exact equality is unreachable and a tighter tolerance
