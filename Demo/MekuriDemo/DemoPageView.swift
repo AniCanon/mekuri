@@ -1,12 +1,14 @@
 import Mekuri
 import SwiftUI
 
-/// One demo page. The number, glyph and edge markers are identical in both
-/// modes; only the indicator strip and the button differ. The vertical
-/// insets keep the indicator and the button clear of the reader's chrome.
+/// One demo page. The mode comes from the pager's environment; the number,
+/// glyph and edge markers are identical in both modes and only the indicator
+/// strip and the button differ. The vertical insets keep the indicator and
+/// the button clear of the reader's chrome.
 struct DemoPageView: View {
+    @Environment(\.mekuriPageMode) private var mode
+
     let index: Int
-    let mode: MekuriPageMode
     let tapCount: Int
     let onButtonTap: () -> Void
 

@@ -12,30 +12,28 @@ struct DemoReaderView: View {
 
     private let pageCount = DemoPageStyle.count
 
-    private var configuration: MekuriConfiguration {
+    /// Applied unconditionally so the pager keeps its identity when the
+    /// toggle flips.
+    private var settleAnimation: Animation {
         self.slowTurns
-            ? MekuriConfiguration(settleAnimation: .linear(duration: 4))
-            : .default
+            ? .linear(duration: 4)
+            : .spring(response: 0.35, dampingFraction: 0.86)
     }
 
     var body: some View {
         ZStack {
             Color(white: 0.12)
                 .ignoresSafeArea()
-            MekuriPager(
-                pageCount: self.pageCount,
-                currentPage: self.$currentPage,
-                direction: self.direction,
-                configuration: self.configuration
-            ) { index, mode in
+            MekuriPager(pageCount: self.pageCount, currentPage: self.$currentPage) { index in
                 DemoPageView(
                     index: index,
-                    mode: mode,
                     tapCount: self.tapCounts[index, default: 0],
                     onButtonTap: { self.tapCounts[index, default: 0] += 1 }
                 )
             }
+            .mekuriDirection(self.direction)
             .mekuriPagingEnabled(self.pagingEnabled)
+            .mekuriSettleAnimation(self.settleAnimation)
             .mekuriOnCenterTap {
                 withAnimation(.easeInOut(duration: 0.2)) {
                     self.chromeVisible.toggle()

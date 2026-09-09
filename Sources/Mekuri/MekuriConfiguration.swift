@@ -1,40 +1,42 @@
 import SwiftUI
 
-/// Fold and gesture tuning shared by every page turn.
-public struct MekuriConfiguration: Equatable, Sendable {
+/// Fold and gesture tuning shared by every page turn. Assembled by
+/// ``MekuriPager`` from the environment; members without a modifier keep
+/// their defaults.
+struct MekuriConfiguration: Equatable, Sendable {
     /// Cylinder radius of the fold as a ratio of the page width.
-    public var cylinderRadiusRatio: CGFloat
+    var cylinderRadiusRatio: CGFloat
 
     /// Horizontal travel of the fold line per unit of vertical distance from
     /// the page centre. A ratio, not an angle.
-    public var cornerShear: CGFloat
+    var cornerShear: CGFloat
 
     /// Brightness multiplier applied to the back face, 0...1.
-    public var backFaceDim: CGFloat
+    var backFaceDim: CGFloat
 
     /// Width of the crease shadow as a ratio of the page width.
-    public var creaseShadowWidthRatio: CGFloat
+    var creaseShadowWidthRatio: CGFloat
 
     /// Peak opacity of the crease shadow, 0...1.
-    public var creaseShadowOpacity: CGFloat
+    var creaseShadowOpacity: CGFloat
 
     /// Turn progress, 0...1, past which a released drag completes the turn.
-    public var snapThreshold: CGFloat
+    var snapThreshold: CGFloat
 
     /// Horizontal velocity in points per second at which a release completes
     /// the turn regardless of progress.
-    public var flingVelocity: CGFloat
+    var flingVelocity: CGFloat
 
     /// Width of each tap-to-turn edge zone as a ratio of the page width.
-    public var tapZoneRatio: CGFloat
+    var tapZoneRatio: CGFloat
 
     /// Animation used to settle a released turn.
-    public var settleAnimation: Animation
+    var settleAnimation: Animation
 
     /// Overrides the system reduce-motion setting when non-nil.
-    public var reducedMotionOverride: Bool?
+    var reducedMotionOverride: Bool?
 
-    public init(
+    init(
         cylinderRadiusRatio: CGFloat = 0.04,
         cornerShear: CGFloat = 0.10,
         backFaceDim: CGFloat = 0.86,
@@ -58,5 +60,5 @@ public struct MekuriConfiguration: Equatable, Sendable {
         self.reducedMotionOverride = reducedMotionOverride
     }
 
-    public static let `default` = MekuriConfiguration()
+    static let `default` = MekuriConfiguration()
 }

@@ -1,19 +1,25 @@
 import SwiftUI
 
 /// A page-curl pager over arbitrary content. Page indices are in reading
-/// order; `direction` chooses the spine edge. The page being turned is
-/// drawn `.turning` and its `.live` view leaves the hierarchy until the turn
+/// order; the spine edge and every tuning value come from the environment.
+/// Each page reads its `\.mekuriPageMode`: the page being turned is drawn
+/// `.turning` and its `.live` view leaves the hierarchy until the turn
 /// settles.
 public struct MekuriPager<Content: View>: View {
     @Environment(\.accessibilityReduceMotion) private var systemReducesMotion
+    @Environment(\.mekuriDirection) var direction
     @Environment(\.mekuriPagingEnabled) var pagingEnabled
     @Environment(\.mekuriOnCenterTap) var onCenterTap
+    @Environment(\.mekuriFoldRadius) private var foldRadius
+    @Environment(\.mekuriCornerLift) private var cornerLift
+    @Environment(\.mekuriTapZone) private var tapZone
+    @Environment(\.mekuriSnapThreshold) private var snapThreshold
+    @Environment(\.mekuriSettleAnimation) private var settleAnimation
+    @Environment(\.mekuriReducedMotion) private var reducedMotionOverride
 
     let pageCount: Int
     @Binding var currentPage: Int
-    let direction: MekuriDirection
-    let configuration: MekuriConfiguration
-    let content: (Int, MekuriPageMode) -> Content
+    let content: (Int) -> Content
 
     /// The page Mekuri is showing. Drives every layer; the binding follows it.
     @State var settledPage: Int
@@ -26,20 +32,27 @@ public struct MekuriPager<Content: View>: View {
     public init(
         pageCount: Int,
         currentPage: Binding<Int>,
-        direction: MekuriDirection,
-        configuration: MekuriConfiguration = .default,
-        @ViewBuilder content: @escaping (Int, MekuriPageMode) -> Content
+        @ViewBuilder content: @escaping (Int) -> Content
     ) {
         self.pageCount = pageCount
         self._currentPage = currentPage
-        self.direction = direction
-        self.configuration = configuration
         self.content = content
         self._settledPage = State(initialValue: currentPage.wrappedValue)
     }
 
+    var configuration: MekuriConfiguration {
+        MekuriConfiguration(
+            cylinderRadiusRatio: self.foldRadius,
+            cornerShear: self.cornerLift,
+            snapThreshold: self.snapThreshold,
+            tapZoneRatio: self.tapZone,
+            settleAnimation: self.settleAnimation,
+            reducedMotionOverride: self.reducedMotionOverride
+        )
+    }
+
     var reducesMotion: Bool {
-        self.configuration.reducedMotionOverride ?? self.systemReducesMotion
+        self.reducedMotionOverride ?? self.systemReducesMotion
     }
 
     var baseIndex: Int? {
@@ -69,13 +82,15 @@ public struct MekuriPager<Content: View>: View {
     private func layers(size: CGSize) -> some View {
         ZStack {
             if let baseIndex = self.baseIndex {
-                self.content(baseIndex, .live)
+                self.content(baseIndex)
+                    .environment(\.mekuriPageMode, .live)
                     .frame(width: size.width, height: size.height)
                     .id(baseIndex)
                     .transition(.opacity)
             }
             if let turn = self.turn, let turningIndex = turn.turningIndex {
-                self.content(turningIndex, .turning)
+                self.content(turningIndex)
+                    .environment(\.mekuriPageMode, .turning)
                     .frame(width: size.width, height: size.height)
                     .modifier(self.foldModifier(for: turn))
                     .id(turn.id)
