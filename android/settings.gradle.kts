@@ -17,3 +17,4 @@ dependencyResolutionManagement {
 rootProject.name = "mekuri-android"
 
 include(":mekuri")
+include(":demo")
