@@ -33,11 +33,7 @@ data class DemoControls(
     val presentation: Boolean,
 )
 
-/**
- * Floating control card the centre tap shows and hides. Every control is a
- * clickable row: the demo depends on Mekuri and Compose foundation alone, which
- * has no switch widget, and a row is driveable by a synthesised tap.
- */
+/** Floating control card the centre tap shows and hides. */
 @Composable
 fun DemoControlPanel(
     controls: DemoControls,

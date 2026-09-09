@@ -30,8 +30,8 @@ import kotlin.math.abs
 import kotlin.math.sin
 
 /**
- * Pulsing dot and running clock. The tick is owned here so nothing above this
- * composable recomposes with it.
+ * Pulsing dot and running clock. The tick is owned here; nothing above this
+ * composable may recompose with it.
  */
 @Composable
 fun DemoLiveIndicator(size: Float) {

@@ -67,7 +67,7 @@ fun DemoSoundEffect(
 }
 
 /**
- * An ellipse with a tail. The tail is added to the ellipse so the stroke runs
+ * An ellipse with a tail. The tail is part of the same path; the stroke runs
  * around the outside only.
  */
 private fun bubblePath(rect: Rect, tail: DemoBubbleTail): Path {

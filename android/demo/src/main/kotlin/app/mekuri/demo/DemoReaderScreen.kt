@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 
 private const val PageCount = 6
 
-/** Slow turns run the settle at a fixed rate so a mid-turn frame can be caught. */
+/** Linear settle duration under the slow-turns control. */
 private const val SlowSettleMillis = 4000
 
 @Composable
