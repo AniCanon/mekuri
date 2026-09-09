@@ -121,11 +121,20 @@ extension MekuriPager {
         return MekuriTurnState.begin(id: self.nextTurnID, turn: turn, from: self.settledPage, pageCount: self.pageCount)
     }
 
-    /// Inserts the fold at rest; the layer's appearance starts the settle.
+    /// Inserts the fold at rest, never animated; the layer's appearance
+    /// starts the settle.
     func arm(_ turn: MekuriTurn, decision: MekuriTurnDecision) {
         var state = self.beginTurn(turn)
         state.phase = .armed(decision)
-        self.turn = state
+        self.withoutAnimation {
+            self.turn = state
+        }
+    }
+
+    func withoutAnimation(_ body: () -> Void) {
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction, body)
     }
 
     func startArmedSettle(id: Int) {
@@ -138,9 +147,7 @@ extension MekuriPager {
         turn.startProgress = self.presented.value
         turn.progress = turn.startProgress
         turn.phase = .dragging
-        var transaction = Transaction()
-        transaction.disablesAnimations = true
-        withTransaction(transaction) {
+        self.withoutAnimation {
             self.turn = turn
         }
     }
@@ -173,8 +180,8 @@ extension MekuriPager {
         }
     }
 
-    /// Moves the shown page and the binding together, so the binding's own
-    /// change is not animated again.
+    /// Moves the shown page and the binding together; the binding's change
+    /// is never animated a second time.
     func commit(to index: Int) {
         self.settledPage = index
         if self.currentPage != index {
@@ -182,13 +189,15 @@ extension MekuriPager {
         }
     }
 
-    /// Removes the turn without animating; the rest of a drag in progress is
+    /// Removes the turn, never animated; the rest of a drag in progress is
     /// ignored.
     func dropTurn() {
         guard let turn = self.turn else { return }
         if turn.phase == .dragging {
             self.ignoresCurrentDrag = true
         }
-        self.turn = nil
+        self.withoutAnimation {
+            self.turn = nil
+        }
     }
 }

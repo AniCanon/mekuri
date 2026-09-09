@@ -108,7 +108,9 @@ public struct MekuriPager<Content: View>: View {
         guard newValue != self.settledPage else { return }
         if self.turn != nil {
             self.dropTurn()
-            self.settledPage = newValue
+            self.withoutAnimation {
+                self.settledPage = newValue
+            }
             return
         }
         switch MekuriTransition.between(from: self.settledPage, to: newValue) {
