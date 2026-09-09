@@ -48,3 +48,25 @@ extension MekuriFoldGeometryTests {
         #expect(geometry.radius(atFoldDistance: 0) < geometry.radius(atFoldDistance: 800))
     }
 }
+
+extension MekuriFoldGeometryTests {
+    /// With only the bow removed, the sheared crease is the straight formula
+    /// `W(1 - p) + shear(y - H/2)` at every row and every progress.
+    @Test func aZeroBowKeepsTheStraightShearedAxis() {
+        let unbowed = MekuriFoldGeometry(pageWidth: 400, configuration: MekuriConfiguration(creaseBow: 0))
+        for progress: CGFloat in [0.1, 0.25, 0.5, 0.75, 0.9] {
+            for y: CGFloat in [0, 200, 400, 600, 800] {
+                let straight = 400 * (1 - progress) + 0.10 * (y - 400)
+                #expect(unbowed.foldAxisOffset(progress: progress, y: y, pageHeight: 800) == straight)
+            }
+        }
+    }
+
+    @Test func aZeroRadiusOpeningKeepsTheRadiusConstantAlongTheFold() {
+        let flat = MekuriFoldGeometry(pageWidth: 400, configuration: MekuriConfiguration(radiusOpening: 0))
+        #expect(flat.heldRadius == 16)
+        for distance: CGFloat in [0, 200, 400, 800] {
+            #expect(flat.radius(atFoldDistance: distance) == flat.heldRadius)
+        }
+    }
+}
