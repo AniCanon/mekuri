@@ -36,7 +36,8 @@ import androidx.compose.ui.semantics.stateDescription
  *
  * @param state selection and turn control; see [rememberMekuriPagerState].
  * @param pagingEnabled whether taps and drags turn pages. A centre tap still
- *   reports when they do not.
+ *   reports when they do not. A gesture keeps the value it began under, so a
+ *   drag in flight when this turns false still releases its turn.
  * @param onCenterTap called for a tap outside both edge zones.
  * @param spread whether one or two pages share the container.
  * @param coverStandsAlone whether page 0 opens alone, like a cover.
