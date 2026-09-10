@@ -319,7 +319,8 @@ Fold and gesture tuning, with the value and what each does:
 | `snapThreshold` | 0.35 | Progress past which a released drag completes the turn |
 | `flingVelocity` | 600 pt/s | Velocity along the turn past which a release completes regardless of progress. Points on iOS are dp on Android |
 | `tapZoneRatio` | 0.25 | Width of each edge tap zone as a ratio of the container width; the middle half is the centre zone |
-| `minimumDoublePageWidth` | 270 pt | Narrowest single page at which two pages are shown automatically |
+| `minimumDoublePageWidth` | 270 pt | Narrowest fitted page at which two pages are shown automatically |
+| `minimumDoubleFillFraction` | 0.6 | Least share of the container's height a fitted spread may cover before it is shown |
 | `landingFraction` | 0.12 | Share of a spread turn over which a hinged leaf's roll flattens |
 | `landingFloor` | 0.01 | Smallest radius scale during landing; the contact shadow divides by the radius, so it cannot be 0 |
 | drag `minimumDistance` | 10 pt | **iOS only.** Travel before a drag reports at all. Android uses the platform's touch slop instead; see §7 |
@@ -417,21 +418,25 @@ with revealed null. Paired: spreads (0, 1), (2, 3), (4, 5), count 3; forward
 from spread 0 is front 1, back 2, selects 2. Neither the layout nor the leaf
 mentions left or right; that is the direction's job.
 
-Automatic spread mode shows two pages when both conditions hold on the
-container: `width ≥ 2 × height × aspect` and `height × aspect ≥ 270`. The
-second is a readability floor rather than a device test, and what reaches it is
-the page shape and the container's height rather than the device class. At the
-default 2/3 aspect a container must be 405 points tall before each page clears
-the floor, so larger phones in landscape spread and smaller ones stay single; a
-narrower page shape needs a taller container still. For aspects of 1/2 or wider
-the floor never decides a portrait container, since `2 × height × aspect ≥
-height > width` already fails the first condition — by about a factor of three
-on a phone and nearer two on a tablet. Below 1/2 a portrait container can pass
-the first condition, and then the floor decides. The page
-size in a spread is the largest at the given aspect such that two fit:
-`height = min(containerHeight, containerWidth / (2 × aspect))`. Forced single
-and forced double ignore the container. The default aspect is 2/3, width over
-height.
+Automatic spread mode fits the pair first and then judges the fitted page. The
+page size in a spread is the largest at the given aspect such that two fit:
+`pageHeight = min(containerHeight, containerWidth / (2 × aspect))`,
+`pageWidth = pageHeight × aspect`. Decide from that same size — asking the
+question at the container's full height instead is what made a taller container
+drop to a single page. Two pages are shown when both conditions hold:
+`pageWidth ≥ 270` and `pageHeight ≥ 0.6 × containerHeight`. The first is a
+readability floor, the second stops a spread that would leave most of the
+container empty; neither is a device test.
+
+In closed form the two conditions are `aspect × containerHeight ≥ 270`,
+`containerWidth ≥ 540` and `containerWidth ≥ 1.2 × aspect × containerHeight`.
+At the default 2/3 aspect that is 405 points of height, 540 of width, and
+`containerWidth ≥ 0.8 × containerHeight`. A portrait container is not excluded
+by shape at any aspect: 600 × 900 at 1/2 fits pages of 300 × 600 and covers two
+thirds of the height, so it spreads. What keeps the common tablet portrait
+single is the fill condition, not the width — 834 × 1194 at 2/3 fits pages
+625.5 tall, 52 percent of the container. Forced single and forced double ignore
+the container. The default aspect is 2/3, width over height.
 
 ### 4.4 The turn state
 

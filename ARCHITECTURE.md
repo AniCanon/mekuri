@@ -70,6 +70,7 @@ formulas in Swift and is what the tests exercise; the shader must match it.
 | `tapZoneRatio` | 0.25 |
 | `settleAnimation` | spring, response 0.35, damping 0.86 |
 | `minimumDoublePageWidth` | 270 pt |
+| `minimumDoubleFillFraction` | 0.6 |
 | `landingFraction` / `landingFloor` | 0.12 / 0.01 |
 
 The last row is the hinged leaf's landing: over the final twelfth of a spread

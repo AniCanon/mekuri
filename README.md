@@ -99,7 +99,7 @@ Nothing is captured. The shader samples the face's live rendered content every f
 .mekuriPageAspectRatio(2.0 / 3.0)  // width over height of one page
 ```
 
-Under `.automatic` two pages appear when both fit the container at the page aspect and each is at least 270 points wide. That is a readability floor, not a device test, and what reaches it is the page shape and the container's height rather than the device class: at the default 2/3 aspect a container has to be 405 points tall before each page clears the floor, so larger phones in landscape spread and smaller ones stay single, and a narrower page shape needs a taller container still. For page shapes at least half as wide as tall the floor never decides a portrait container, because two pages cannot fit its width in the first place. A spread holding one page (the cover, or a lone last page) sits centred and slides into its slot as the first turn begins.
+Under `.automatic` two pages are laid out at whatever size actually fits, and the spread appears when each fitted page is at least 270 points wide and the pair covers at least 60 percent of the container's height. The first is a readability floor, the second keeps a spread from leaving half the container empty; neither is a device test. Written out, a container of `width × height` at `aspect` spreads when `aspect × height ≥ 270`, `width ≥ 540` and `width ≥ 1.2 × aspect × height`. At the default 2/3 shape that makes 405 points of height and 540 of width the entry price, and the last condition reads `width ≥ 0.8 × height`, so an ordinary phone stays single in both orientations, a tablet spreads in landscape and stays single in portrait, and a page shape narrower than the container needs less width to fill it. A spread holding one page (the cover, or a lone last page) sits centred and slides into its slot as the first turn begins.
 
 ### Modifiers
 
@@ -174,13 +174,14 @@ The sheet bends around a cylinder whose axis is parallel to the spine and travel
 | `flingVelocity` | `600 pt/s` | Velocity past which a release completes regardless of progress |
 | `settleAnimation` | spring, response `0.35`, damping `0.86` | Completion and spring-back |
 | `tapZoneWidth` | `0.25 × pageWidth` | Outer zone on each side; the middle half is the centre zone |
-| `minimumDoublePageWidth` | `270 pt` | Narrowest single page at which `.automatic` lays out a spread |
+| `minimumDoublePageWidth` | `270 pt` | Narrowest fitted page at which `.automatic` lays out a spread |
+| `minimumDoubleFillFraction` | `0.6` | Least share of the container's height a fitted spread may cover |
 
 Six of these are the modifiers above: `cylinderRadius`, `cornerShear`, `creaseBow`, `snapThreshold`, `settleAnimation` and `tapZoneWidth`. Radius opening, back-face dimming, the crease shadow and the fling velocity keep their tuned values. [ARCHITECTURE.md](ARCHITECTURE.md) describes how the fold is drawn and what a turn costs.
 
 ## Demo
 
-`ios/Demo/MekuriDemo.xcodeproj` is a six-page comic drawn in code, with every modifier on a control. It keeps the default 2/3 page shape, so what rotation does depends on the device: an iPhone 17 Pro simulator is 402 points tall in landscape, which puts a page at 268 points and holds it single in both orientations, while an iPad spreads in landscape and stays single in portrait, where two pages miss the width by nearly half. The Spread control forces `.double` if you want the two-page layout on a phone regardless. The fourth and fifth pages are one composition that runs across the spine. Each page carries a clock that keeps ticking on a settled page and freezes on the face being turned.
+`ios/Demo/MekuriDemo.xcodeproj` is a six-page comic drawn in code, with every modifier on a control. It keeps the default 2/3 page shape, so what rotation does depends on the device: an iPhone 17 Pro simulator is 402 points tall in landscape, which puts a page at 268 points and holds it single in both orientations, while an iPad spreads in landscape and stays single in portrait, where two fitted pages cover only 52 percent of the height. The Spread control forces `.double` if you want the two-page layout on a phone regardless. The fourth and fifth pages are one composition that runs across the spine. Each page carries a clock that keeps ticking on a settled page and freezes on the face being turned.
 
 The controls float over the page and a tap in the centre zone shows or hides them. **Presentation** turns off the harness affordances — the edge letters, the per-page button and the counter — and hides the status bar, leaving the page edge to edge; the centre tap still brings the controls back. It is off by default because those affordances are how the gesture-precedence checks are driven.
 
