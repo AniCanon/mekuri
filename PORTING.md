@@ -717,11 +717,12 @@ page in view state and the guide never mentions restoration. On Android a reader
 that forgets its page on rotation is a defect, so `rememberMekuriPagerState` uses
 `rememberSaveable` with a `Saver`. The saved value is the page as stored, never
 the clamped read, and the composable writes the real page count immediately
-after restoring, so a book still loading does not discard the page. Rotation does
-not exercise that path in the Android demo: its activity declares
-`android:configChanges` for orientation and size, so the activity is never
-recreated and the saver never runs. Restoration has to be driven another way —
-process death, or an activity without that declaration.
+after restoring, so a book still loading does not discard the page. An activity
+that declares `android:configChanges` for orientation and size is never
+recreated on rotation and never runs the saver, so a consumer that wants the
+path exercised must leave that declaration off — as the demo does — or drive it
+through process death. A consumer whose own reader state is plain `remember`
+snaps back to its defaults on the same rotation the pager survives.
 
 **A spread half is placed by a transform, never by a size.** `Modifier.size`
 asking for more than the incoming constraints allow does not fail and does not
@@ -730,6 +731,15 @@ it asked for. A spread whose two halves were placed that way came out shifted by
 half a page width each. Slots and the leaf are therefore sized to what fits and
 placed with an explicit centred box plus a `graphicsLayer` translation, which is
 also what keeps the layout direction from moving a slot.
+
+The same rule binds a consumer drawing art across the spine. `requiredSize` and
+`requiredWidth` are documented to report the coerced size upward and to centre
+what overflows in the space the node was given, so a composition laid out at
+twice the page width and halved between two pages comes out shifted by half a
+page each way — measured correctly, placed wrong. Art that spans the spine is
+measured with an explicit `Layout` at `Constraints.fixed(width * 2, height)` and
+placed at `0` or `-width`, or with `wrapContentSize(unbounded = true)`, never by
+asking for a size larger than the parent allows.
 
 **Progress lives outside the turn state.** iOS animates
 `MekuriTurnState.progress` through `animatableData` and records the presented
