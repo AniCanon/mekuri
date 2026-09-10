@@ -36,13 +36,13 @@ A page-curl pager for SwiftUI and Jetpack Compose. Pages turn the way paper does
 Swift Package Manager:
 
 ```swift
-.package(url: "https://github.com/AniCanon/mekuri.git", from: "0.1.0")
+.package(url: "https://github.com/AniCanon/mekuri.git", from: "0.2.0")
 ```
 
 Gradle, from GitHub Packages:
 
 ```kotlin
-implementation("app.mekuri:mekuri:0.1.0")
+implementation("studio.anicanon.mekuri:mekuri:0.2.0")
 ```
 
 Both need a little more than one line — the Swift product to depend on, the Maven repository and its credentials. The platform guides below have the whole thing.

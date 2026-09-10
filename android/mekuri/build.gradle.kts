@@ -8,11 +8,11 @@ plugins {
 
 apply(from = rootProject.file("gradle/publish-android-library.gradle"))
 
-group = "app.mekuri"
-version = "0.1.0"
+group = "studio.anicanon.mekuri"
+version = "0.2.0"
 
 android {
-    namespace = "app.mekuri"
+    namespace = "studio.anicanon.mekuri"
     compileSdk = 35
 
     defaultConfig {

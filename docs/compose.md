@@ -4,7 +4,7 @@ How to install the pager, how a page learns it is being turned, and every parame
 
 ## Installation
 
-The Android library is published to GitHub Packages as `app.mekuri:mekuri`. GitHub's Maven registry requires authentication even for public packages, so supply a personal access token with the `read:packages` scope. Keep it out of the repository — `~/.gradle/gradle.properties` is the usual home.
+The Android library is published to GitHub Packages as `studio.anicanon.mekuri:mekuri`. GitHub's Maven registry requires authentication even for public packages, so supply a personal access token with the `read:packages` scope. Keep it out of the repository — `~/.gradle/gradle.properties` is the usual home.
 
 ```kotlin
 // settings.gradle.kts
@@ -26,7 +26,7 @@ dependencyResolutionManagement {
 ```kotlin
 // build.gradle.kts
 dependencies {
-    implementation("app.mekuri:mekuri:0.1.0")
+    implementation("studio.anicanon.mekuri:mekuri:0.2.0")
 }
 ```
 

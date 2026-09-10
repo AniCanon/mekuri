@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "app.mekuri.demo"
+    namespace = "studio.anicanon.mekuri.demo"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "app.mekuri.demo"
+        applicationId = "studio.anicanon.mekuri.demo"
         minSdk = 33
         targetSdk = 35
         versionCode = 1
