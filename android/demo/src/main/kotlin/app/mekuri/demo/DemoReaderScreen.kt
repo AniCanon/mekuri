@@ -6,12 +6,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,7 +32,7 @@ private const val SlowSettleMillis = 4000
 
 @Composable
 fun DemoReaderScreen() {
-    var controls by remember {
+    var controls by rememberSaveable(stateSaver = DemoControlsSaver) {
         mutableStateOf(
             DemoControls(
                 direction = MekuriDirection.LeftToRight,
@@ -42,7 +44,7 @@ fun DemoReaderScreen() {
             ),
         )
     }
-    var chromeVisible by remember { mutableStateOf(true) }
+    var chromeVisible by rememberSaveable { mutableStateOf(true) }
     val tapCounts = remember { mutableStateMapOf<Int, Int>() }
     val scope = rememberCoroutineScope()
     val state = rememberMekuriPagerState(pageCount = PageCount, direction = controls.direction)
@@ -55,8 +57,6 @@ fun DemoReaderScreen() {
             MekuriConfiguration()
         }
     }
-    // The spanning composition sits on the second spread, whose first page
-    // depends on whether the cover stands alone.
     val spreadPairStart = if (controls.coverStandsAlone) 3 else 2
 
     Box(Modifier.fillMaxSize().background(DemoInk.Backdrop)) {
@@ -90,7 +90,10 @@ fun DemoReaderScreen() {
                     controls = next
                 },
                 onPage = { page -> scope.launch { state.animateToPage(page) } },
-                modifier = Modifier.align(Alignment.BottomStart).padding(20.dp),
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .safeDrawingPadding()
+                    .padding(20.dp),
             )
         }
     }

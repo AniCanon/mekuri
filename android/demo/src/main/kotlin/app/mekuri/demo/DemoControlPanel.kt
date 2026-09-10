@@ -3,6 +3,8 @@ package app.mekuri.demo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,9 +13,12 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +38,30 @@ data class DemoControls(
     val presentation: Boolean,
 )
 
+/** Carries the controls across the activity recreation a rotation causes. */
+val DemoControlsSaver: Saver<DemoControls, Any> = listSaver(
+    save = {
+        listOf(
+            it.direction.name,
+            it.pagingEnabled,
+            it.slowTurns,
+            it.spread.name,
+            it.coverStandsAlone,
+            it.presentation,
+        )
+    },
+    restore = {
+        DemoControls(
+            direction = MekuriDirection.valueOf(it[0] as String),
+            pagingEnabled = it[1] as Boolean,
+            slowTurns = it[2] as Boolean,
+            spread = MekuriSpread.valueOf(it[3] as String),
+            coverStandsAlone = it[4] as Boolean,
+            presentation = it[5] as Boolean,
+        )
+    },
+)
+
 /** Floating control card the centre tap shows and hides. */
 @Composable
 fun DemoControlPanel(
@@ -44,11 +73,16 @@ fun DemoControlPanel(
     modifier: Modifier = Modifier,
 ) {
     Column(
+        // Never a fixed width: the card plus its outer padding must fit a
+        // 360 dp phone.
         modifier
-            .width(340.dp)
+            .widthIn(max = 340.dp)
+            .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
             .background(Color(0.16f, 0.16f, 0.16f, 0.94f))
             .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(24.dp))
+            // The card is taller than a phone's landscape height allows.
+            .verticalScroll(rememberScrollState())
             .padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {

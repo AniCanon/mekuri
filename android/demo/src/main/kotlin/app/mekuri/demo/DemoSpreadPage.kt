@@ -31,6 +31,10 @@ enum class DemoSpreadHalf {
  */
 @Composable
 fun DemoSpreadPage(half: DemoSpreadHalf, scale: Float) {
+    // The composition must be measured and placed here, never sized with
+    // requiredWidth/requiredSize: a child asking for more than the incoming
+    // constraints allow is reported at the coerced size and offset to sit
+    // centred in the space it was given, which shifts each half by W/2.
     Layout(
         content = { DemoSpreadComposition(scale) },
         modifier = Modifier.fillMaxSize().clipToBounds(),

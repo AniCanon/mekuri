@@ -18,6 +18,14 @@ android {
         versionName = "0.1.0"
     }
 
+    buildTypes {
+        // Measurement runs on this variant: a debuggable build slows the
+        // Compose runtime enough to make frame timings meaningless.
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("debug")
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

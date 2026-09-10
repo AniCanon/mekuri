@@ -41,7 +41,7 @@ fun DemoHarnessOverlay(tapCount: Int, onButtonTap: () -> Unit) {
                 .align(Alignment.Center)
                 .clip(RoundedCornerShape(percent = 50))
                 .background(DemoInk.Ink)
-                .then(if (turning) Modifier else Modifier.clickable(onClick = onButtonTap))
+                .clickable(enabled = !turning, onClick = onButtonTap)
                 .padding(horizontal = 28.dp, vertical = 14.dp),
         ) {
             BasicText(
