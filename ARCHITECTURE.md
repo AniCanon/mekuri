@@ -172,9 +172,9 @@ turn); it is now built once with the other faces, outside the modifier.
 
 Measured on the demo in a release build on an emulator: a flat main thread at
 about 1 ms, and 1.5 to 3 ms more render-thread time while a turn runs. The
-graphics figure means nothing on that target, because the emulator's GPU is
-not the one a reader holds. **Android's cost has not been measured on
-hardware**, and the numbers above are the emulator's, not a device's.
+graphics figure means nothing on that target. **Android's cost has not been
+measured on hardware**, and the numbers above are the emulator's, not a
+device's.
 
 ## Layout
 
