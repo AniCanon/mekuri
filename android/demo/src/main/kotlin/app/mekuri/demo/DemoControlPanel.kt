@@ -81,7 +81,7 @@ fun DemoControlPanel(
             .clip(RoundedCornerShape(24.dp))
             .background(Color(0.16f, 0.16f, 0.16f, 0.94f))
             .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(24.dp))
-            // The card is taller than a phone's landscape height allows.
+            // Must scroll: the full card does not fit a phone's landscape height.
             .verticalScroll(rememberScrollState())
             .padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),

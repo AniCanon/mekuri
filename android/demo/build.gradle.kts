@@ -19,8 +19,7 @@ android {
     }
 
     buildTypes {
-        // Measurement runs on this variant: a debuggable build slows the
-        // Compose runtime enough to make frame timings meaningless.
+        // Frame timings are taken on this variant, never on a debuggable one.
         getByName("release") {
             signingConfig = signingConfigs.getByName("debug")
         }
