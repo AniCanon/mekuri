@@ -172,18 +172,24 @@ compositing and then scaling; only the additive constant-alpha shadow
 stacked.
 
 On iOS the fix is to flatten each face into a single layer before the effect
-runs. On Compose a `graphicsLayer` is a single surface, so the natural place
-to attach the render effect probably already flattens; do not take that on
-faith. Run the N-rectangle probe once and confirm the ratio is independent of
-N. If it is ignored: the shadow's darkness depends on how many primitives the
-consumer's page happens to contain, which no tuning constant can fix.
+runs. **On Compose it does not reproduce.** A render effect on a
+`graphicsLayer` runs over one already-flattened surface, so the stacking
+cannot happen, and the probe was run rather than assumed:
+`MekuriCompositingProbeTest` folds the same page at N = 1 and N = 8 — once
+with N draw-modifier nodes, once with N children each carrying its own
+graphics layer — and both measure zero differing pixels. The positive control
+in the same file, two shadow passes stacked, differs by more than zero, so the
+measurement can see the defect it is looking for. If this is ever ignored on a
+platform where it does reproduce: the shadow's darkness depends on how many
+primitives the consumer's page happens to contain, which no tuning constant
+can fix.
 
-A related detail: the shadow pass on iOS is drawn on an opaque black layer,
-not a transparent one, because the framework culls a layer with nothing
-visible in it before the effect can run. The shader replaces every pixel and
-samples none, so the layer's own colour never shows. Check whether Compose
-skips drawing an effect over an empty or fully transparent layer; if it does,
-give the shadow layer an opaque fill the same way.
+A related detail: the shadow pass is drawn on an opaque black layer, not a
+transparent one, because iOS culls a layer with nothing visible in it before
+the effect can run. The shader replaces every pixel and samples none, so the
+layer's own colour never shows. Compose's shadow layer carries the same
+opaque fill; whether Compose would have culled a transparent one was not
+measured separately.
 
 ### 2.4 The per-frame body must not rebuild the back face
 
@@ -254,9 +260,12 @@ is how a video panel stops without a callback and why per-page view state
 does not survive a turn. Mid-turn screenshots confirm both at once: the leaf's
 face shows a frozen clock while the page beneath it ticks. The shader samples
 the face's rendered content every frame, so a face must be drawable from what
-is already in memory; content that arrives asynchronously turns as whatever
-placeholder is showing when the turn begins, and anything animating inside a
-face is rasterised as it plays. Consumers are told to stand playback down when
+is already in memory, and anything animating inside a
+face is rasterised as it plays; nothing is captured, so a face that resolves a
+placeholder or finishes a load mid-turn re-renders inside the fold, in view of
+the reader. A face has to be static for the length of the turn, and that is a
+requirement on the consumer, not something the library can hold still.
+Consumers are told to stand playback down when
 the mode is `turning` and draw the last frame they have. If it is ignored: a
 video keeps decoding inside a sheet that is being bent, and the two copies of
 the page disagree.

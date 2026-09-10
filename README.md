@@ -33,7 +33,7 @@ A page-curl pager for SwiftUI and Jetpack Compose. Pages turn the way paper does
 
 ## Installation
 
-Until the first tagged release, consume the package by path:
+Until the first tagged release, consume the package by path — the path is to your checkout of this repository, wherever it sits beside the consuming project:
 
 ```swift
 dependencies: [
@@ -47,7 +47,7 @@ On Android, `android/` is a composite build; include it from the consuming build
 and depend on the module it publishes, `app.mekuri:mekuri`:
 
 ```kotlin
-// settings.gradle.kts
+// settings.gradle.kts — the path is to the android/ directory of your checkout
 includeBuild(settingsDir.resolve("../Mekuri/android").normalize()) {
     name = "mekuri-android"
 }
@@ -85,7 +85,7 @@ struct PageView: View {
 }
 ```
 
-A `.turning` face is rasterized by the fold shader every frame, so it must be drawable from what is already in memory. Content that arrives asynchronously turns as whatever is on screen when the turn begins.
+Nothing is captured. The shader samples the face's live rendered content every frame, on both platforms, so **the turning view must be static for as long as the turn lasts**. Draw it from what is already in memory. Anything that resolves mid-turn — a placeholder that fills in, an image that finishes loading, an animation still running — re-renders inside the fold, and the reader sees the sheet change under the finger.
 
 ### Selection
 
@@ -128,7 +128,7 @@ val state = rememberMekuriPagerState(pageCount = pages.size, direction = MekuriD
 
 MekuriPager(
     state = state,
-    configuration = MekuriConfiguration(creaseBow = 0.35f),
+    configuration = MekuriConfiguration(creaseBow = 0.6f),
     pagingEnabled = !isZoomed,
     onCenterTap = { chromeHidden = !chromeHidden },
     spread = MekuriSpread.Automatic,
@@ -143,7 +143,19 @@ state.animateToPage(n)
 
 `MekuriPagerState` carries the selection. `currentPage` follows the page on screen; `animateToPage` curls to its target and `scrollToPage` cuts to it, and a `scrollToPage` arriving mid-turn cancels a pending `animateToPage`. A turn the user grabs and pushes back returns from `animateToPage` normally, with the settled page, rather than throwing. `rememberMekuriPagerState` saves the page across a configuration change.
 
+To hold the state outside composition — in a view model, say — build it directly with the page count as a function, the way Compose's own pager state takes it, so a book that loads its pages later still reports them:
+
+```kotlin
+val state = MekuriPagerState(pageCount = { book.pages.size })
+```
+
 The fold and gesture knobs live on `MekuriConfiguration`, whose public constructor takes `foldRadius`, `cornerLift`, `creaseBow`, `tapZone`, `snapThreshold`, `settleAnimation` and `reducedMotionOverride` — the same seven the SwiftUI modifiers expose. `settleAnimation` is a Compose `AnimationSpec` and is the one value deliberately not held in parity with iOS; the two animation systems have no shared representation, so the feel is matched by eye and the numbers are not asserted equal.
+
+## Accessibility
+
+The pager is a single element that contains its pages. It exposes the settled page as a value — `Page 3 of 12` — and two actions that turn with the same fold a tap gives: a SwiftUI adjustable action, incrementing forward and decrementing back, and on Compose custom actions named `Next page` and `Previous page`. With paging off the value stays and the actions go, on both platforms.
+
+Those strings are English literals in the library and there is no way to override them. A reader in another language reads its own pages and an English page count.
 
 ## The fold
 
@@ -172,13 +184,15 @@ Six of these are the modifiers above: `cylinderRadius`, `cornerShear`, `creaseBo
 
 The controls float over the page and a tap in the centre zone shows or hides them. **Presentation** turns off the harness affordances — the edge letters, the per-page button and the counter — and hides the status bar, leaving the page edge to edge; the centre tap still brings the controls back. It is off by default because those affordances are how the gesture-precedence checks are driven.
 
-`android/demo` is the same comic in Compose: `cd Mekuri/android && ./gradlew :demo:installDebug`. It keeps the same 2/3 page shape. A 1080 x 2400 emulator at its native 420 dpi is 411 dp tall in landscape, which puts a page at 274 dp: single in portrait, a spread when rotated. A shorter phone stays single in landscape too; a tablet spreads in landscape and stays single in portrait.
+`android/demo` is the same comic in Compose: `cd android && ./gradlew :demo:installDebug`. It keeps the same 2/3 page shape. A 1080 x 2400 emulator at its native 420 dpi is 411 dp tall in landscape, which puts a page at 274 dp: single in portrait, a spread when rotated. A shorter phone stays single in landscape too; a tablet spreads in landscape and stays single in portrait.
 
 ## Tests
 
+From the root of this repository:
+
 ```bash
-swift test --package-path Mekuri
-cd Mekuri/android && ./gradlew :mekuri:check
+swift test
+cd android && ./gradlew :mekuri:check
 ```
 
 The geometry, the turn model and the spread layout are UIKit-free, so the Swift suite runs on macOS without a simulator, and the Kotlin unit tests are plain JVM tests. `MekuriParityTests.swift` and `MekuriParityTest.kt` assert the same literal expected values on both sides, to an absolute tolerance of 1e-3 at page scale, so a constant that drifts in one language fails there rather than both moving together. The fold itself is verified by running the demos.

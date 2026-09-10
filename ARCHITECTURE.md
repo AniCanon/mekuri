@@ -139,6 +139,8 @@ every place the Android behaviour deliberately differs.
 
 ## Cost
 
+### iOS
+
 Measured on the demo in an iPad Pro 11-inch simulator (spread) and an iPhone
 17 Pro simulator (single page), tap-driven turns, counting invocations of the
 consumer's `content` closure, evaluations of the page body, and shader
@@ -166,6 +168,14 @@ handed to the animatable modifier as a closure and rebuilt every frame of a
 spread turn (one `content` call per frame, about 170 over a four-second
 turn); it is now built once with the other faces, outside the modifier.
 
+### Android
+
+Measured on the demo in a release build on an emulator: a flat main thread at
+about 1 ms, and 1.5 to 3 ms more render-thread time while a turn runs. The
+graphics figure means nothing on that target, because the emulator's GPU is
+not the one a reader holds. **Android's cost has not been measured on
+hardware**, and the numbers above are the emulator's, not a device's.
+
 ## Layout
 
 ```
@@ -174,6 +184,7 @@ Mekuri/
 ├── LICENSE
 ├── README.md
 ├── ARCHITECTURE.md
+├── PORTING.md        # the description the Compose port was built from
 ├── assets/           # the mark, light and dark
 ├── ios/
 │   ├── Sources/Mekuri/
@@ -184,6 +195,14 @@ Mekuri/
     └── demo/         # the same comic in Compose
 ```
 
-One type per file, named for it. The Android module mirrors the same units
-with the same names, and `PORTING.md` is the description the port was built
-from.
+One type per file, named for it. The Android module mirrors the arithmetic
+core unit for unit and name for name — that is what parity is asserted on.
+The renderer and the pager deliberately diverge, and each platform has types
+the other has no use for: Kotlin holds `MekuriFoldEffect`,
+`MekuriFoldUniforms`, `MekuriPagerController`, `MekuriPagerState`,
+`MekuriPageModeLocal` and `MekuriReducedMotion`; Swift holds
+`MekuriFoldShader`, `MekuriPresentedProgress`, the fold, leaf and shift
+modifiers and `Mekuri+Environment`. Those are each platform's own idiom for
+holding a shader, a selection and a per-frame progress, and a name invented on
+one side is not a gap on the other. `PORTING.md` is the description the port
+was built from, and its §7 lists every deliberate difference in behaviour.
