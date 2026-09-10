@@ -15,8 +15,14 @@ class MekuriSpreadTest {
     }
 
     @Test
-    fun `automatic shows one page when two would not fit the width`() {
-        assertFalse(MekuriSpread.Automatic.isDouble(Size(700f, 800f), aspect))
+    fun `automatic shows two pages fitted narrower than the container`() {
+        assertTrue(MekuriSpread.Automatic.isDouble(Size(700f, 800f), aspect))
+    }
+
+    @Test
+    fun `automatic shows one page when the pair would not fill the height`() {
+        assertFalse(MekuriSpread.Automatic.isDouble(Size(600f, 800f), aspect))
+        assertFalse(MekuriSpread.Automatic.isDouble(Size(834f, 1194f), aspect))
     }
 
     @Test

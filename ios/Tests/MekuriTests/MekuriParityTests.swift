@@ -124,6 +124,15 @@ import Testing
         #expect(!MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 2000, height: 500), pageAspectRatio: 0.5))
         #expect(MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 956, height: 440), pageAspectRatio: 0.7))
         #expect(!MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 440, height: 956), pageAspectRatio: 0.7))
+        #expect(!MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 1366, height: 1024), pageAspectRatio: 0.25))
+    }
+
+    @Test func theSpreadFillFractionMatchesTheKotlinImplementation() {
+        #expect(self.close(MekuriSpread.minimumDoubleFillFraction, 0.6))
+        #expect(!MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 590, height: 1000), pageAspectRatio: 0.5))
+        #expect(MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 610, height: 1000), pageAspectRatio: 0.5))
+        #expect(MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 1366, height: 1024), pageAspectRatio: 0.7))
+        #expect(!MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 1024, height: 1366), pageAspectRatio: 0.7))
     }
 
     @Test func theSpreadPageSizeMatchesTheKotlinImplementation() {

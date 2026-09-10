@@ -111,6 +111,16 @@ class MekuriParityTest {
         assertFalse(MekuriSpread.Automatic.isDouble(Size(2000f, 500f), 0.5f))
         assertTrue(MekuriSpread.Automatic.isDouble(Size(956f, 440f), 0.7f))
         assertFalse(MekuriSpread.Automatic.isDouble(Size(440f, 956f), 0.7f))
+        assertFalse(MekuriSpread.Automatic.isDouble(Size(1366f, 1024f), 0.25f))
+    }
+
+    @Test
+    fun `the spread fill fraction matches the swift implementation`() {
+        assertEquals(0.6f, MekuriSpread.MinimumDoubleFillFraction, TOLERANCE)
+        assertFalse(MekuriSpread.Automatic.isDouble(Size(590f, 1000f), 0.5f))
+        assertTrue(MekuriSpread.Automatic.isDouble(Size(610f, 1000f), 0.5f))
+        assertTrue(MekuriSpread.Automatic.isDouble(Size(1366f, 1024f), 0.7f))
+        assertFalse(MekuriSpread.Automatic.isDouble(Size(1024f, 1366f), 0.7f))
     }
 
     @Test

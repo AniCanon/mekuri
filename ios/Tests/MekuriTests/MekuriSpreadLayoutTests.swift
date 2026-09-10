@@ -84,6 +84,8 @@ import Testing
         #expect(MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 956, height: 440), pageAspectRatio: aspect))
         #expect(!MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 852, height: 393), pageAspectRatio: aspect))
         #expect(!MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 834, height: 1194), pageAspectRatio: aspect))
+        #expect(MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 700, height: 800), pageAspectRatio: aspect))
+        #expect(!MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 600, height: 800), pageAspectRatio: aspect))
         #expect(MekuriSpread.double.isDouble(containerSize: CGSize(width: 852, height: 393), pageAspectRatio: aspect))
         #expect(!MekuriSpread.single.isDouble(containerSize: CGSize(width: 1194, height: 834), pageAspectRatio: aspect))
     }
