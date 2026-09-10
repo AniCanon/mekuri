@@ -1,0 +1,58 @@
+apply plugin: "maven-publish"
+
+android {
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
+}
+
+def githubOwner = providers.gradleProperty("PUBLISH_GITHUB_OWNER")
+    .orElse(providers.environmentVariable("GITHUB_OWNER"))
+    .orElse("AniCanon")
+
+def githubRepository = providers.gradleProperty("PUBLISH_GITHUB_REPOSITORY")
+    .orElse("mekuri")
+
+def githubUsername = providers.gradleProperty("gpr.user")
+    .orElse(providers.environmentVariable("GITHUB_ACTOR"))
+
+def githubToken = providers.gradleProperty("gpr.key")
+    .orElse(providers.environmentVariable("GITHUB_TOKEN"))
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(org.gradle.api.publish.maven.MavenPublication) {
+                from components.release
+                groupId = project.group.toString()
+                artifactId = project.name
+                version = project.version.toString()
+
+                pom {
+                    name = project.name
+                    description = "A page-curl pager for Jetpack Compose"
+                    licenses {
+                        license {
+                            name = "MIT"
+                            url = "https://opensource.org/licenses/MIT"
+                        }
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/${githubOwner.get()}/${githubRepository.get()}")
+
+                credentials {
+                    username = githubUsername.orNull
+                    password = githubToken.orNull
+                }
+            }
+        }
+    }
+}

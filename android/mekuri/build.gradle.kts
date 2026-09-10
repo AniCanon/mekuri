@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
+apply(from = rootProject.file("gradle/publish-android-library.gradle"))
+
 group = "app.mekuri"
 version = "0.1.0"
 
