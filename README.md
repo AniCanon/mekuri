@@ -99,7 +99,7 @@ A `.turning` face is rasterized by the fold shader every frame, so it must be dr
 .mekuriPageAspectRatio(2.0 / 3.0)  // width over height of one page
 ```
 
-Under `.automatic` two pages appear when both fit the container at the page aspect and each is at least 275 points wide. That is a readability floor, not a device test: a phone in landscape spreads for ordinary page shapes, a narrower page stays single, and a portrait container never reaches the floor because two pages cannot fit its width in the first place. A spread holding one page (the cover, or a lone last page) sits centred and slides into its slot as the first turn begins.
+Under `.automatic` two pages appear when both fit the container at the page aspect and each is at least 270 points wide. That is a readability floor, not a device test, and what reaches it is the page shape and the container's height rather than the device class: at the default 2/3 aspect a container has to be 405 points tall before each page clears the floor, so larger phones in landscape spread and smaller ones stay single, and a narrower page shape needs a taller container still. For page shapes at least half as wide as tall the floor never decides a portrait container, because two pages cannot fit its width in the first place. A spread holding one page (the cover, or a lone last page) sits centred and slides into its slot as the first turn begins.
 
 ### Modifiers
 
@@ -168,11 +168,11 @@ Six of these are the modifiers above: `cylinderRadius`, `cornerShear`, `creaseBo
 
 ## Demo
 
-`ios/Demo/MekuriDemo.xcodeproj` is a six-page comic drawn in code, with every modifier on a control. Build it for an iPhone in portrait to see single pages, and rotate it, or build for an iPad, to see spreads; the fourth and fifth pages are one composition that runs across the spine. Each page carries a clock that keeps ticking on a settled page and freezes on the face being turned.
+`ios/Demo/MekuriDemo.xcodeproj` is a six-page comic drawn in code, with every modifier on a control. It keeps the default 2/3 page shape, so what rotation does depends on the device: an iPhone 17 Pro simulator is 402 points tall in landscape, which puts a page at 268 points and holds it single in both orientations, while an iPad spreads in landscape and stays single in portrait, where two pages miss the width by nearly half. The Spread control forces `.double` if you want the two-page layout on a phone regardless. The fourth and fifth pages are one composition that runs across the spine. Each page carries a clock that keeps ticking on a settled page and freezes on the face being turned.
 
 The controls float over the page and a tap in the centre zone shows or hides them. **Presentation** turns off the harness affordances — the edge letters, the per-page button and the counter — and hides the status bar, leaving the page edge to edge; the centre tap still brings the controls back. It is off by default because those affordances are how the gesture-precedence checks are driven.
 
-`android/demo` is the same comic in Compose: `cd Mekuri/android && ./gradlew :demo:installDebug`. A phone in portrait shows single pages; rotating it, or running on a tablet, shows spreads.
+`android/demo` is the same comic in Compose: `cd Mekuri/android && ./gradlew :demo:installDebug`. It keeps the same 2/3 page shape. A 1080 x 2400 emulator at its native 420 dpi is 411 dp tall in landscape, which puts a page at 274 dp: single in portrait, a spread when rotated. A shorter phone stays single in landscape too; a tablet spreads in landscape and stays single in portrait.
 
 ## Tests
 

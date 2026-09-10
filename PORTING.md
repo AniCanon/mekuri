@@ -409,11 +409,16 @@ from spread 0 is front 1, back 2, selects 2. Neither the layout nor the leaf
 mentions left or right; that is the direction's job.
 
 Automatic spread mode shows two pages when both conditions hold on the
-container: `width ≥ 2 × height × aspect` and `height × aspect ≥ 275`. The
-second is a readability floor rather than a device test: at 275 a phone in
-landscape spreads for ordinary page shapes, and a narrower page stays single.
-It never decides a portrait container, where the first condition already fails
-by about a factor of three. The page
+container: `width ≥ 2 × height × aspect` and `height × aspect ≥ 270`. The
+second is a readability floor rather than a device test, and what reaches it is
+the page shape and the container's height rather than the device class. At the
+default 2/3 aspect a container must be 405 points tall before each page clears
+the floor, so larger phones in landscape spread and smaller ones stay single; a
+narrower page shape needs a taller container still. For aspects of 1/2 or wider
+the floor never decides a portrait container, since `2 × height × aspect ≥
+height > width` already fails the first condition — by about a factor of three
+on a phone and nearer two on a tablet. Below 1/2 a portrait container can pass
+the first condition, and then the floor decides. The page
 size in a spread is the largest at the given aspect such that two fit:
 `height = min(containerHeight, containerWidth / (2 × aspect))`. Forced single
 and forced double ignore the container. The default aspect is 2/3, width over
