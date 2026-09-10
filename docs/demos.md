@@ -1,0 +1,7 @@
+# The demos
+
+`ios/Demo/MekuriDemo.xcodeproj` is a six-page comic drawn in code, with every modifier on a control. It keeps the default 2/3 page shape, so what rotation does depends on the device: an iPhone 17 Pro simulator is 402 points tall in landscape, which puts a page at 268 points and holds it single in both orientations, while an iPad spreads in landscape and stays single in portrait, where two fitted pages cover only 52 percent of the height. The Spread control forces `.double` if you want the two-page layout on a phone regardless. The fourth and fifth pages are one composition that runs across the spine. Each page carries a clock that keeps ticking on a settled page and freezes on the face being turned.
+
+The controls float over the page and a tap in the centre zone shows or hides them. **Presentation** turns off the harness affordances — the edge letters, the per-page button and the counter — and hides the status bar, leaving the page edge to edge; the centre tap still brings the controls back. It is off by default because those affordances are how the gesture-precedence checks are driven.
+
+`android/demo` is the same comic in Compose: `cd android && ./gradlew :demo:installDebug`. It keeps the same 2/3 page shape. A 1080 x 2400 emulator at its native 420 dpi is 411 dp tall in landscape, which puts a page at 274 dp: single in portrait, a spread when rotated. A shorter phone stays single in landscape too; a tablet spreads in landscape and stays single in portrait.

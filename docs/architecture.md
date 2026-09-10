@@ -135,7 +135,7 @@ shader samples the live rendered content of the face each frame.
 
 The pager itself is idiomatic to each platform. SwiftUI cascades every knob
 through the environment; Compose takes them as parameters with defaults and
-passes only the page mode through a composition local. `PORTING.md` §7 lists
+passes only the page mode through a composition local. `porting.md` §7 lists
 every place the Android behaviour deliberately differs.
 
 ## Cost
@@ -184,8 +184,7 @@ Mekuri/
 ├── Package.swift     # at the root so the package can be consumed by URL; targets point into ios/
 ├── LICENSE
 ├── README.md
-├── ARCHITECTURE.md
-├── PORTING.md        # the description the Compose port was built from
+├── docs/             # the guides, this document and the porting notes
 ├── assets/           # the mark, light and dark
 ├── ios/
 │   ├── Sources/Mekuri/
@@ -205,5 +204,5 @@ the other has no use for: Kotlin holds `MekuriFoldEffect`,
 `MekuriFoldShader`, `MekuriPresentedProgress`, the fold, leaf and shift
 modifiers and `Mekuri+Environment`. Those are each platform's own idiom for
 holding a shader, a selection and a per-frame progress, and a name invented on
-one side is not a gap on the other. `PORTING.md` is the description the port
+one side is not a gap on the other. `porting.md` is the description the port
 was built from, and its §7 lists every deliberate difference in behaviour.
