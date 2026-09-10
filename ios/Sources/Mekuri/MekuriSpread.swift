@@ -12,7 +12,7 @@ public enum MekuriSpread: Equatable, Sendable {
     /// Two pages side by side, scaled to fit the container.
     case double
 
-    /// Narrowest single page, in points, at which two pages stay readable.
+    /// Narrowest fitted page, in points, at which two pages stay readable.
     static let minimumDoublePageWidth: CGFloat = 270
 
     /// Smallest share of the container's height a fitted pair may cover.

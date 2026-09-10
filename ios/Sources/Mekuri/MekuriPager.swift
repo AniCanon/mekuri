@@ -15,7 +15,7 @@ import SwiftUI
 ///     PageView(page: pages[pageIndex])   // reads @Environment(\.mekuriPageMode)
 /// }
 /// .mekuriDirection(.rightToLeft)        // spine on the right, indices unchanged
-/// .mekuriSpread(.automatic)             // two pages whenever they fit
+/// .mekuriSpread(.automatic)             // two pages when a fitted pair reads well
 /// .mekuriCoverStandsAlone(true)         // page 0 opens alone, like a cover
 /// .mekuriPageAspectRatio(2.0 / 3.0)     // width over height of one page
 /// .mekuriPagingEnabled(!isZoomed)

@@ -40,7 +40,7 @@ public enum class MekuriSpread {
     }
 
     internal companion object {
-        /** Narrowest single page, in dp, at which two pages stay readable. */
+        /** Narrowest fitted page, in dp, at which two pages stay readable. */
         internal const val MinimumDoublePageWidth = 270f
 
         /** Smallest share of the container's height a fitted pair may cover. */
