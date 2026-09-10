@@ -81,6 +81,7 @@ import Testing
     @Test func twoPagesAppearOnlyWhenTheyFitAndStayReadable() {
         let aspect: CGFloat = 2.0 / 3.0
         #expect(MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 1194, height: 834), pageAspectRatio: aspect))
+        #expect(MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 956, height: 440), pageAspectRatio: aspect))
         #expect(!MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 852, height: 393), pageAspectRatio: aspect))
         #expect(!MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 834, height: 1194), pageAspectRatio: aspect))
         #expect(MekuriSpread.double.isDouble(containerSize: CGSize(width: 852, height: 393), pageAspectRatio: aspect))

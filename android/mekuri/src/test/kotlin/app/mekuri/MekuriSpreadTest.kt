@@ -20,6 +20,11 @@ class MekuriSpreadTest {
     }
 
     @Test
+    fun `automatic spreads a large phone in landscape`() {
+        assertTrue(MekuriSpread.Automatic.isDouble(Size(956f, 440f), aspect))
+    }
+
+    @Test
     fun `automatic shows one page when each would be narrower than the floor`() {
         assertFalse(MekuriSpread.Automatic.isDouble(Size(4000f, 400f), aspect))
     }

@@ -310,7 +310,7 @@ Fold and gesture tuning, with the value and what each does:
 | `snapThreshold` | 0.35 | Progress past which a released drag completes the turn |
 | `flingVelocity` | 600 pt/s | Velocity along the turn past which a release completes regardless of progress. Points on iOS are dp on Android |
 | `tapZoneRatio` | 0.25 | Width of each edge tap zone as a ratio of the container width; the middle half is the centre zone |
-| `minimumDoublePageWidth` | 320 pt | Narrowest single page at which two pages are shown automatically |
+| `minimumDoublePageWidth` | 275 pt | Narrowest single page at which two pages are shown automatically |
 | `landingFraction` | 0.12 | Share of a spread turn over which a hinged leaf's roll flattens |
 | `landingFloor` | 0.01 | Smallest radius scale during landing; the contact shadow divides by the radius, so it cannot be 0 |
 | drag `minimumDistance` | 10 pt | **iOS only.** Travel before a drag reports at all. Android uses the platform's touch slop instead; see §7 |
@@ -409,8 +409,11 @@ from spread 0 is front 1, back 2, selects 2. Neither the layout nor the leaf
 mentions left or right; that is the direction's job.
 
 Automatic spread mode shows two pages when both conditions hold on the
-container: `width ≥ 2 × height × aspect` and `height × aspect ≥ 320`. The
-second is the floor that keeps a phone in landscape at one page. The page
+container: `width ≥ 2 × height × aspect` and `height × aspect ≥ 275`. The
+second is a readability floor rather than a device test: at 275 a phone in
+landscape spreads for ordinary page shapes, and a narrower page stays single.
+It never decides a portrait container, where the first condition already fails
+by about a factor of three. The page
 size in a spread is the largest at the given aspect such that two fit:
 `height = min(containerHeight, containerWidth / (2 × aspect))`. Forced single
 and forced double ignore the container. The default aspect is 2/3, width over

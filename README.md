@@ -89,7 +89,7 @@ A `.turning` face is rasterized by the fold shader every frame, so it must be dr
 .mekuriPageAspectRatio(2.0 / 3.0)  // width over height of one page
 ```
 
-Under `.automatic` two pages appear when both fit the container at the page aspect and each is at least 320 points wide — a landscape iPad, not a phone. A spread holding one page (the cover, or a lone last page) sits centred and slides into its slot as the first turn begins.
+Under `.automatic` two pages appear when both fit the container at the page aspect and each is at least 275 points wide. That is a readability floor, not a device test: a phone in landscape spreads for ordinary page shapes, a narrower page stays single, and a portrait container never reaches the floor because two pages cannot fit its width in the first place. A spread holding one page (the cover, or a lone last page) sits centred and slides into its slot as the first turn begins.
 
 ### Modifiers
 
@@ -144,6 +144,7 @@ The sheet bends around a cylinder whose axis is parallel to the spine and travel
 | `flingVelocity` | `600 pt/s` | Velocity past which a release completes regardless of progress |
 | `settleAnimation` | spring, response `0.35`, damping `0.86` | Completion and spring-back |
 | `tapZoneWidth` | `0.25 × pageWidth` | Outer zone on each side; the middle half is the centre zone |
+| `minimumDoublePageWidth` | `275 pt` | Narrowest single page at which `.automatic` lays out a spread |
 
 Six of these are the modifiers above: `cylinderRadius`, `cornerShear`, `creaseBow`, `snapThreshold`, `settleAnimation` and `tapZoneWidth`. Radius opening, back-face dimming, the crease shadow and the fling velocity keep their tuned values. [ARCHITECTURE.md](ARCHITECTURE.md) describes how the fold is drawn and what a turn costs.
 
