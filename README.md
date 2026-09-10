@@ -29,7 +29,7 @@ A page-curl pager for SwiftUI and Jetpack Compose. Pages turn the way paper does
 ## Requirements
 
 - iOS 18 / macOS 14, Swift 6.0. The fold is a Metal `layerEffect`; on macOS the package builds so `swift test` runs anywhere, and the fold renders on iOS.
-- Android arrives as its own Gradle build under `android/`.
+- Android minSdk 33, Kotlin with Compose. The fold is an AGSL `RuntimeShader` applied as a render effect. The library is its own Gradle build under `android/`.
 
 ## Installation
 
@@ -42,6 +42,16 @@ dependencies: [
 ```
 
 `Package.swift` sits at the repository root — Swift Package Manager finds a manifest only there when a package is consumed by URL — and its targets point into `ios/`.
+
+On Android, `android/` is a composite build; include it from the consuming build
+and depend on the module it publishes, `app.mekuri:mekuri`:
+
+```kotlin
+// settings.gradle.kts
+includeBuild(settingsDir.resolve("../Mekuri/android").normalize()) {
+    name = "mekuri-android"
+}
+```
 
 ## SwiftUI
 
@@ -111,21 +121,29 @@ Under `.automatic` two pages appear when both fit the container at the page aspe
 
 ## Jetpack Compose
 
-Compose has no cascading modifier for arbitrary values, so the Compose API mirrors the concepts rather than the syntax. The page mode arrives through a composition local so a deep child can read it, exactly as on iOS. This is the designed surface; the module ships with the Android build.
+Compose has no cascading modifier for arbitrary values, so the Compose API mirrors the concepts rather than the syntax: everything that is a modifier on iOS is a parameter with a default here. The page mode arrives through a composition local so a deep child can read it, exactly as on iOS.
 
 ```kotlin
 val state = rememberMekuriPagerState(pageCount = pages.size, direction = MekuriDirection.RightToLeft)
 
 MekuriPager(
     state = state,
+    configuration = MekuriConfiguration(creaseBow = 0.35f),
     pagingEnabled = !isZoomed,
     onCenterTap = { chromeHidden = !chromeHidden },
+    spread = MekuriSpread.Automatic,
+    coverStandsAlone = true,
+    pageAspectRatio = 2f / 3f,
 ) { pageIndex ->
     PageContent(page = pages[pageIndex])   // reads LocalMekuriPageMode.current
 }
 
 state.animateToPage(n)
 ```
+
+`MekuriPagerState` carries the selection. `currentPage` follows the page on screen; `animateToPage` curls to its target and `scrollToPage` cuts to it, and a `scrollToPage` arriving mid-turn cancels a pending `animateToPage`. A turn the user grabs and pushes back returns from `animateToPage` normally, with the settled page, rather than throwing. `rememberMekuriPagerState` saves the page across a configuration change.
+
+The fold and gesture knobs live on `MekuriConfiguration`, whose public constructor takes `foldRadius`, `cornerLift`, `creaseBow`, `tapZone`, `snapThreshold`, `settleAnimation` and `reducedMotionOverride` — the same seven the SwiftUI modifiers expose. `settleAnimation` is a Compose `AnimationSpec` and is the one value deliberately not held in parity with iOS; the two animation systems have no shared representation, so the feel is matched by eye and the numbers are not asserted equal.
 
 ## The fold
 
@@ -150,21 +168,30 @@ Six of these are the modifiers above: `cylinderRadius`, `cornerShear`, `creaseBo
 
 ## Demo
 
-`ios/Demo/MekuriDemo.xcodeproj` is a six-page comic drawn in code, with every modifier on a control. Build it for an iPhone to see single pages and for an iPad in landscape to see spreads; the fourth and fifth pages are one composition that runs across the spine. Each page carries a clock that keeps ticking on a settled page and freezes on the face being turned.
+`ios/Demo/MekuriDemo.xcodeproj` is a six-page comic drawn in code, with every modifier on a control. Build it for an iPhone in portrait to see single pages, and rotate it, or build for an iPad, to see spreads; the fourth and fifth pages are one composition that runs across the spine. Each page carries a clock that keeps ticking on a settled page and freezes on the face being turned.
 
 The controls float over the page and a tap in the centre zone shows or hides them. **Presentation** turns off the harness affordances — the edge letters, the per-page button and the counter — and hides the status bar, leaving the page edge to edge; the centre tap still brings the controls back. It is off by default because those affordances are how the gesture-precedence checks are driven.
+
+`android/demo` is the same comic in Compose: `cd Mekuri/android && ./gradlew :demo:installDebug`. A phone in portrait shows single pages; rotating it, or running on a tablet, shows spreads.
 
 ## Tests
 
 ```bash
 swift test --package-path Mekuri
+cd Mekuri/android && ./gradlew :mekuri:check
 ```
 
-The geometry, the turn model and the spread layout are UIKit-free, so the suite runs on macOS without a simulator. The fold itself is verified by running the demo.
+The geometry, the turn model and the spread layout are UIKit-free, so the Swift suite runs on macOS without a simulator, and the Kotlin unit tests are plain JVM tests. `MekuriParityTests.swift` and `MekuriParityTest.kt` assert the same literal expected values on both sides, to an absolute tolerance of 1e-3 at page scale, so a constant that drifts in one language fails there rather than both moving together. The fold itself is verified by running the demos.
 
 ## Out of scope
 
-Vertical and continuous-scroll reading modes; page thumbnails, counters and chrome; image loading of any kind; publishing to a registry.
+Deliberately absent, and not planned:
+
+- **Page content of any kind.** The library never loads, decodes or caches an image. A page is a closure the consumer writes, and the library only asks it for an index.
+- **Zoom and pan.** A pinch-to-zoom reader wraps the pager and stands paging down with `mekuriPagingEnabled(false)` / `pagingEnabled = false` while it is zoomed.
+- **Vertical and continuous-scroll reading modes.** The fold is a horizontal page turn and nothing else.
+- **Chrome.** Page counters, thumbnails, a scrubber and a table of contents are the consumer's, and the demos show one way to build them.
+- **Publishing to a registry.** Consume by path, or by an included Gradle build, until there is a tagged release.
 
 ## Licence
 

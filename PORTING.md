@@ -717,7 +717,19 @@ page in view state and the guide never mentions restoration. On Android a reader
 that forgets its page on rotation is a defect, so `rememberMekuriPagerState` uses
 `rememberSaveable` with a `Saver`. The saved value is the page as stored, never
 the clamped read, and the composable writes the real page count immediately
-after restoring, so a book still loading does not discard the page.
+after restoring, so a book still loading does not discard the page. Rotation does
+not exercise that path in the Android demo: its activity declares
+`android:configChanges` for orientation and size, so the activity is never
+recreated and the saver never runs. Restoration has to be driven another way —
+process death, or an activity without that declaration.
+
+**A spread half is placed by a transform, never by a size.** `Modifier.size`
+asking for more than the incoming constraints allow does not fail and does not
+clip: the node measures to what fits and the content is centred inside the size
+it asked for. A spread whose two halves were placed that way came out shifted by
+half a page width each. Slots and the leaf are therefore sized to what fits and
+placed with an explicit centred box plus a `graphicsLayer` translation, which is
+also what keeps the layout direction from moving a slot.
 
 **Progress lives outside the turn state.** iOS animates
 `MekuriTurnState.progress` through `animatableData` and records the presented

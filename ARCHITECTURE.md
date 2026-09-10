@@ -121,6 +121,22 @@ shadow pass is a separate opaque layer beneath the leaf so neither shadow is
 drawn twice. The shader folds a flap entering from the right only; a
 right-to-left turn mirrors the layer on both sides of the effect.
 
+## The renderer per platform
+
+The arithmetic core is one description in two languages and is asserted equal
+by `MekuriParityTests.swift` and `MekuriParityTest.kt`, to an absolute
+tolerance of 1e-3 at page scale. The renderer is not: iOS folds with a Metal
+`layerEffect` and Compose with an AGSL `RuntimeShader` applied as a render
+effect on the face's graphics layer. The two shader sources are
+near-transliterations of each other and must both match `MekuriFoldGeometry`,
+which is what the tests exercise. Neither platform captures a bitmap; the
+shader samples the live rendered content of the face each frame.
+
+The pager itself is idiomatic to each platform. SwiftUI cascades every knob
+through the environment; Compose takes them as parameters with defaults and
+passes only the page mode through a composition local. `PORTING.md` §7 lists
+every place the Android behaviour deliberately differs.
+
 ## Cost
 
 Measured on the demo in an iPad Pro 11-inch simulator (spread) and an iPhone
@@ -164,7 +180,10 @@ Mekuri/
 │   ├── Tests/MekuriTests/
 │   └── Demo/         # a package cannot be an app, so the demo is its own project
 └── android/          # its own Gradle build
+    ├── mekuri/       # the library module
+    └── demo/         # the same comic in Compose
 ```
 
 One type per file, named for it. The Android module mirrors the same units
-with the same names.
+with the same names, and `PORTING.md` is the description the port was built
+from.
