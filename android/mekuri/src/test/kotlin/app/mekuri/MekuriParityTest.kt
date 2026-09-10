@@ -104,10 +104,10 @@ class MekuriParityTest {
 
     @Test
     fun `the spread floor matches the swift implementation`() {
-        assertEquals(275f, MekuriSpread.MinimumDoublePageWidth, TOLERANCE)
-        assertTrue(MekuriSpread.Automatic.isDouble(Size(1200f, 550f), 0.5f))
-        assertTrue(MekuriSpread.Automatic.isDouble(Size(1200f, 552f), 0.5f))
-        assertFalse(MekuriSpread.Automatic.isDouble(Size(1200f, 548f), 0.5f))
+        assertEquals(270f, MekuriSpread.MinimumDoublePageWidth, TOLERANCE)
+        assertTrue(MekuriSpread.Automatic.isDouble(Size(1200f, 540f), 0.5f))
+        assertTrue(MekuriSpread.Automatic.isDouble(Size(1200f, 542f), 0.5f))
+        assertFalse(MekuriSpread.Automatic.isDouble(Size(1200f, 538f), 0.5f))
         assertFalse(MekuriSpread.Automatic.isDouble(Size(2000f, 500f), 0.5f))
         assertTrue(MekuriSpread.Automatic.isDouble(Size(956f, 440f), 0.7f))
         assertFalse(MekuriSpread.Automatic.isDouble(Size(440f, 956f), 0.7f))

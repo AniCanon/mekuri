@@ -117,10 +117,10 @@ import Testing
     // MARK: - The spread rule
 
     @Test func theSpreadFloorMatchesTheKotlinImplementation() {
-        #expect(self.close(MekuriSpread.minimumDoublePageWidth, 275))
-        #expect(MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 1200, height: 550), pageAspectRatio: 0.5))
-        #expect(MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 1200, height: 552), pageAspectRatio: 0.5))
-        #expect(!MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 1200, height: 548), pageAspectRatio: 0.5))
+        #expect(self.close(MekuriSpread.minimumDoublePageWidth, 270))
+        #expect(MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 1200, height: 540), pageAspectRatio: 0.5))
+        #expect(MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 1200, height: 542), pageAspectRatio: 0.5))
+        #expect(!MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 1200, height: 538), pageAspectRatio: 0.5))
         #expect(!MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 2000, height: 500), pageAspectRatio: 0.5))
         #expect(MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 956, height: 440), pageAspectRatio: 0.7))
         #expect(!MekuriSpread.automatic.isDouble(containerSize: CGSize(width: 440, height: 956), pageAspectRatio: 0.7))

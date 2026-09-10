@@ -162,7 +162,7 @@ The sheet bends around a cylinder whose axis is parallel to the spine and travel
 | `flingVelocity` | `600 pt/s` | Velocity past which a release completes regardless of progress |
 | `settleAnimation` | spring, response `0.35`, damping `0.86` | Completion and spring-back |
 | `tapZoneWidth` | `0.25 × pageWidth` | Outer zone on each side; the middle half is the centre zone |
-| `minimumDoublePageWidth` | `275 pt` | Narrowest single page at which `.automatic` lays out a spread |
+| `minimumDoublePageWidth` | `270 pt` | Narrowest single page at which `.automatic` lays out a spread |
 
 Six of these are the modifiers above: `cylinderRadius`, `cornerShear`, `creaseBow`, `snapThreshold`, `settleAnimation` and `tapZoneWidth`. Radius opening, back-face dimming, the crease shadow and the fling velocity keep their tuned values. [ARCHITECTURE.md](ARCHITECTURE.md) describes how the fold is drawn and what a turn costs.
 

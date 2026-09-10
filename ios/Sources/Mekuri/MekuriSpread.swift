@@ -12,7 +12,7 @@ public enum MekuriSpread: Equatable, Sendable {
     case double
 
     /// Narrowest single page, in points, at which two pages stay readable.
-    static let minimumDoublePageWidth: CGFloat = 275
+    static let minimumDoublePageWidth: CGFloat = 270
 
     /// `pageAspectRatio` is width over height. Under `.automatic`, two pages
     /// laid out to the container's height must fit its width and each must

@@ -310,7 +310,7 @@ Fold and gesture tuning, with the value and what each does:
 | `snapThreshold` | 0.35 | Progress past which a released drag completes the turn |
 | `flingVelocity` | 600 pt/s | Velocity along the turn past which a release completes regardless of progress. Points on iOS are dp on Android |
 | `tapZoneRatio` | 0.25 | Width of each edge tap zone as a ratio of the container width; the middle half is the centre zone |
-| `minimumDoublePageWidth` | 275 pt | Narrowest single page at which two pages are shown automatically |
+| `minimumDoublePageWidth` | 270 pt | Narrowest single page at which two pages are shown automatically |
 | `landingFraction` | 0.12 | Share of a spread turn over which a hinged leaf's roll flattens |
 | `landingFloor` | 0.01 | Smallest radius scale during landing; the contact shadow divides by the radius, so it cannot be 0 |
 | drag `minimumDistance` | 10 pt | **iOS only.** Travel before a drag reports at all. Android uses the platform's touch slop instead; see §7 |
