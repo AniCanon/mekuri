@@ -40,7 +40,7 @@ class MekuriPagerScreenshotTest {
 
     @Test
     fun aSinglePageTurnsUnderTheFinger() {
-        val state = MekuriPagerState(pageCount = 6, initialPage = 2)
+        val state = MekuriPagerState(pageCount = { 6 }, initialPage = 2)
         this.rule.setContent {
             MekuriPagerScene(width = SINGLE_WIDTH, height = SINGLE_HEIGHT) {
                 MekuriPager(
@@ -61,7 +61,7 @@ class MekuriPagerScreenshotTest {
 
     @Test
     fun aSpreadTurnsItsBackFaceAcrossTheSpine() {
-        val state = MekuriPagerState(pageCount = 8, initialPage = 1)
+        val state = MekuriPagerState(pageCount = { 8 }, initialPage = 1)
         this.rule.setContent {
             MekuriPagerScene(width = SPREAD_WIDTH, height = SPREAD_HEIGHT) {
                 MekuriPager(
@@ -82,7 +82,7 @@ class MekuriPagerScreenshotTest {
 
     @Test
     fun aLoneCoverSitsCentredInItsSpread() {
-        val state = MekuriPagerState(pageCount = 8, initialPage = 0)
+        val state = MekuriPagerState(pageCount = { 8 }, initialPage = 0)
         this.rule.setContent {
             MekuriPagerScene(width = SPREAD_WIDTH, height = SPREAD_HEIGHT) {
                 MekuriPager(
@@ -99,7 +99,7 @@ class MekuriPagerScreenshotTest {
 
     @Test
     fun theCoverSlidesToItsSlotAsItOpens() {
-        val state = MekuriPagerState(pageCount = 8, initialPage = 0)
+        val state = MekuriPagerState(pageCount = { 8 }, initialPage = 0)
         this.rule.setContent {
             MekuriPagerScene(width = SPREAD_WIDTH, height = SPREAD_HEIGHT) {
                 MekuriPager(
@@ -121,7 +121,7 @@ class MekuriPagerScreenshotTest {
 
     @Test
     fun anEdgeTapTurnsThePageAndACentreTapReports() {
-        val state = MekuriPagerState(pageCount = 6, initialPage = 2)
+        val state = MekuriPagerState(pageCount = { 6 }, initialPage = 2)
         var centreTaps = 0
         this.rule.setContent {
             MekuriPagerScene(width = SINGLE_WIDTH, height = SINGLE_HEIGHT) {
@@ -157,7 +157,7 @@ class MekuriPagerScreenshotTest {
      */
     @Test
     fun aBlockedTurnLiftsThePageOverTheGround() {
-        val state = MekuriPagerState(pageCount = 6, initialPage = 5)
+        val state = MekuriPagerState(pageCount = { 6 }, initialPage = 5)
         this.rule.setContent {
             MekuriPagerScene(width = SINGLE_WIDTH, height = SINGLE_HEIGHT) {
                 MekuriPager(

@@ -63,19 +63,19 @@ public extension View {
 public extension View {
     /// Whether ``MekuriPager`` shows one page or a two-page spread.
     /// Defaults to `.automatic`, which shows two when they fit.
-    func mekuriSpread(_ spread: MekuriSpread = .automatic) -> some View {
+    func mekuriSpread(_ spread: MekuriSpread) -> some View {
         self.environment(\.mekuriSpread, spread)
     }
 
     /// In a spread, whether the first page sits alone in the trailing slot,
     /// the way a book falls open, or pairs with the second. Defaults to true.
-    func mekuriCoverStandsAlone(_ standsAlone: Bool = true) -> some View {
+    func mekuriCoverStandsAlone(_ standsAlone: Bool) -> some View {
         self.environment(\.mekuriCoverStandsAlone, standsAlone)
     }
 
     /// Width over height of one page, used to lay out a spread and to decide
     /// whether two pages fit. Must be positive. Defaults to 2/3.
-    func mekuriPageAspectRatio(_ ratio: CGFloat = 2.0 / 3.0) -> some View {
+    func mekuriPageAspectRatio(_ ratio: CGFloat) -> some View {
         self.environment(\.mekuriPageAspectRatio, ratio)
     }
 }

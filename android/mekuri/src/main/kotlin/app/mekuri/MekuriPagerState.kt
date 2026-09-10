@@ -3,7 +3,10 @@ package app.mekuri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,20 +44,20 @@ internal interface MekuriTurnDriver {
  * settled page. A [scrollToPage] arriving mid-turn cancels the pending
  * [animateToPage].
  *
- * @param pageCount number of pages in the book.
+ * @param pageCount number of pages in the book, read on every use rather than
+ *   copied, so a book that loads its pages later reports them.
  * @param direction spine placement and sweep direction.
  * @param initialPage page shown first; clamped on read into `0 until pageCount`.
  */
 public class MekuriPagerState(
-    pageCount: Int,
+    pageCount: () -> Int,
     direction: MekuriDirection = MekuriDirection.LeftToRight,
     initialPage: Int = 0,
 ) {
     private val driver = MutableStateFlow<MekuriTurnDriver?>(null)
 
-    private var pageCountState by mutableIntStateOf(pageCount.coerceAtLeast(0))
-
-    private val pageCountFlow = MutableStateFlow(pageCount.coerceAtLeast(0))
+    /** Replaced, never mutated: an equal provider instance writes nothing. */
+    internal var pageCountProvider: () -> Int by mutableStateOf(pageCount)
 
     /** Bumped whenever a scroll drops a turn; a dropped turn may not settle. */
     private var dropGeneration = 0
@@ -62,12 +65,8 @@ public class MekuriPagerState(
     private var currentPageState by mutableIntStateOf(initialPage)
 
     /** Number of pages in the book. Shrinking it clamps [currentPage]. */
-    public var pageCount: Int
-        get() = this.pageCountState
-        internal set(value) {
-            this.pageCountState = value.coerceAtLeast(0)
-            this.pageCountFlow.value = this.pageCountState
-        }
+    public val pageCount: Int
+        get() = this.pageCountProvider().coerceAtLeast(0)
 
     /** Spine placement and sweep direction. */
     public var direction: MekuriDirection = direction
@@ -79,7 +78,7 @@ public class MekuriPagerState(
      * momentarily drops to zero must not discard it.
      */
     public var currentPage: Int
-        get() = coerce(this.currentPageState, this.pageCountState)
+        get() = coerce(this.currentPageState, this.pageCount)
         internal set(value) {
             this.currentPageState = value
         }
@@ -90,11 +89,11 @@ public class MekuriPagerState(
      * count. A turn a [scrollToPage] dropped meanwhile leaves the page alone.
      */
     public suspend fun animateToPage(page: Int) {
-        val driver = combine(this.driver, this.pageCountFlow) { driver, count ->
+        val driver = combine(this.driver, snapshotFlow { this.pageCount }) { driver, count ->
             driver.takeIf { count > 0 }
         }.filterNotNull().first()
         val generation = this.dropGeneration
-        val settled = driver.turnTo(coerce(page, this.pageCountState))
+        val settled = driver.turnTo(coerce(page, this.pageCount))
         if (generation != this.dropGeneration) return
         this.currentPageState = settled
     }
@@ -124,7 +123,7 @@ public class MekuriPagerState(
          */
         internal val Saver: Saver<MekuriPagerState, Int> = Saver(
             save = { it.currentPageState },
-            restore = { MekuriPagerState(pageCount = 0, initialPage = it) },
+            restore = { MekuriPagerState(pageCount = { 0 }, initialPage = it) },
         )
     }
 }
@@ -132,7 +131,8 @@ public class MekuriPagerState(
 /**
  * Remembers a [MekuriPagerState] across recompositions and configuration
  * changes. [pageCount] and [direction] are written into the remembered state on
- * every composition; [initialPage] is read once.
+ * every composition; [initialPage] is read once. A state held outside
+ * composition is built directly, with the page count as a function.
  */
 @Composable
 public fun rememberMekuriPagerState(
@@ -140,10 +140,11 @@ public fun rememberMekuriPagerState(
     direction: MekuriDirection = MekuriDirection.LeftToRight,
     initialPage: Int = 0,
 ): MekuriPagerState {
+    val provider = remember(pageCount) { { pageCount } }
     val state = rememberSaveable(saver = MekuriPagerState.Saver) {
-        MekuriPagerState(pageCount = pageCount, direction = direction, initialPage = initialPage)
+        MekuriPagerState(pageCount = provider, direction = direction, initialPage = initialPage)
     }
-    state.pageCount = pageCount
+    state.pageCountProvider = provider
     state.direction = direction
     return state
 }

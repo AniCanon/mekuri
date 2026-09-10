@@ -75,7 +75,7 @@ class MekuriPagerReleaseTest {
     }
 
     private fun pager(): MekuriPagerState {
-        val state = MekuriPagerState(pageCount = 6, initialPage = 2)
+        val state = MekuriPagerState(pageCount = { 6 }, initialPage = 2)
         this.rule.setContent {
             Scene {
                 MekuriPager(

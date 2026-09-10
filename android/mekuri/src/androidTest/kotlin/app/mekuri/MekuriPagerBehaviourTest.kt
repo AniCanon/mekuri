@@ -31,7 +31,7 @@ class MekuriPagerBehaviourTest {
 
     @Test
     fun pagingStoodDownStillReportsACentreTap() {
-        val state = MekuriPagerState(pageCount = 6, initialPage = 2)
+        val state = MekuriPagerState(pageCount = { 6 }, initialPage = 2)
         var centreTaps = 0
         this.rule.setContent {
             Scene {
@@ -68,7 +68,7 @@ class MekuriPagerBehaviourTest {
 
     @Test
     fun aDragBlockedAtTheEndSpringsBack() {
-        val state = MekuriPagerState(pageCount = 6, initialPage = 5)
+        val state = MekuriPagerState(pageCount = { 6 }, initialPage = 5)
         this.rule.setContent {
             Scene {
                 MekuriPager(
@@ -104,7 +104,7 @@ class MekuriPagerBehaviourTest {
 
     /** Leaves the clock paused a few frames after the tap. */
     private fun tapTheTrailingEdge(reducesMotion: Boolean): MekuriPagerState {
-        val state = MekuriPagerState(pageCount = 6, initialPage = 2)
+        val state = MekuriPagerState(pageCount = { 6 }, initialPage = 2)
         this.rule.mainClock.autoAdvance = false
         this.rule.setContent {
             Scene {
@@ -125,7 +125,7 @@ class MekuriPagerBehaviourTest {
 
     @Test
     fun aTurningFaceTellsAChildAtAnyDepth() {
-        val state = MekuriPagerState(pageCount = 6, initialPage = 2)
+        val state = MekuriPagerState(pageCount = { 6 }, initialPage = 2)
         val modes = mutableMapOf<Int, MekuriPageMode>()
         this.rule.setContent {
             Scene {
@@ -157,7 +157,7 @@ class MekuriPagerBehaviourTest {
 
     @Test
     fun aContainerSizeChangeDropsTheTurnInFlight() {
-        val state = MekuriPagerState(pageCount = 6, initialPage = 2)
+        val state = MekuriPagerState(pageCount = { 6 }, initialPage = 2)
         var narrow by mutableStateOf(true)
         this.rule.setContent {
             Scene(width = if (narrow) SCENE_WIDTH else SCENE_WIDTH - 40) {
@@ -182,7 +182,7 @@ class MekuriPagerBehaviourTest {
 
     @Test
     fun aJumpOfMoreThanOnePageCrossfadesAndLands() {
-        val state = MekuriPagerState(pageCount = 6, initialPage = 0)
+        val state = MekuriPagerState(pageCount = { 6 }, initialPage = 0)
         var jump by mutableStateOf(false)
         this.rule.setContent {
             Scene {
@@ -206,7 +206,7 @@ class MekuriPagerBehaviourTest {
      */
     @Test
     fun aSlotThatChangesPageBuildsANewPage() {
-        val state = MekuriPagerState(pageCount = 6, initialPage = 2)
+        val state = MekuriPagerState(pageCount = { 6 }, initialPage = 2)
         val bornAs = mutableMapOf<Int, Int>()
         this.rule.setContent {
             Scene {
@@ -237,7 +237,7 @@ class MekuriPagerBehaviourTest {
      */
     @Test
     fun pagingFlippedMidDragStillReleasesTheTurn() {
-        val state = MekuriPagerState(pageCount = 6, initialPage = 2)
+        val state = MekuriPagerState(pageCount = { 6 }, initialPage = 2)
         var paging by mutableStateOf(true)
         this.rule.setContent {
             Scene {
@@ -272,7 +272,7 @@ class MekuriPagerBehaviourTest {
     /** A cancelled caller cancels the curl; it may not land the page anyway. */
     @Test
     fun cancellingTheCallerOfAnAnimationDropsTheCurl() {
-        val state = MekuriPagerState(pageCount = 6, initialPage = 2)
+        val state = MekuriPagerState(pageCount = { 6 }, initialPage = 2)
         var animating by mutableStateOf(false)
         this.rule.mainClock.autoAdvance = false
         this.rule.setContent {
@@ -298,7 +298,7 @@ class MekuriPagerBehaviourTest {
     /** The later of two animations owns the turn; the dropped one lets go. */
     @Test
     fun aSecondAnimationLandsOverTheFirst() {
-        val state = MekuriPagerState(pageCount = 6, initialPage = 2)
+        val state = MekuriPagerState(pageCount = { 6 }, initialPage = 2)
         var first by mutableStateOf(false)
         var second by mutableStateOf(false)
         this.rule.mainClock.autoAdvance = false
