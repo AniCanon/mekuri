@@ -8,12 +8,9 @@ android {
     }
 }
 
-def githubOwner = providers.gradleProperty("PUBLISH_GITHUB_OWNER")
-    .orElse(providers.environmentVariable("GITHUB_OWNER"))
-    .orElse("AniCanon")
-
-def githubRepository = providers.gradleProperty("PUBLISH_GITHUB_REPOSITORY")
-    .orElse("mekuri")
+// The library has one home; a shared gradle property must not redirect it.
+def githubOwner = "AniCanon"
+def githubRepository = "mekuri"
 
 def githubUsername = providers.gradleProperty("gpr.user")
     .orElse(providers.environmentVariable("GITHUB_ACTOR"))
@@ -46,7 +43,7 @@ afterEvaluate {
         repositories {
             maven {
                 name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/${githubOwner.get()}/${githubRepository.get()}")
+                url = uri("https://maven.pkg.github.com/$githubOwner/$githubRepository")
 
                 credentials {
                     username = githubUsername.orNull
