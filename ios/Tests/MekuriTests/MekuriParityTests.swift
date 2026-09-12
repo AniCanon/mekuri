@@ -87,19 +87,19 @@ import Testing
     // MARK: - The radius profile
 
     @Test func theRadiusProfileMatchesTheKotlinImplementationAtBothEnds() {
-        #expect(self.close(self.geometry.heldRadius, 16))
-        #expect(self.close(self.geometry.radiusSlope, 0.04))
-        #expect(self.close(self.geometry.radius(atFoldDistance: 0), 16))
-        #expect(self.close(self.geometry.radius(atFoldDistance: 400), 32))
-        #expect(self.close(self.geometry.radius(atFoldDistance: 800), 48))
+        #expect(self.close(self.geometry.heldRadius, 100))
+        #expect(self.close(self.geometry.radiusSlope, 0.0625))
+        #expect(self.close(self.geometry.radius(atFoldDistance: 0), 100))
+        #expect(self.close(self.geometry.radius(atFoldDistance: 400), 125))
+        #expect(self.close(self.geometry.radius(atFoldDistance: 800), 150))
         #expect(self.close(self.straightCrease.radiusSlope, 0))
-        #expect(self.close(self.straightCrease.radius(atFoldDistance: 800), 16))
+        #expect(self.close(self.straightCrease.radius(atFoldDistance: 800), 100))
     }
 
     @Test func theLandingScaleMatchesTheKotlinImplementation() {
         #expect(self.close(self.geometry.landingRadiusScale(progress: 0), 1))
-        #expect(self.close(self.geometry.landingRadiusScale(progress: 0.88), 1))
-        #expect(self.close(self.geometry.landingRadiusScale(progress: 0.94), 0.5))
+        #expect(self.close(self.geometry.landingRadiusScale(progress: 0.7), 1))
+        #expect(self.close(self.geometry.landingRadiusScale(progress: 0.85), 0.5))
         #expect(self.close(self.geometry.landingRadiusScale(progress: 1), 0.01))
     }
 

@@ -48,8 +48,8 @@ struct MekuriConfiguration: Equatable, Sendable {
     var reducedMotionOverride: Bool?
 
     init(
-        cylinderRadiusRatio: CGFloat = 0.04,
-        radiusOpening: CGFloat = 1.0,
+        cylinderRadiusRatio: CGFloat = 0.25,
+        radiusOpening: CGFloat = 0.25,
         creaseBow: CGFloat = 0.35,
         cornerShear: CGFloat = 0.10,
         backFaceDim: CGFloat = 0.86,
@@ -58,7 +58,7 @@ struct MekuriConfiguration: Equatable, Sendable {
         snapThreshold: CGFloat = 0.35,
         flingVelocity: CGFloat = 600,
         tapZoneRatio: CGFloat = 0.25,
-        settleAnimation: Animation = .spring(response: 0.35, dampingFraction: 0.86),
+        settleAnimation: Animation = .timingCurve(0.35, 0.1, 0.75, 0.85, duration: 0.42),
         reducedMotionOverride: Bool? = nil
     ) {
         self.cylinderRadiusRatio = cylinderRadiusRatio

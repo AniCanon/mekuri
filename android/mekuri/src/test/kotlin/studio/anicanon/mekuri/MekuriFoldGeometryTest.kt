@@ -77,17 +77,17 @@ class MekuriFoldGeometryTest {
 
     @Test
     fun `radius opens along the fold from the held end`() {
-        assertEquals(16f, geometry.heldRadius, TOLERANCE)
-        assertEquals(0.04f, geometry.radiusSlope, TOLERANCE)
-        assertEquals(16f, geometry.radius(foldDistance = 0f), TOLERANCE)
-        assertEquals(48f, geometry.radius(foldDistance = 800f), TOLERANCE)
+        assertEquals(100f, geometry.heldRadius, TOLERANCE)
+        assertEquals(0.0625f, geometry.radiusSlope, TOLERANCE)
+        assertEquals(100f, geometry.radius(foldDistance = 0f), TOLERANCE)
+        assertEquals(150f, geometry.radius(foldDistance = 800f), TOLERANCE)
     }
 
     @Test
-    fun `landing scale holds at one until the last twelfth and floors at the end`() {
+    fun `landing scale holds at one until the last thirty percent and floors at the end`() {
         assertEquals(1f, geometry.landingRadiusScale(0f), TOLERANCE)
         assertEquals(1f, geometry.landingRadiusScale(0.5f), TOLERANCE)
-        assertEquals(0.5f, geometry.landingRadiusScale(0.94f), TOLERANCE)
+        assertEquals(0.5f, geometry.landingRadiusScale(0.85f), TOLERANCE)
         assertEquals(MekuriFoldGeometry.LandingFloor, geometry.landingRadiusScale(1f), TOLERANCE)
     }
 

@@ -51,13 +51,13 @@ struct MekuriFoldGeometry: Equatable, Sendable {
         progress <= 0
     }
 
-    /// Share of the turn over which a hinged leaf's roll flattens.
-    static let landingFraction: CGFloat = 0.12
+    /// Share of the turn over which the roll flattens.
+    static let landingFraction: CGFloat = 0.3
 
     /// Smallest radius scale; the contact shadow divides by the radius.
     static let landingFloor: CGFloat = 0.01
 
-    /// Scale on the cylinder radius and corner shear of a hinged leaf: 1
+    /// Scale on the cylinder radius and corner shear: 1
     /// until the landing begins, `landingFloor` at progress 1.
     func landingRadiusScale(progress: CGFloat) -> CGFloat {
         let remaining = 1 - self.clamped(progress)

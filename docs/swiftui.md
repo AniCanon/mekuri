@@ -78,12 +78,12 @@ Under `.automatic` two pages are laid out at whatever size actually fits, and th
 | `mekuriSpread(_:)` | `.automatic` | One page or two |
 | `mekuriCoverStandsAlone(_:)` | `true` | Page 0 alone in the trailing slot |
 | `mekuriPageAspectRatio(_:)` | `2/3` | Width over height of one page |
-| `mekuriFoldRadius(_:)` | `0.04` | Cylinder radius as a ratio of page width |
+| `mekuriFoldRadius(_:)` | `0.25` | Cylinder radius as a ratio of page width |
 | `mekuriCornerLift(_:)` | `0.10` | Fold-line travel per unit of vertical distance from the page centre |
 | `mekuriCreaseBow(_:)` | `0.35` | How far the free corner runs ahead of a straight crease, 0…1 |
 | `mekuriTapZone(_:)` | `0.25` | Width of each edge tap zone as a ratio of page width |
 | `mekuriSnapThreshold(_:)` | `0.35` | Progress past which a release completes the turn |
-| `mekuriSettleAnimation(_:)` | `nil` | Settle animation; `nil` is the package spring |
+| `mekuriSettleAnimation(_:)` | `nil` | Settle animation; `nil` is the package curve |
 | `mekuriReducedMotion(_:)` | `nil` | Override the system setting either way; `nil` follows it |
 
 ## Working against a checkout

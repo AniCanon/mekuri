@@ -54,15 +54,15 @@ bottom corner lifts and neither shader changes. Three things shape the crease:
 
 Every pixel is classified by its signed distance `d` from the fold axis: past
 the roll it shows the page beneath and the contact shadow; on the roll it
-samples the front or the mirrored back at the unrolled distance and shades the
-back by its normal against a fixed light; short of the crease it shows the
+samples the front or the mirrored back at the unrolled distance, darkens the
+front toward the crest and shades the back by its normal against a fixed light; short of the crease it shows the
 flat front, dimmed by the crease shadow. `MekuriFoldGeometry` holds the same
 formulas in Swift and is what the tests exercise; the shader must match it.
 
 | Constant | Value |
 |---|---|
-| `cylinderRadiusRatio` | 0.04 |
-| `radiusOpening` | 1.0 |
+| `cylinderRadiusRatio` | 0.25 |
+| `radiusOpening` | 0.25 |
 | `creaseBow` | 0.35 |
 | `cornerShear` | 0.10 |
 | `backFaceDim` | 0.86 |
@@ -71,13 +71,12 @@ formulas in Swift and is what the tests exercise; the shader must match it.
 | `snapThreshold` | 0.35 |
 | `flingVelocity` | 600 pt/s |
 | `tapZoneRatio` | 0.25 |
-| `settleAnimation` | spring, response 0.35, damping 0.86 |
+| `settleAnimation` | timing curve (0.35, 0.1, 0.75, 0.85), 0.42 s |
 | `minimumDoublePageWidth` | 270 pt |
 | `minimumDoubleFillFraction` | 0.6 |
-| `landingFraction` / `landingFloor` | 0.12 / 0.01 |
+| `landingFraction` / `landingFloor` | 0.3 / 0.01 |
 
-The last row is the hinged leaf's landing: over the final twelfth of a spread
-turn the roll and the shear flatten so the crease meets the spine, otherwise a
+The last row is the landing: over the final 30% of a turn the roll and the shear flatten so the crease meets the spine, otherwise a
 roll would stand on the spine at rest.
 
 ## The turn

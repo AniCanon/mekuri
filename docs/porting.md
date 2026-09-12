@@ -309,8 +309,8 @@ Fold and gesture tuning, with the value and what each does:
 
 | Constant | Value | What it does |
 |---|---|---|
-| `cylinderRadiusRatio` | 0.04 | Radius of the roll at the held end, as a ratio of page width. Tighter reads as thin paper, wider as card. 0.10 was tried first and the half-turn arc consumed the whole flap, so the back never appeared |
-| `radiusOpening` | 1.0 | Growth of the radius per page width of fold distance from the held end, as a multiple of `cylinderRadiusRatio`. `radiusSlope = cylinderRadiusRatio × radiusOpening`. 0 keeps the radius constant |
+| `cylinderRadiusRatio` | 0.25 | Radius of the roll at the held end, as a ratio of page width. A wide roll keeps most of the lifted sheet on the curve, so the back shows only near the crest instead of lying flat over the page. 0.04 reads as a peeled sticker |
+| `radiusOpening` | 0.25 | Growth of the radius per page width of fold distance from the held end, as a multiple of `cylinderRadiusRatio`. `radiusSlope = cylinderRadiusRatio × radiusOpening`. 0 keeps the radius constant |
 | `creaseBow` | 0.35 | How far the free corner runs ahead of a straight crease, 0…1. The axis stays monotonic in progress at every row for values up to 1 |
 | `cornerShear` | 0.10 | Horizontal travel of the fold line per unit of vertical distance from the page centre. A ratio, never an angle |
 | `backFaceDim` | 0.86 | Darkest brightness of the lit back, reached where the surface turns fully away from the light |
@@ -321,16 +321,16 @@ Fold and gesture tuning, with the value and what each does:
 | `tapZoneRatio` | 0.25 | Width of each edge tap zone as a ratio of the container width; the middle half is the centre zone |
 | `minimumDoublePageWidth` | 270 pt | Narrowest fitted page at which two pages are shown automatically |
 | `minimumDoubleFillFraction` | 0.6 | Least share of the container's height a fitted spread may cover before it is shown |
-| `landingFraction` | 0.12 | Share of a spread turn over which a hinged leaf's roll flattens |
+| `landingFraction` | 0.3 | Share of a turn over which the roll flattens |
 | `landingFloor` | 0.01 | Smallest radius scale during landing; the contact shadow divides by the radius, so it cannot be 0 |
 | drag `minimumDistance` | 10 pt | **iOS only.** Travel before a drag reports at all. Android uses the platform's touch slop instead; see §7 |
 | `horizontalDominance` | 1 | Horizontal travel must exceed vertical travel times this before a drag locks a turn; a tie does not lock |
 | `blockedDamping` | 1/3 | Fraction of drag travel kept when the turn is blocked at either end |
 
-`settleAnimation` is a spring with response 0.35 and damping fraction 0.86 on
-iOS. It is deliberately not held in parity: the two animation systems have no
-shared representation, so Kotlin uses its own spring spec and the feel is
-matched by eye. The parity test asserts numbers only.
+`settleAnimation` is a cubic timing curve (0.35, 0.1, 0.75, 0.85) over 0.42 s:
+slow off the grab and quick into the landing, like a falling sheet. Kotlin uses
+a `tween` with the same easing and duration, but the two animation systems have
+no shared representation, so parity is by value and not asserted. The parity test asserts numbers only.
 
 The public knobs are a subset: direction, paging enabled, centre tap, spread
 mode, cover stands alone, page aspect ratio, fold radius, corner lift (which
@@ -372,10 +372,10 @@ the spine, the landed back short of the outer edge by `πr`, and a crease that
 crosses the spine diagonally because of the shear. So a hinged leaf's held
 radius, radius slope and corner shear are all multiplied by
 `landingRadiusScale(p) = max(min((1 − p) / landingFraction, 1), landingFloor)`:
-1 until the last twelfth of the turn, then linearly down to 0.01 at progress
+1 until the last 30% of the turn, then linearly down to 0.01 at progress
 1, at which point the back lies flat in its slot and meets the revealed page
-on a vertical seam at the spine. Whole mode never sees this; the multiplier
-is applied only when a hinge is given.
+on a vertical seam at the spine. A whole page gets the same multiplier, so
+its roll does not stand at the leading edge when the turn completes.
 
 The parity test worth copying: for progress in {0.1, 0.25, 0.5, 0.75, 0.9,
 1} and rows {0, 200, 400, 600, 800} on a 400-wide page in an 800-wide layer,

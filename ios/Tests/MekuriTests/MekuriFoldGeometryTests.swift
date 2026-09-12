@@ -64,7 +64,7 @@ extension MekuriFoldGeometryTests {
 
     @Test func aZeroRadiusOpeningKeepsTheRadiusConstantAlongTheFold() {
         let flat = MekuriFoldGeometry(pageWidth: 400, configuration: MekuriConfiguration(radiusOpening: 0))
-        #expect(flat.heldRadius == 16)
+        #expect(flat.heldRadius == 100)
         for distance: CGFloat in [0, 200, 400, 800] {
             #expect(flat.radius(atFoldDistance: distance) == flat.heldRadius)
         }

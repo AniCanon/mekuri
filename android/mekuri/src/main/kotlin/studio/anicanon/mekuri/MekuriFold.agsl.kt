@@ -3,9 +3,9 @@ package studio.anicanon.mekuri
 /**
  * The fold shader, a term-for-term transliteration of `MekuriFold.metal`.
  *
- * Frozen text. New behaviour is a transformation of the uniforms, never a new
- * or reassociated term here, and no branch shares a converted value with
- * another. Every departure from the Metal source is listed below and the list
+ * Frozen text. A new term lands in `MekuriFold.metal` first and is copied here
+ * term for term; nothing is reassociated, and no branch shares a converted value
+ * with another. Every departure from the Metal source is listed below and the list
  * must stay complete:
  *
  * 1. `layer.sample(p)` is `layer.eval(p)` — forced, AGSL's sampler API.
@@ -48,6 +48,12 @@ const half4 mekuriClear = half4(0.0);
 half mekuriBackShade(float nx, float nz, float dim) {
     float facing = saturate(nx * mekuriLight.x + nz * mekuriLight.y);
     return half(mix(dim, 1.0, facing * facing * facing));
+}
+
+// Shade of a front-face pixel `u` radii along the roll, from 1 where the
+// sheet leaves the page to `dim` at the crest.
+half mekuriFrontShade(float u, float dim) {
+    return half(mix(1.0, dim, 1.0 - sqrt(saturate(1.0 - u * u))));
 }
 
 // Shadow the lifted sheet casts on the page beneath, `d` past the crease.
@@ -100,7 +106,9 @@ half4 main(float2 position) {
             if (face == mekuriFaceShadow) {
                 return mekuriClear;
             }
-            return layer.eval(float2(axis + front, position.y));
+            half4 color = layer.eval(float2(axis + front, position.y));
+            half shade = mekuriFrontShade(d / radius, backFaceDim);
+            return half4(color.rgb * shade, color.a);
         }
         if (face == mekuriFaceFront) {
             return mekuriClear;

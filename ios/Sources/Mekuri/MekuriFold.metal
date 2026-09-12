@@ -13,6 +13,12 @@ static half mekuriBackShade(float nx, float nz, float dim) {
     return half(mix(dim, 1.0, facing * facing * facing));
 }
 
+// Shade of a front-face pixel `u` radii along the roll, from 1 where the
+// sheet leaves the page to `dim` at the crest.
+static half mekuriFrontShade(float u, float dim) {
+    return half(mix(1.0, dim, 1.0 - sqrt(saturate(1.0 - u * u))));
+}
+
 // Shadow the lifted sheet casts on the page beneath, `d` past the crease.
 // Darkest where the roll is tightest; reaches two radii past the rim.
 static half4 mekuriContactShadow(float d, float radius, float heldRadius, float opacity) {
@@ -93,7 +99,9 @@ constant half4 mekuriClear = half4(0.0h);
             if (face == mekuriFaceShadow) {
                 return mekuriClear;
             }
-            return layer.sample(float2(axis + front, position.y));
+            half4 color = layer.sample(float2(axis + front, position.y));
+            half shade = mekuriFrontShade(d / radius, backFaceDim);
+            return half4(color.rgb * shade, color.a);
         }
         if (face == mekuriFaceFront) {
             return mekuriClear;

@@ -74,20 +74,20 @@ class MekuriParityTest {
 
     @Test
     fun `the radius profile matches the swift implementation at both ends`() {
-        assertEquals(16f, geometry.heldRadius, TOLERANCE)
-        assertEquals(0.04f, geometry.radiusSlope, TOLERANCE)
-        assertEquals(16f, geometry.radius(0f), TOLERANCE)
-        assertEquals(32f, geometry.radius(400f), TOLERANCE)
-        assertEquals(48f, geometry.radius(800f), TOLERANCE)
+        assertEquals(100f, geometry.heldRadius, TOLERANCE)
+        assertEquals(0.0625f, geometry.radiusSlope, TOLERANCE)
+        assertEquals(100f, geometry.radius(0f), TOLERANCE)
+        assertEquals(125f, geometry.radius(400f), TOLERANCE)
+        assertEquals(150f, geometry.radius(800f), TOLERANCE)
         assertEquals(0f, straightCrease.radiusSlope, TOLERANCE)
-        assertEquals(16f, straightCrease.radius(800f), TOLERANCE)
+        assertEquals(100f, straightCrease.radius(800f), TOLERANCE)
     }
 
     @Test
     fun `the landing scale matches the swift implementation`() {
         assertEquals(1f, geometry.landingRadiusScale(0f), TOLERANCE)
-        assertEquals(1f, geometry.landingRadiusScale(0.88f), TOLERANCE)
-        assertEquals(0.5f, geometry.landingRadiusScale(0.94f), TOLERANCE)
+        assertEquals(1f, geometry.landingRadiusScale(0.7f), TOLERANCE)
+        assertEquals(0.5f, geometry.landingRadiusScale(0.85f), TOLERANCE)
         assertEquals(0.01f, geometry.landingRadiusScale(1f), TOLERANCE)
     }
 

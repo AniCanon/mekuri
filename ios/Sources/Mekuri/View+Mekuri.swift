@@ -18,7 +18,7 @@ public extension View {
         self.environment(\.mekuriOnCenterTap, action)
     }
 
-    /// Cylinder radius of the fold as a ratio of the page width. Defaults to 0.04.
+    /// Cylinder radius of the fold as a ratio of the page width. Defaults to 0.25.
     func mekuriFoldRadius(_ ratio: CGFloat) -> some View {
         self.environment(\.mekuriFoldRadius, ratio)
     }
@@ -48,7 +48,7 @@ public extension View {
     }
 
     /// Animation used to settle a released turn. Defaults to nil, which uses
-    /// the package spring with response 0.35 and damping fraction 0.86.
+    /// the package curve: 0.42 s, slow off the grab and quick into the landing.
     func mekuriSettleAnimation(_ animation: Animation?) -> some View {
         self.environment(\.mekuriSettleAnimation, animation)
     }

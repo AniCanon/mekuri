@@ -25,9 +25,9 @@ internal data class MekuriFoldUniforms(
 
         /**
          * [hinge] is the distance from the layer's leading edge to the spine a
-         * leaf turns on, null for a page folded across the whole layer. A
-         * hinged leaf's roll and corner shear flatten as it lands so the crease
-         * meets the hinge; unhinged arguments reach the shader untouched.
+         * leaf turns on, null for a page folded across the whole layer. Every
+         * roll and corner shear flatten as the turn lands, so no roll stands at
+         * the leading edge and a leaf's crease meets the hinge.
          */
         fun of(
             size: Size,
@@ -46,7 +46,7 @@ internal data class MekuriFoldUniforms(
             }
             val geometry = MekuriFoldGeometry(size.width - (hinge ?: 0f), configuration)
             val shadow = geometry.creaseShadowRect(progress, size)
-            val landing = if (hinge == null) 1f else geometry.landingRadiusScale(progress)
+            val landing = geometry.landingRadiusScale(progress)
             return MekuriFoldUniforms(
                 size = size,
                 progress = sweep?.shaderProgress ?: progress,

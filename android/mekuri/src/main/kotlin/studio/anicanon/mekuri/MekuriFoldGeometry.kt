@@ -51,8 +51,8 @@ internal data class MekuriFoldGeometry(
     fun isFlat(progress: Float): Boolean = progress <= 0f
 
     /**
-     * Scale on the cylinder radius and corner shear of a hinged leaf: 1 until
-     * the landing begins, [LandingFloor] at progress 1.
+     * Scale on the cylinder radius and corner shear: 1 until the landing
+     * begins, [LandingFloor] at progress 1.
      */
     fun landingRadiusScale(progress: Float): Float {
         val remaining = 1 - clamped(progress)
@@ -74,8 +74,8 @@ internal data class MekuriFoldGeometry(
     private fun clamped(progress: Float): Float = min(max(progress, 0f), 1f)
 
     companion object {
-        /** Share of the turn over which a hinged leaf's roll flattens. */
-        const val LandingFraction = 0.12f
+        /** Share of the turn over which the roll flattens. */
+        const val LandingFraction = 0.3f
 
         /** Smallest radius scale; the contact shadow divides by the radius. */
         const val LandingFloor = 0.01f

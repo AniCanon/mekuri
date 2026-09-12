@@ -1,7 +1,8 @@
 package studio.anicanon.mekuri
 
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.tween
 
 /**
  * Fold and gesture tuning shared by every page turn.
@@ -96,8 +97,8 @@ public class MekuriConfiguration internal constructor(
     }
 
     internal companion object {
-        private const val DEFAULT_CYLINDER_RADIUS_RATIO = 0.04f
-        private const val DEFAULT_RADIUS_OPENING = 1.0f
+        private const val DEFAULT_CYLINDER_RADIUS_RATIO = 0.25f
+        private const val DEFAULT_RADIUS_OPENING = 0.25f
         private const val DEFAULT_CREASE_BOW = 0.35f
         private const val DEFAULT_CORNER_SHEAR = 0.10f
         private const val DEFAULT_BACK_FACE_DIM = 0.86f
@@ -107,10 +108,10 @@ public class MekuriConfiguration internal constructor(
         private const val DEFAULT_FLING_VELOCITY = 600f
         private const val DEFAULT_TAP_ZONE_RATIO = 0.25f
 
-        /** Not held in numeric parity with the iOS settle spring. */
-        internal val DefaultSettleAnimation: AnimationSpec<Float> = spring(
-            dampingRatio = 0.86f,
-            stiffness = 320f,
+        /** Matches the iOS settle curve by value; not asserted in parity. */
+        internal val DefaultSettleAnimation: AnimationSpec<Float> = tween(
+            durationMillis = 420,
+            easing = CubicBezierEasing(0.35f, 0.1f, 0.75f, 0.85f),
         )
 
         internal val Default: MekuriConfiguration = MekuriConfiguration()

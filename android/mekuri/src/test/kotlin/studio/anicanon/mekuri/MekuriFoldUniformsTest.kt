@@ -13,8 +13,8 @@ class MekuriFoldUniformsTest {
     fun `an unhinged pass reaches the shader untouched`() {
         val uniforms = MekuriFoldUniforms.of(pageSize, 0.4f, configuration, MekuriFace.Whole)
         assertEquals(0.4f, uniforms.progress, TOLERANCE)
-        assertEquals(16f, uniforms.heldRadius, TOLERANCE)
-        assertEquals(0.04f, uniforms.radiusSlope, TOLERANCE)
+        assertEquals(100f, uniforms.heldRadius, TOLERANCE)
+        assertEquals(0.0625f, uniforms.radiusSlope, TOLERANCE)
         assertEquals(0.10f, uniforms.shear, TOLERANCE)
         assertEquals(0.35f, uniforms.bow, TOLERANCE)
         assertEquals(0.86f, uniforms.backFaceDim, TOLERANCE)
@@ -46,7 +46,7 @@ class MekuriFoldUniformsTest {
         )
         assertEquals(400f, MekuriFoldUniforms.hinge(leafSize), TOLERANCE)
         assertEquals(0.2f, uniforms.progress, TOLERANCE)
-        assertEquals(16f, uniforms.heldRadius, TOLERANCE)
+        assertEquals(100f, uniforms.heldRadius, TOLERANCE)
         assertEquals(40f, uniforms.shadowWidth, TOLERANCE)
         assertEquals(0.35f * 0.6f / 0.8f, uniforms.bow, TOLERANCE)
     }
@@ -60,16 +60,17 @@ class MekuriFoldUniformsTest {
             MekuriFace.Back,
             MekuriFoldUniforms.hinge(leafSize),
         )
-        assertEquals(16f, landed(0.5f).heldRadius, TOLERANCE)
+        assertEquals(100f, landed(0.5f).heldRadius, TOLERANCE)
         assertEquals(0.10f, landed(0.5f).shear, TOLERANCE)
-        assertEquals(16f * 0.5f, landed(0.94f).heldRadius, TOLERANCE)
-        assertEquals(16f * 0.01f, landed(1f).heldRadius, TOLERANCE)
+        assertEquals(100f * 0.5f, landed(0.85f).heldRadius, TOLERANCE)
+        assertEquals(100f * 0.01f, landed(1f).heldRadius, TOLERANCE)
         assertEquals(0.10f * 0.01f, landed(1f).shear, TOLERANCE)
     }
 
     @Test
-    fun `a whole pass never lands`() {
-        assertEquals(16f, MekuriFoldUniforms.of(pageSize, 1f, configuration, MekuriFace.Whole).heldRadius, TOLERANCE)
+    fun `a whole pass flattens its roll over the landing too`() {
+        assertEquals(100f, MekuriFoldUniforms.of(pageSize, 0.5f, configuration, MekuriFace.Whole).heldRadius, TOLERANCE)
+        assertEquals(1f, MekuriFoldUniforms.of(pageSize, 1f, configuration, MekuriFace.Whole).heldRadius, TOLERANCE)
     }
 
     private companion object {
