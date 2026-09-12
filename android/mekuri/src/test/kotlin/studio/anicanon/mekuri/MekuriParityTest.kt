@@ -397,6 +397,21 @@ class MekuriParityTest {
     }
 
     @Test
+    fun `the drag reach matches the swift implementation`() {
+        val single = MekuriArrangement.Single(pageCount = 6)
+        val spread = MekuriArrangement.Spread(
+            MekuriSpreadLayout(pageCount = 6, coverStandsAlone = true),
+            androidx.compose.ui.geometry.Size(556f, 834f),
+        )
+        assertEquals(804f, single.turnWidth(402f), TOLERANCE)
+        assertEquals(0.5f, single.dragReach, TOLERANCE)
+        assertEquals(0.35f, single.releaseProgress(0.175f), TOLERANCE)
+        assertEquals(1112f, spread.turnWidth(1194f), TOLERANCE)
+        assertEquals(1f, spread.dragReach, TOLERANCE)
+        assertEquals(0.35f, spread.releaseProgress(0.35f), TOLERANCE)
+    }
+
+    @Test
     fun `the release decision matches the swift implementation`() {
         val configuration = MekuriConfiguration.Default
         assertEquals(MekuriTurnDecision.Commit, MekuriTurnDecision.resolve(0.35f, 0f, configuration))

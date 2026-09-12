@@ -23,12 +23,28 @@ enum MekuriArrangement: Equatable {
         )
     }
 
-    /// Distance a drag travels to complete a turn: the width of what turns.
+    /// Distance the free edge travels across a whole turn, so the edge stays
+    /// under the finger. A single page's edge crosses the container and as far
+    /// again past the spine, beyond any drag; a spread's crosses both slots.
     func turnWidth(containerWidth: CGFloat) -> CGFloat {
         switch self {
-        case .single: containerWidth
+        case .single: containerWidth * 2
         case .spread(_, let pageSize): pageSize.width * 2
         }
+    }
+
+    /// Share of a turn a drag across the whole page or spread reaches.
+    var dragReach: CGFloat {
+        switch self {
+        case .single: 0.5
+        case .spread: 1
+        }
+    }
+
+    /// Progress as a release is judged: the share of the travel a drag can
+    /// reach, so the snap threshold means the same distance in either mode.
+    func releaseProgress(_ progress: CGFloat) -> CGFloat {
+        progress / self.dragReach
     }
 
     func turnState(id: Int, turn: MekuriTurn, from page: Int) -> MekuriTurnState {

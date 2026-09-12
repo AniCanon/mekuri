@@ -363,6 +363,20 @@ import Testing
         #expect(MekuriDrag.liftsFromBottom(y: 800, height: 800))
     }
 
+    @Test func theDragReachMatchesTheKotlinImplementation() {
+        let single = MekuriArrangement.single(pageCount: 6)
+        let spread = MekuriArrangement.spread(
+            MekuriSpreadLayout(pageCount: 6, coverStandsAlone: true),
+            pageSize: CGSize(width: 556, height: 834)
+        )
+        #expect(self.close(single.turnWidth(containerWidth: 402), 804))
+        #expect(self.close(single.dragReach, 0.5))
+        #expect(self.close(single.releaseProgress(0.175), 0.35))
+        #expect(self.close(spread.turnWidth(containerWidth: 1194), 1112))
+        #expect(self.close(spread.dragReach, 1))
+        #expect(self.close(spread.releaseProgress(0.35), 0.35))
+    }
+
     @Test func theReleaseDecisionMatchesTheKotlinImplementation() {
         let configuration = MekuriConfiguration.default
         #expect(MekuriTurnDecision.resolve(progress: 0.35, velocity: 0, configuration: configuration) == .commit)

@@ -21,12 +21,14 @@ class MekuriArrangementTest {
     fun `an arrangement is single until two pages fit`() {
         val phone = this.resolve(Size(402f, 874f))
         assertEquals(MekuriArrangement.Single(pageCount = 6), phone)
-        assertEquals(402f, phone.turnWidth(402f))
+        assertEquals(804f, phone.turnWidth(402f))
+        assertEquals(0.5f, phone.dragReach)
         assertEquals(MekuriSpreadPages(leading = null, trailing = 3), phone.slots(3))
 
         val pad = this.resolve(Size(1194f, 834f))
         assertEquals(MekuriArrangement.Spread(this.coverAlone, Size(556f, 834f)), pad)
         assertEquals(1112f, pad.turnWidth(1194f))
+        assertEquals(1f, pad.dragReach)
         assertEquals(MekuriSpreadPages(leading = 3, trailing = 4), pad.slots(4))
         assertEquals(MekuriTransition.None, pad.transition(3, 4))
     }

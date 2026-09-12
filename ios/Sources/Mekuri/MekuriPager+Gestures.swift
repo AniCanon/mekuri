@@ -1,7 +1,7 @@
 import SwiftUI
 
 extension MekuriPager {
-    /// `width` is the distance a drag travels to complete a turn; `height` is
+    /// `width` is the distance the free edge travels across a whole turn; `height` is
     /// the container's, against which the grab picks the lifting corner.
     func dragGesture(width: CGFloat, height: CGFloat, arrangement: MekuriArrangement) -> some Gesture {
         DragGesture(minimumDistance: MekuriDrag.minimumDistance, coordinateSpace: .local)
@@ -108,7 +108,7 @@ extension MekuriPager {
         }
         let axis = MekuriDrag.axis(turn: turn.turn, direction: self.direction)
         let decision = MekuriTurnDecision.resolve(
-            progress: turn.progress,
+            progress: arrangement.releaseProgress(turn.progress),
             velocity: MekuriDrag.projectedVelocity(velocity, axis: axis),
             configuration: self.configuration
         )
@@ -122,7 +122,7 @@ extension MekuriPager {
         let axis = MekuriDrag.axis(turn: direction, direction: self.direction)
         let progress = MekuriDrag.progress(start: 0, translation: translation.width, width: width, axis: axis, isBlocked: false)
         let decision = MekuriTurnDecision.resolve(
-            progress: progress,
+            progress: arrangement.releaseProgress(progress),
             velocity: MekuriDrag.projectedVelocity(velocity, axis: axis),
             configuration: self.configuration
         )

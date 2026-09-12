@@ -166,12 +166,14 @@ extension MekuriPagerTests {
         let aspect: CGFloat = 2.0 / 3.0
         let phone = MekuriArrangement.resolve(containerSize: CGSize(width: 402, height: 874), pageCount: 6, spread: .automatic, coverStandsAlone: true, pageAspectRatio: aspect)
         #expect(phone == .single(pageCount: 6))
-        #expect(phone.turnWidth(containerWidth: 402) == 402)
+        #expect(phone.turnWidth(containerWidth: 402) == 804)
+        #expect(phone.dragReach == 0.5)
         #expect(phone.slots(showing: 3) == (nil, 3))
 
         let pad = MekuriArrangement.resolve(containerSize: CGSize(width: 1194, height: 834), pageCount: 6, spread: .automatic, coverStandsAlone: true, pageAspectRatio: aspect)
         #expect(pad == .spread(MekuriSpreadLayout(pageCount: 6, coverStandsAlone: true), pageSize: CGSize(width: 556, height: 834)))
         #expect(pad.turnWidth(containerWidth: 1194) == 1112)
+        #expect(pad.dragReach == 1)
         #expect(pad.slots(showing: 4) == (3, 4))
         #expect(pad.transition(from: 3, to: 4) == .none)
     }

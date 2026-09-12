@@ -62,7 +62,7 @@ internal class MekuriPagerController(
 
     val settledPage: Int get() = this.state.currentPage
 
-    /** Distance a drag travels to complete a turn, in dp. */
+    /** Distance the free edge travels across a whole turn, in dp. */
     val turnWidth: Float get() = this.arrangement.turnWidth(this.containerSize.width)
 
     fun foldProgress(): Float = this.turn?.turn?.fold(this.progress) ?: 0f
@@ -208,7 +208,7 @@ internal class MekuriPagerController(
         val axis = MekuriDrag.axis(current.turn, this.direction)
         this.settle(
             MekuriTurnDecision.resolve(
-                progress = this.progress,
+                progress = this.arrangement.releaseProgress(this.progress),
                 velocity = MekuriDrag.projectedVelocity(velocity, axis),
                 configuration = this.configuration,
             ),
@@ -225,7 +225,9 @@ internal class MekuriPagerController(
         val target = this.arrangement.turnState(0, turn, this.settledPage).targetIndex ?: return
         val axis = MekuriDrag.axis(turn, this.direction)
         val decision = MekuriTurnDecision.resolve(
-            progress = MekuriDrag.progress(0f, translation.x, this.turnWidth, axis, isBlocked = false),
+            progress = this.arrangement.releaseProgress(
+                MekuriDrag.progress(0f, translation.x, this.turnWidth, axis, isBlocked = false),
+            ),
             velocity = MekuriDrag.projectedVelocity(velocity, axis),
             configuration = this.configuration,
         )
