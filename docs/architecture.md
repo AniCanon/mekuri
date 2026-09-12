@@ -36,9 +36,12 @@ flowchart TB
 ## The fold model
 
 The sheet bends around a cylinder whose axis is parallel to the spine and
-sweeps from the free edge (progress 0) to the spine (progress 1). Fold
-distance is measured from the held end at the bottom of the page toward the
-free corner at the top. Three things shape the crease:
+sweeps from the free edge (progress 0) to the spine (progress 1). In the
+shader's own space, fold distance is measured from the held end at the bottom
+of the page toward the free corner at the top. A turn that begins with a grab
+in the lower half of the container mirrors the layer vertically on both sides
+of the effect, exactly as a right-to-left turn mirrors it horizontally, so the
+bottom corner lifts and neither shader changes. Three things shape the crease:
 
 - **Corner shear** moves the fold line horizontally per unit of vertical
   distance from the page centre, so the corner lifts before the edge. It is a
@@ -86,6 +89,13 @@ a backward turn is the previous spread's forward leaf unfolding, so the fold
 renderer reads `1 − progress` for it and the face roles swap. Single-page mode
 is the degenerate spread: no leading slot, no back face, and the leaf's
 reverse is its own front mirrored.
+
+A drag is divided by the distance the free edge travels across a whole turn,
+so the edge stays under the finger. For a spread that is both slots. For a
+single page it is twice the container, because the edge crosses the page and
+as far again past the spine; a drag across the screen reaches half a turn and
+the settle finishes it. The release is judged on progress divided by that
+reach, so the snap threshold is the same distance in both modes.
 
 Phases: `dragging` follows every sample; `armed` inserts the leaf at rest and
 starts the settle the moment the layer appears; `settling` animates progress
