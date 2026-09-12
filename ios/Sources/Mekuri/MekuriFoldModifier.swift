@@ -20,7 +20,8 @@ nonisolated struct MekuriFoldModifier: ViewModifier, Animatable {
         MekuriFoldedPage(
             progress: self.turn.foldProgress,
             direction: self.direction,
-            configuration: self.configuration
+            configuration: self.configuration,
+            liftsFromBottom: self.turn.liftsFromBottom
         ) {
             content
         }

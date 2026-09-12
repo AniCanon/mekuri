@@ -116,10 +116,14 @@ public struct MekuriPager<Content: View>: View {
             self.layers(size: proxy.size, arrangement: arrangement)
                 .contentShape(Rectangle())
                 .gesture(
-                    self.dragGesture(width: arrangement.turnWidth(containerWidth: proxy.size.width), arrangement: arrangement),
+                    self.dragGesture(
+                        width: arrangement.turnWidth(containerWidth: proxy.size.width),
+                        height: proxy.size.height,
+                        arrangement: arrangement
+                    ),
                     including: self.pagingEnabled ? .all : .subviews
                 )
-                .gesture(self.tapGesture(width: proxy.size.width, arrangement: arrangement))
+                .gesture(self.tapGesture(width: proxy.size.width, height: proxy.size.height, arrangement: arrangement))
                 .accessibilityElement(children: .contain)
                 .accessibilityValue(Text("Page \(self.settledPage + 1) of \(self.pageCount)"))
                 .accessibilityAdjustableAction { adjustment in

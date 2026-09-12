@@ -33,6 +33,9 @@ struct MekuriTurnState: Equatable {
     /// Progress the current drag started from; non-zero after a takeover.
     var startProgress: CGFloat = 0
     var phase: Phase = .dragging
+    /// The bottom corner lifts instead of the top. Decided when the turn
+    /// begins; a takeover keeps it.
+    var liftsFromBottom = false
 
     var isBlocked: Bool { self.targetIndex == nil }
 

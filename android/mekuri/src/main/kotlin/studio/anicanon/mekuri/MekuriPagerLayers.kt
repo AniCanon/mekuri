@@ -40,6 +40,7 @@ internal fun MekuriSingleLayers(
                     direction = controller.direction,
                     configuration = controller.configuration,
                     modifier = Modifier.fillMaxSize(),
+                    liftsFromBottom = turn.liftsFromBottom,
                 ) {
                     MekuriPage(turning, MekuriPageMode.Turning, controller.arrangement, content)
                 }
@@ -84,12 +85,14 @@ internal fun MekuriSpreadLayers(
                         direction = controller.direction,
                         configuration = controller.configuration,
                         modifier = Modifier.fillMaxSize(),
+                        liftsFromBottom = turn.liftsFromBottom,
                     )
                     MekuriFoldedLeaf(
                         progress = progress,
                         direction = controller.direction,
                         configuration = controller.configuration,
                         modifier = Modifier.fillMaxSize(),
+                        liftsFromBottom = turn.liftsFromBottom,
                         back = { MekuriFace(turn.leafBack, controller.arrangement, content) },
                     ) {
                         MekuriFace(turn.leafFront, controller.arrangement, content)

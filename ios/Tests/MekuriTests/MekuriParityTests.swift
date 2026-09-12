@@ -322,6 +322,12 @@ import Testing
         #expect(mirrored.isMirrored)
         #expect(self.close(mirrored.shaderProgress, 0.4))
         #expect(self.close(mirrored.mirrorScale, -1))
+        #expect(self.close(mirrored.verticalScale, 1))
+
+        let bottom = MekuriFoldPass(direction: .rightToLeft, progress: 0.4, liftsFromBottom: true)
+        #expect(self.close(bottom.shaderProgress, 0.4))
+        #expect(self.close(bottom.mirrorScale, -1))
+        #expect(self.close(bottom.verticalScale, -1))
     }
 
     // MARK: - The drag and the release
@@ -347,6 +353,14 @@ import Testing
             0
         ))
         #expect(self.close(MekuriDrag.projectedVelocity(-900, axis: -1), 900))
+    }
+
+    @Test func theLiftingCornerMatchesTheKotlinImplementation() {
+        #expect(!MekuriDrag.liftsFromBottom(y: 0, height: 800))
+        #expect(!MekuriDrag.liftsFromBottom(y: 399, height: 800))
+        #expect(!MekuriDrag.liftsFromBottom(y: 400, height: 800))
+        #expect(MekuriDrag.liftsFromBottom(y: 401, height: 800))
+        #expect(MekuriDrag.liftsFromBottom(y: 800, height: 800))
     }
 
     @Test func theReleaseDecisionMatchesTheKotlinImplementation() {

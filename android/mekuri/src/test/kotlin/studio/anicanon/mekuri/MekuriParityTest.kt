@@ -337,6 +337,12 @@ class MekuriParityTest {
         assertTrue(mirrored.isMirrored)
         assertEquals(0.4f, mirrored.shaderProgress, TOLERANCE)
         assertEquals(-1f, mirrored.mirrorScale, TOLERANCE)
+        assertEquals(1f, mirrored.verticalScale, TOLERANCE)
+
+        val bottom = MekuriFoldPass(MekuriDirection.RightToLeft, 0.4f, liftsFromBottom = true)
+        assertEquals(0.4f, bottom.shaderProgress, TOLERANCE)
+        assertEquals(-1f, bottom.mirrorScale, TOLERANCE)
+        assertEquals(-1f, bottom.verticalScale, TOLERANCE)
     }
 
     // The drag and the release
@@ -379,6 +385,15 @@ class MekuriParityTest {
             TOLERANCE,
         )
         assertEquals(900f, MekuriDrag.projectedVelocity(-900f, -1f), TOLERANCE)
+    }
+
+    @Test
+    fun `the lifting corner matches the swift implementation`() {
+        assertFalse(MekuriDrag.liftsFromBottom(0f, 800f))
+        assertFalse(MekuriDrag.liftsFromBottom(399f, 800f))
+        assertFalse(MekuriDrag.liftsFromBottom(400f, 800f))
+        assertTrue(MekuriDrag.liftsFromBottom(401f, 800f))
+        assertTrue(MekuriDrag.liftsFromBottom(800f, 800f))
     }
 
     @Test

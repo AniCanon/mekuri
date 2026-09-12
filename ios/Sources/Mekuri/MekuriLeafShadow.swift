@@ -8,17 +8,19 @@ struct MekuriLeafShadow: View {
     private let progress: CGFloat
     private let direction: MekuriDirection
     private let configuration: MekuriConfiguration
+    private let liftsFromBottom: Bool
 
-    init(progress: CGFloat, direction: MekuriDirection, configuration: MekuriConfiguration) {
+    init(progress: CGFloat, direction: MekuriDirection, configuration: MekuriConfiguration, liftsFromBottom: Bool = false) {
         self.progress = progress
         self.direction = direction
         self.configuration = configuration
+        self.liftsFromBottom = liftsFromBottom
     }
 
     var isFolded: Bool { self.progress > 0 }
 
     var foldPass: MekuriFoldPass {
-        MekuriFoldPass(direction: self.direction, progress: self.progress)
+        MekuriFoldPass(direction: self.direction, progress: self.progress, liftsFromBottom: self.liftsFromBottom)
     }
 
     var body: some View {
@@ -36,7 +38,7 @@ struct MekuriLeafShadow: View {
         return Color.black
             .compositingGroup()
             .layerEffect(self.shadow(size: size, pass: pass), maxSampleOffset: .zero)
-            .scaleEffect(x: pass.mirrorScale, y: 1)
+            .scaleEffect(x: pass.mirrorScale, y: pass.verticalScale)
     }
 
     private func shadow(size: CGSize, pass: MekuriFoldPass) -> Shader {

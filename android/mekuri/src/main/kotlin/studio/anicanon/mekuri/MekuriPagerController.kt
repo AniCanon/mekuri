@@ -69,7 +69,8 @@ internal class MekuriPagerController(
 
     // Taps and programmatic turns
 
-    fun tapped(x: Float, onCenterTap: (() -> Unit)?, pagingEnabled: Boolean) {
+    /** [x] and [y] are in dp; a tap in the lower half lifts the bottom corner. */
+    fun tapped(x: Float, y: Float, onCenterTap: (() -> Unit)?, pagingEnabled: Boolean) {
         val zone = MekuriZone.resolve(x, this.containerSize.width, this.configuration)
         val turn = MekuriTurn.from(zone, this.direction)
         if (turn == null) {
@@ -77,13 +78,13 @@ internal class MekuriPagerController(
             return
         }
         if (!pagingEnabled) return
-        this.perform(turn)
+        this.perform(turn, MekuriDrag.liftsFromBottom(y, this.containerSize.height))
     }
 
     /** Does nothing at the ends or while another turn is in flight. */
-    fun perform(turn: MekuriTurn) {
+    fun perform(turn: MekuriTurn, liftsFromBottom: Boolean = false) {
         if (this.turn != null) return
-        val begun = this.begin(turn)
+        val begun = this.begin(turn).copy(liftsFromBottom = liftsFromBottom)
         val target = begun.targetIndex ?: return
         if (this.reducesMotion) {
             this.state.currentPage = target
@@ -153,9 +154,10 @@ internal class MekuriPagerController(
 
     /**
      * A drag that is not horizontally dominant neither locks nor takes over a
-     * turn; a locked turn follows every later sample. `translation` is in dp.
+     * turn; a locked turn follows every later sample. `translation` and
+     * [grabY], the height the drag started at, are in dp.
      */
-    fun dragChanged(translation: Offset) {
+    fun dragChanged(translation: Offset, grabY: Float) {
         if (this.ignoresCurrentDrag || this.reducesMotion) return
         val width = this.turnWidth
         val current = this.turn
@@ -176,6 +178,7 @@ internal class MekuriPagerController(
         }
         val turn = MekuriDrag.turn(translation, this.direction) ?: return
         val begun = this.begin(turn)
+            .copy(liftsFromBottom = MekuriDrag.liftsFromBottom(grabY, this.containerSize.height))
         if (!begun.hasLeaf) return
         this.turn = begun
         this.progress = MekuriDrag.progress(

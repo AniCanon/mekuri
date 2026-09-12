@@ -25,12 +25,14 @@ nonisolated struct MekuriLeafModifier<Back: View>: ViewModifier, Animatable {
             MekuriLeafShadow(
                 progress: self.turn.foldProgress,
                 direction: self.direction,
-                configuration: self.configuration
+                configuration: self.configuration,
+                liftsFromBottom: self.turn.liftsFromBottom
             )
             MekuriFoldedLeaf(
                 progress: self.turn.foldProgress,
                 direction: self.direction,
-                configuration: self.configuration
+                configuration: self.configuration,
+                liftsFromBottom: self.turn.liftsFromBottom
             ) {
                 content
             } back: {

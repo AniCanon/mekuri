@@ -29,6 +29,19 @@ class MekuriFoldPassTest {
         assertEquals(-1f, MekuriFoldPass.mirrorScale(MekuriDirection.RightToLeft), TOLERANCE)
     }
 
+    @Test
+    fun `a bottom lift flips the layer vertically in either direction`() {
+        for (direction in MekuriDirection.entries) {
+            val pass = MekuriFoldPass(direction, 0.4f, liftsFromBottom = true)
+            assertEquals(-1f, pass.verticalScale, TOLERANCE)
+            assertEquals(MekuriFoldPass.mirrorScale(direction), pass.mirrorScale, TOLERANCE)
+            assertEquals(0.4f, pass.shaderProgress, TOLERANCE)
+        }
+        assertEquals(1f, MekuriFoldPass(MekuriDirection.LeftToRight, 0.4f).verticalScale, TOLERANCE)
+        assertEquals(1f, MekuriFoldPass.verticalScale(liftsFromBottom = false), TOLERANCE)
+        assertEquals(-1f, MekuriFoldPass.verticalScale(liftsFromBottom = true), TOLERANCE)
+    }
+
     private companion object {
         const val TOLERANCE = 1e-3f
     }

@@ -11,6 +11,7 @@ struct MekuriFoldedLeaf<Front: View, Back: View>: View {
     private let progress: CGFloat
     private let direction: MekuriDirection
     private let configuration: MekuriConfiguration
+    private let liftsFromBottom: Bool
     private let front: () -> Front
     private let back: (() -> Back)?
 
@@ -18,12 +19,14 @@ struct MekuriFoldedLeaf<Front: View, Back: View>: View {
         progress: CGFloat,
         direction: MekuriDirection,
         configuration: MekuriConfiguration,
+        liftsFromBottom: Bool = false,
         @ViewBuilder front: @escaping () -> Front,
         @ViewBuilder back: @escaping () -> Back
     ) {
         self.progress = progress
         self.direction = direction
         self.configuration = configuration
+        self.liftsFromBottom = liftsFromBottom
         self.front = front
         self.back = back
     }
@@ -32,11 +35,13 @@ struct MekuriFoldedLeaf<Front: View, Back: View>: View {
         progress: CGFloat,
         direction: MekuriDirection,
         configuration: MekuriConfiguration,
+        liftsFromBottom: Bool = false,
         @ViewBuilder front: @escaping () -> Front
     ) where Back == EmptyView {
         self.progress = progress
         self.direction = direction
         self.configuration = configuration
+        self.liftsFromBottom = liftsFromBottom
         self.front = front
         self.back = nil
     }
@@ -46,7 +51,7 @@ struct MekuriFoldedLeaf<Front: View, Back: View>: View {
     var isFolded: Bool { self.progress > 0 }
 
     var foldPass: MekuriFoldPass {
-        MekuriFoldPass(direction: self.direction, progress: self.progress)
+        MekuriFoldPass(direction: self.direction, progress: self.progress, liftsFromBottom: self.liftsFromBottom)
     }
 
     var body: some View {
@@ -59,7 +64,12 @@ struct MekuriFoldedLeaf<Front: View, Back: View>: View {
                 }
             }
         } else {
-            MekuriFoldedPage(progress: self.progress, direction: self.direction, configuration: self.configuration) {
+            MekuriFoldedPage(
+                progress: self.progress,
+                direction: self.direction,
+                configuration: self.configuration,
+                liftsFromBottom: self.liftsFromBottom
+            ) {
                 self.front()
             }
         }
@@ -81,10 +91,10 @@ struct MekuriFoldedLeaf<Front: View, Back: View>: View {
 
     private func facePass(_ layer: some View, size: CGSize, pass: MekuriFoldPass, face: MekuriFace) -> some View {
         layer
-            .scaleEffect(x: pass.mirrorScale, y: 1)
+            .scaleEffect(x: pass.mirrorScale, y: pass.verticalScale)
             .compositingGroup()
             .layerEffect(self.fold(size: size, pass: pass, face: face), maxSampleOffset: size)
-            .scaleEffect(x: pass.mirrorScale, y: 1)
+            .scaleEffect(x: pass.mirrorScale, y: pass.verticalScale)
     }
 
     /// Geometry effects only: layout alignment would follow the layout

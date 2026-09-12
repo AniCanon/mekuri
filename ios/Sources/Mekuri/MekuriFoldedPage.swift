@@ -8,24 +8,27 @@ struct MekuriFoldedPage<Content: View>: View {
     private let progress: CGFloat
     private let direction: MekuriDirection
     private let configuration: MekuriConfiguration
+    private let liftsFromBottom: Bool
     private let content: () -> Content
 
     init(
         progress: CGFloat,
         direction: MekuriDirection,
         configuration: MekuriConfiguration,
+        liftsFromBottom: Bool = false,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.progress = progress
         self.direction = direction
         self.configuration = configuration
+        self.liftsFromBottom = liftsFromBottom
         self.content = content
     }
 
     var isFolded: Bool { self.progress > 0 }
 
     var foldPass: MekuriFoldPass {
-        MekuriFoldPass(direction: self.direction, progress: self.progress)
+        MekuriFoldPass(direction: self.direction, progress: self.progress, liftsFromBottom: self.liftsFromBottom)
     }
 
     var body: some View {
@@ -42,10 +45,10 @@ struct MekuriFoldedPage<Content: View>: View {
     private func foldedContent(size: CGSize) -> some View {
         let pass = self.foldPass
         self.content()
-            .scaleEffect(x: pass.mirrorScale, y: 1)
+            .scaleEffect(x: pass.mirrorScale, y: pass.verticalScale)
             .compositingGroup()
             .layerEffect(self.fold(size: size, progress: pass.shaderProgress), maxSampleOffset: size)
-            .scaleEffect(x: pass.mirrorScale, y: 1)
+            .scaleEffect(x: pass.mirrorScale, y: pass.verticalScale)
     }
 
     private func fold(size: CGSize, progress: CGFloat) -> Shader {

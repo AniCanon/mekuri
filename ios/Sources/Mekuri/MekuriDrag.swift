@@ -14,6 +14,12 @@ enum MekuriDrag {
     /// Travel fraction kept when the turn is blocked at the first or last page.
     static let blockedDamping: CGFloat = 1 / 3
 
+    /// Pages are centred vertically, so the container's midline is the
+    /// page's. A grab on the midline lifts the top corner.
+    static func liftsFromBottom(y: CGFloat, height: CGFloat) -> Bool {
+        y > height / 2
+    }
+
     static func isHorizontallyDominant(_ translation: CGSize) -> Bool {
         abs(translation.width) > abs(translation.height) * self.horizontalDominance
     }

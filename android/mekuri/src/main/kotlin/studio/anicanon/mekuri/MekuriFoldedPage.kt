@@ -19,6 +19,7 @@ internal fun MekuriFoldedPage(
     direction: MekuriDirection,
     configuration: MekuriConfiguration,
     modifier: Modifier = Modifier,
+    liftsFromBottom: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val isFolded by remember(progress) { derivedStateOf { progress() > 0f } }
@@ -31,6 +32,7 @@ internal fun MekuriFoldedPage(
                     .mekuriFold(
                         shader = shader,
                         mirrorScale = MekuriFoldPass.mirrorScale(direction),
+                        verticalScale = MekuriFoldPass.verticalScale(liftsFromBottom),
                         face = MekuriFace.Whole,
                         isHinged = false,
                         configuration = configuration,

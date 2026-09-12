@@ -19,6 +19,12 @@ internal object MekuriDrag {
     const val BlockedDamping: Float = 1f / 3f
 
     /**
+     * Pages are centred vertically, so the container's midline is the page's. A
+     * grab on the midline lifts the top corner.
+     */
+    fun liftsFromBottom(y: Float, height: Float): Boolean = y > height / 2f
+
+    /**
      * Re-evaluated on every sample until a turn locks; never latched.
      */
     fun isHorizontallyDominant(translation: Offset): Boolean =

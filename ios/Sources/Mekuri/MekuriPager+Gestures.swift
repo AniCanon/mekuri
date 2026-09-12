@@ -1,11 +1,17 @@
 import SwiftUI
 
 extension MekuriPager {
-    /// `width` is the distance a drag travels to complete a turn.
-    func dragGesture(width: CGFloat, arrangement: MekuriArrangement) -> some Gesture {
+    /// `width` is the distance a drag travels to complete a turn; `height` is
+    /// the container's, against which the grab picks the lifting corner.
+    func dragGesture(width: CGFloat, height: CGFloat, arrangement: MekuriArrangement) -> some Gesture {
         DragGesture(minimumDistance: MekuriDrag.minimumDistance, coordinateSpace: .local)
             .onChanged { value in
-                self.dragChanged(translation: value.translation, width: width, in: arrangement)
+                self.dragChanged(
+                    translation: value.translation,
+                    liftsFromBottom: MekuriDrag.liftsFromBottom(y: value.startLocation.y, height: height),
+                    width: width,
+                    in: arrangement
+                )
             }
             .onEnded { value in
                 self.dragEnded(
@@ -17,28 +23,34 @@ extension MekuriPager {
             }
     }
 
-    func tapGesture(width: CGFloat, arrangement: MekuriArrangement) -> some Gesture {
+    func tapGesture(width: CGFloat, height: CGFloat, arrangement: MekuriArrangement) -> some Gesture {
         SpatialTapGesture(coordinateSpace: .local)
             .onEnded { value in
-                self.tapped(x: value.location.x, width: width, in: arrangement)
+                self.tapped(
+                    x: value.location.x,
+                    liftsFromBottom: MekuriDrag.liftsFromBottom(y: value.location.y, height: height),
+                    width: width,
+                    in: arrangement
+                )
             }
     }
 
-    func tapped(x: CGFloat, width: CGFloat, in arrangement: MekuriArrangement) {
+    func tapped(x: CGFloat, liftsFromBottom: Bool, width: CGFloat, in arrangement: MekuriArrangement) {
         let zone = MekuriZone.resolve(x: x, width: width, configuration: self.configuration)
         guard let turn = MekuriTurn.from(zone: zone, direction: self.direction) else {
             self.onCenterTap?()
             return
         }
         guard self.pagingEnabled else { return }
-        self.perform(turn, in: arrangement)
+        self.perform(turn, liftsFromBottom: liftsFromBottom, in: arrangement)
     }
 
     /// Turns one page or spread with a full animated curl. Does nothing at
     /// the ends or while another turn is in flight.
-    func perform(_ turn: MekuriTurn, in arrangement: MekuriArrangement) {
+    func perform(_ turn: MekuriTurn, liftsFromBottom: Bool = false, in arrangement: MekuriArrangement) {
         guard self.turn == nil else { return }
-        let state = self.beginTurn(turn, in: arrangement)
+        var state = self.beginTurn(turn, in: arrangement)
+        state.liftsFromBottom = liftsFromBottom
         guard let target = state.targetIndex else { return }
         if self.reducesMotion {
             self.commit(to: target)
@@ -49,7 +61,7 @@ extension MekuriPager {
 
     /// A drag that is not horizontally dominant neither locks nor takes over
     /// a turn; a locked turn follows every later sample.
-    func dragChanged(translation: CGSize, width: CGFloat, in arrangement: MekuriArrangement) {
+    func dragChanged(translation: CGSize, liftsFromBottom: Bool, width: CGFloat, in arrangement: MekuriArrangement) {
         guard !self.ignoresCurrentDrag, !self.reducesMotion else { return }
         if var turn = self.turn {
             if turn.isSettling {
@@ -70,6 +82,7 @@ extension MekuriPager {
         guard let direction = MekuriDrag.turn(translation: translation, direction: self.direction) else { return }
         var turn = self.beginTurn(direction, in: arrangement)
         guard turn.hasLeaf else { return }
+        turn.liftsFromBottom = liftsFromBottom
         turn.progress = MekuriDrag.progress(
             start: 0,
             translation: translation.width,

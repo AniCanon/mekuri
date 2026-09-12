@@ -20,6 +20,16 @@ import CoreGraphics
         #expect(pass.shaderProgress >= 0)
     }
 
+    @Test func aBottomLiftFlipsTheLayerVerticallyInEitherDirection() {
+        for direction in [MekuriDirection.leftToRight, .rightToLeft] {
+            let pass = MekuriFoldPass(direction: direction, progress: 0.4, liftsFromBottom: true)
+            #expect(pass.verticalScale == -1)
+            #expect(pass.mirrorScale == (direction == .rightToLeft ? -1 : 1))
+            #expect(pass.shaderProgress == 0.4)
+        }
+        #expect(MekuriFoldPass(direction: .leftToRight, progress: 0.4).verticalScale == 1)
+    }
+
     @Test func shaderProgressFollowsTheSweepMagnitude() {
         for direction in [MekuriDirection.leftToRight, .rightToLeft] {
             let pass = MekuriFoldPass(direction: direction, progress: 0.4)

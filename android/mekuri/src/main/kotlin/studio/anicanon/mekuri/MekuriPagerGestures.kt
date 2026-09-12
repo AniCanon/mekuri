@@ -54,7 +54,7 @@ internal fun Modifier.mekuriGestures(
                     val translation = change.position - down.position
                     if (!dragging && translation.getDistance() > slop) dragging = true
                     if (dragging && pagingEnabledForGesture) {
-                        controller.dragChanged(translation / this.density)
+                        controller.dragChanged(translation / this.density, grabY = down.position.y / this.density)
                         if (controller.turn != null) change.consume()
                     }
                 }
@@ -70,6 +70,7 @@ internal fun Modifier.mekuriGestures(
                         last.consume()
                         controller.tapped(
                             x = down.position.x / this.density,
+                            y = down.position.y / this.density,
                             onCenterTap = centreTap.value,
                             pagingEnabled = pagingEnabledForGesture,
                         )

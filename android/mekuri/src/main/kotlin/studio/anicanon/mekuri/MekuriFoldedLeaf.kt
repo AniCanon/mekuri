@@ -27,15 +27,17 @@ internal fun MekuriFoldedLeaf(
     direction: MekuriDirection,
     configuration: MekuriConfiguration,
     modifier: Modifier = Modifier,
+    liftsFromBottom: Boolean = false,
     back: (@Composable () -> Unit)? = null,
     front: @Composable () -> Unit,
 ) {
     if (back == null) {
-        MekuriFoldedPage(progress, direction, configuration, modifier, front)
+        MekuriFoldedPage(progress, direction, configuration, modifier, liftsFromBottom, front)
         return
     }
     val isFolded by remember(progress) { derivedStateOf { progress() > 0f } }
     val mirrorScale = MekuriFoldPass.mirrorScale(direction)
+    val verticalScale = MekuriFoldPass.verticalScale(liftsFromBottom)
     val frontShader = rememberMekuriFoldShader()
     val backShader = rememberMekuriFoldShader()
     Box(modifier) {
@@ -43,10 +45,10 @@ internal fun MekuriFoldedLeaf(
             MekuriLeafSlot(mirrorScale, isMirroredInSlot = false, content = front)
             return@Box
         }
-        MekuriLeafFace(frontShader, mirrorScale, MekuriFace.Front, configuration, direction, progress) {
+        MekuriLeafFace(frontShader, mirrorScale, verticalScale, MekuriFace.Front, configuration, direction, progress) {
             MekuriLeafSlot(mirrorScale, isMirroredInSlot = false, content = front)
         }
-        MekuriLeafFace(backShader, mirrorScale, MekuriFace.Back, configuration, direction, progress) {
+        MekuriLeafFace(backShader, mirrorScale, verticalScale, MekuriFace.Back, configuration, direction, progress) {
             MekuriLeafSlot(mirrorScale, isMirroredInSlot = true, content = back)
         }
     }
@@ -59,6 +61,7 @@ internal fun MekuriFoldedLeaf(
 private fun MekuriLeafFace(
     shader: RuntimeShader,
     mirrorScale: Float,
+    verticalScale: Float,
     face: MekuriFace,
     configuration: MekuriConfiguration,
     direction: MekuriDirection,
@@ -71,6 +74,7 @@ private fun MekuriLeafFace(
             .mekuriFold(
                 shader = shader,
                 mirrorScale = mirrorScale,
+                verticalScale = verticalScale,
                 face = face,
                 isHinged = true,
                 configuration = configuration,

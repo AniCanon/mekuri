@@ -15,21 +15,26 @@ internal fun rememberMekuriFoldShader(): RuntimeShader = remember { RuntimeShade
 
 /**
  * Folds the content this modifier is applied to. The shader folds a flap
- * entering from the right only, so a right-to-left pass mirrors the content
- * into the effect and mirrors the result back out; the mirror is spatial, never
- * a negated progress.
+ * entering from the right with its free corner at the top only, so a
+ * right-to-left pass mirrors the content horizontally into the effect and the
+ * result back out, and a bottom lift does the same vertically; the mirror is
+ * spatial, never a negated progress.
  *
  * [progress] must be read inside the layer block, not in composition.
  */
 internal fun Modifier.mekuriFold(
     shader: RuntimeShader,
     mirrorScale: Float,
+    verticalScale: Float,
     face: MekuriFace,
     isHinged: Boolean,
     configuration: MekuriConfiguration,
     progress: () -> Float,
 ): Modifier = this
-    .graphicsLayer { scaleX = mirrorScale }
+    .graphicsLayer {
+        scaleX = mirrorScale
+        scaleY = verticalScale
+    }
     .graphicsLayer {
         val uniforms = MekuriFoldUniforms.of(
             size = size,
@@ -43,7 +48,10 @@ internal fun Modifier.mekuriFold(
         compositingStrategy = CompositingStrategy.Offscreen
         clip = true
     }
-    .graphicsLayer { scaleX = mirrorScale }
+    .graphicsLayer {
+        scaleX = mirrorScale
+        scaleY = verticalScale
+    }
 
 private const val LAYER_UNIFORM = "layer"
 

@@ -22,6 +22,7 @@ internal fun MekuriLeafShadow(
     direction: MekuriDirection,
     configuration: MekuriConfiguration,
     modifier: Modifier = Modifier,
+    liftsFromBottom: Boolean = false,
 ) {
     val isFolded by remember(progress) { derivedStateOf { progress() > 0f } }
     val shader = rememberMekuriFoldShader()
@@ -33,6 +34,7 @@ internal fun MekuriLeafShadow(
                 .mekuriFold(
                     shader = shader,
                     mirrorScale = MekuriFoldPass.mirrorScale(direction),
+                    verticalScale = MekuriFoldPass.verticalScale(liftsFromBottom),
                     face = MekuriFace.Shadow,
                     isHinged = true,
                     configuration = configuration,

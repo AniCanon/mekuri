@@ -35,6 +35,11 @@ internal data class MekuriTurnState(
     /** Progress the current drag started from; non-zero after a takeover. */
     val startProgress: Float = 0f,
     val phase: MekuriTurnPhase = MekuriTurnPhase.Dragging,
+    /**
+     * The bottom corner lifts instead of the top. Decided when the turn begins;
+     * a takeover keeps it.
+     */
+    val liftsFromBottom: Boolean = false,
 ) {
     val isBlocked: Boolean get() = this.targetIndex == null
 
