@@ -58,9 +58,9 @@ half mekuriFrontShade(float u, float dim) {
 
 // Shadow the lifted sheet casts on the page beneath, `d` past the crease.
 // Starts at `extent`, how far the sheet reaches past the crease, darkest
-// where the roll is tightest, and fades over twice that reach.
+// where the roll is tightest, and fades over half that reach.
 half4 mekuriContactShadow(float d, float extent, float radius, float heldRadius, float opacity) {
-    float reach = 1.0 - saturate((d - extent) / (2.0 * max(extent, 1.0)));
+    float reach = 1.0 - saturate((d - extent) / (0.5 * max(extent, 1.0)));
     float alpha = opacity * (heldRadius / radius) * reach * reach;
     return half4(0.0, 0.0, 0.0, half(alpha));
 }
