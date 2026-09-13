@@ -54,8 +54,10 @@ extension MekuriPager {
         guard let target = state.targetIndex else { return }
         if self.reducesMotion {
             self.commit(to: target)
+            self.play(.land)
         } else {
             self.arm(state, decision: .commit)
+            self.play(.lift)
         }
     }
 
@@ -68,6 +70,7 @@ extension MekuriPager {
                 guard MekuriDrag.turn(translation: translation, direction: self.direction) != nil else { return }
                 self.takeOver(&turn)
             }
+            let before = turn.progress
             turn.progress = MekuriDrag.progress(
                 start: turn.startProgress,
                 translation: translation.width,
@@ -77,6 +80,9 @@ extension MekuriPager {
             )
             self.presented.value = turn.progress
             self.turn = turn
+            if !turn.isBlocked, self.crossesSnap(from: before, to: turn.progress, in: arrangement) {
+                self.play(.detent)
+            }
             return
         }
         guard let direction = MekuriDrag.turn(translation: translation, direction: self.direction) else { return }
@@ -92,6 +98,7 @@ extension MekuriPager {
         )
         self.presented.value = turn.progress
         self.turn = turn
+        self.play(.lift)
     }
 
     func dragEnded(translation: CGSize, velocity: CGFloat, width: CGFloat, in arrangement: MekuriArrangement) {
@@ -128,6 +135,7 @@ extension MekuriPager {
         )
         if decision == .commit {
             self.commit(to: target)
+            self.play(.land)
         }
     }
 
@@ -188,6 +196,7 @@ extension MekuriPager {
         case .commit:
             if let target = turn.targetIndex {
                 self.commit(to: target)
+                self.play(.land)
             }
         case .revert:
             if self.currentPage != self.settledPage {
@@ -203,6 +212,19 @@ extension MekuriPager {
         if self.currentPage != index {
             self.currentPage = index
         }
+    }
+
+    func play(_ haptic: MekuriHaptic) {
+        guard self.hapticsEnabled else { return }
+        self.haptic = MekuriHapticEvent(id: (self.haptic?.id ?? 0) + 1, haptic: haptic)
+    }
+
+    private func crossesSnap(from old: CGFloat, to new: CGFloat, in arrangement: MekuriArrangement) -> Bool {
+        MekuriHaptic.crossesThreshold(
+            from: arrangement.releaseProgress(old),
+            to: arrangement.releaseProgress(new),
+            threshold: self.configuration.snapThreshold
+        )
     }
 
     /// Removes the turn, never animated; the rest of a drag in progress is

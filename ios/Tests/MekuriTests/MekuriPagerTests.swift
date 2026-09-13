@@ -185,3 +185,12 @@ extension MekuriPagerTests {
         #expect(narrow == CGSize(width: 300, height: 450))
     }
 }
+
+extension MekuriPagerTests {
+    @Test func aDragTicksOnlyWhenItCrossesTheCommitPoint() {
+        #expect(MekuriHaptic.crossesThreshold(from: 0.3, to: 0.35, threshold: 0.35))
+        #expect(MekuriHaptic.crossesThreshold(from: 0.4, to: 0.34, threshold: 0.35))
+        #expect(!MekuriHaptic.crossesThreshold(from: 0.1, to: 0.34, threshold: 0.35))
+        #expect(!MekuriHaptic.crossesThreshold(from: 0.35, to: 0.9, threshold: 0.35))
+    }
+}

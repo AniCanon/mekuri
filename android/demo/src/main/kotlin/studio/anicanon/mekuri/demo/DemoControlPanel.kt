@@ -36,6 +36,7 @@ data class DemoControls(
     val spread: MekuriSpread,
     val coverStandsAlone: Boolean,
     val presentation: Boolean,
+    val haptics: Boolean,
 )
 
 /** Carries the controls across the activity recreation a rotation causes. */
@@ -48,6 +49,7 @@ val DemoControlsSaver: Saver<DemoControls, Any> = listSaver(
             it.spread.name,
             it.coverStandsAlone,
             it.presentation,
+            it.haptics,
         )
     },
     restore = {
@@ -58,6 +60,7 @@ val DemoControlsSaver: Saver<DemoControls, Any> = listSaver(
             spread = MekuriSpread.valueOf(it[3] as String),
             coverStandsAlone = it[4] as Boolean,
             presentation = it[5] as Boolean,
+            haptics = it[6] as Boolean,
         )
     },
 )
@@ -114,6 +117,9 @@ fun DemoControlPanel(
         }
         DemoPillRow("Slow turns", controls.slowTurns) {
             onControls(controls.copy(slowTurns = !controls.slowTurns))
+        }
+        DemoPillRow("Haptics", controls.haptics) {
+            onControls(controls.copy(haptics = !controls.haptics))
         }
         DemoPillRow(
             title = "Spread",

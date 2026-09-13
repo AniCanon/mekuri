@@ -41,6 +41,7 @@ fun DemoReaderScreen() {
                 spread = MekuriSpread.Automatic,
                 coverStandsAlone = true,
                 presentation = false,
+                haptics = true,
             ),
         )
     }
@@ -69,6 +70,7 @@ fun DemoReaderScreen() {
             spread = controls.spread,
             coverStandsAlone = controls.coverStandsAlone,
             pageAspectRatio = 2f / 3f,
+            haptics = controls.haptics,
         ) { index ->
             DemoPage(
                 index = index,

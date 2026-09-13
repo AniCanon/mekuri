@@ -50,6 +50,7 @@ public struct MekuriPager<Content: View>: View {
     @Environment(\.mekuriSpread) private var spread
     @Environment(\.mekuriCoverStandsAlone) private var coverStandsAlone
     @Environment(\.mekuriPageAspectRatio) private var pageAspectRatio
+    @Environment(\.mekuriHaptics) var hapticsEnabled
 
     let pageCount: Int
     @Binding var currentPage: Int
@@ -63,6 +64,7 @@ public struct MekuriPager<Content: View>: View {
     @State var nextTurnID = 0
     @State var settleCount = 0
     @State var ignoresCurrentDrag = false
+    @State var haptic: MekuriHapticEvent?
 
     /// - Parameters:
     ///   - pageCount: Number of pages, in reading order.
@@ -124,6 +126,9 @@ public struct MekuriPager<Content: View>: View {
                     including: self.pagingEnabled ? .all : .subviews
                 )
                 .gesture(self.tapGesture(width: proxy.size.width, height: proxy.size.height, arrangement: arrangement))
+                .sensoryFeedback(trigger: self.haptic) { _, event in
+                    event?.haptic.feedback
+                }
                 .accessibilityElement(children: .contain)
                 .accessibilityValue(Text("Page \(self.settledPage + 1) of \(self.pageCount)"))
                 .accessibilityAdjustableAction { adjustment in

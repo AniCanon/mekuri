@@ -85,6 +85,7 @@ Under `.automatic` two pages are laid out at whatever size actually fits, and th
 | `mekuriSnapThreshold(_:)` | `0.35` | Progress past which a release completes the turn |
 | `mekuriSettleAnimation(_:)` | `nil` | Settle animation; `nil` is the package curve |
 | `mekuriReducedMotion(_:)` | `nil` | Override the system setting either way; `nil` follows it |
+| `mekuriHaptics(_:)` | `true` | A tap as the page lifts, a tick as a drag crosses the commit point, a thump as it lands |
 
 ## Working against a checkout
 

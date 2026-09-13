@@ -9,6 +9,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
@@ -42,6 +43,9 @@ import androidx.compose.ui.semantics.stateDescription
  * @param spread whether one or two pages share the container.
  * @param coverStandsAlone whether page 0 opens alone, like a cover.
  * @param pageAspectRatio width over height of one page.
+ * @param haptics whether turns play haptics: a tap as the page lifts, a tick as
+ *   a drag crosses the point where releasing completes the turn, and a thump as
+ *   the page lands. Follows the system touch-feedback setting.
  * @param content builds the page at an index.
  */
 @Composable
@@ -54,12 +58,19 @@ public fun MekuriPager(
     spread: MekuriSpread = MekuriSpread.Automatic,
     coverStandsAlone: Boolean = true,
     pageAspectRatio: Float = DEFAULT_PAGE_ASPECT_RATIO,
+    haptics: Boolean = true,
     content: @Composable (Int) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val controller = remember(state, scope) { MekuriPagerController(state, scope) }
     controller.configuration = configuration
     controller.reducesMotion = rememberMekuriReducesMotion(configuration.reducedMotionOverride)
+    val view = LocalView.current
+    controller.onHaptic = if (haptics) {
+        { haptic -> view.performHapticFeedback(haptic.feedbackConstant) }
+    } else {
+        {}
+    }
 
     DisposableEffect(state, controller) {
         state.attach(controller)

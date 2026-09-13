@@ -14,6 +14,7 @@ import Testing
         #expect(values.mekuriPageMode == .live)
         #expect(values.mekuriReducedMotion == nil)
         #expect(values.mekuriSettleAnimation == nil)
+        #expect(values.mekuriHaptics)
     }
 
     @Test func aNilSettleAnimationFallsBackToThePackageCurve() {

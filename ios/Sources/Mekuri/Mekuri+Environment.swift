@@ -20,4 +20,5 @@ extension EnvironmentValues {
     @Entry var mekuriSpread: MekuriSpread = .automatic
     @Entry var mekuriCoverStandsAlone: Bool = true
     @Entry var mekuriPageAspectRatio: CGFloat = 2.0 / 3.0
+    @Entry var mekuriHaptics: Bool = true
 }

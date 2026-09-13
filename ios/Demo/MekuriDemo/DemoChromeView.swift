@@ -8,6 +8,7 @@ struct DemoChromeView: View {
     @Binding var direction: MekuriDirection
     @Binding var pagingEnabled: Bool
     @Binding var slowTurns: Bool
+    @Binding var haptics: Bool
     @Binding var spread: MekuriSpread
     @Binding var coverStandsAlone: Bool
     @Binding var presentation: Bool
@@ -28,6 +29,9 @@ struct DemoChromeView: View {
             }
             self.switchRow("Slow turns", isOn: self.slowTurns) {
                 self.slowTurns.toggle()
+            }
+            self.switchRow("Haptics", isOn: self.haptics) {
+                self.haptics.toggle()
             }
             self.pillRow("Spread", label: self.spreadLabel, isOn: self.spread != .single) {
                 self.spread = self.nextSpread

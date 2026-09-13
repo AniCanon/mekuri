@@ -36,6 +36,9 @@ internal class MekuriPagerController(
 
     var reducesMotion: Boolean = false
 
+    /** Plays a cue; written by the pager each composition. */
+    var onHaptic: (MekuriHaptic) -> Unit = {}
+
     /** Presented progress of the turn in flight. */
     var progress: Float by mutableFloatStateOf(0f)
 
@@ -88,8 +91,10 @@ internal class MekuriPagerController(
         val target = begun.targetIndex ?: return
         if (this.reducesMotion) {
             this.state.currentPage = target
+            this.onHaptic(MekuriHaptic.Land)
         } else {
             this.arm(begun, MekuriTurnDecision.Commit)
+            this.onHaptic(MekuriHaptic.Lift)
         }
     }
 
@@ -163,6 +168,7 @@ internal class MekuriPagerController(
         val current = this.turn
         if (current != null) {
             var moving = current
+            val before = this.progress
             if (current.isSettling) {
                 if (MekuriDrag.turn(translation, this.direction) == null) return
                 moving = this.takeOver(current)
@@ -174,6 +180,7 @@ internal class MekuriPagerController(
                 axis = MekuriDrag.axis(moving.turn, this.direction),
                 isBlocked = moving.isBlocked,
             )
+            if (!moving.isBlocked && this.crossesSnap(before, this.progress)) this.onHaptic(MekuriHaptic.Detent)
             return
         }
         val turn = MekuriDrag.turn(translation, this.direction) ?: return
@@ -188,7 +195,14 @@ internal class MekuriPagerController(
             axis = MekuriDrag.axis(turn, this.direction),
             isBlocked = begun.isBlocked,
         )
+        this.onHaptic(MekuriHaptic.Lift)
     }
+
+    private fun crossesSnap(from: Float, to: Float): Boolean = MekuriHaptic.crossesThreshold(
+        from = this.arrangement.releaseProgress(from),
+        to = this.arrangement.releaseProgress(to),
+        threshold = this.configuration.snapThreshold,
+    )
 
     /** `velocity` is the horizontal drag velocity in dp per second. */
     fun dragEnded(translation: Offset, velocity: Float) {
@@ -231,7 +245,10 @@ internal class MekuriPagerController(
             velocity = MekuriDrag.projectedVelocity(velocity, axis),
             configuration = this.configuration,
         )
-        if (decision == MekuriTurnDecision.Commit) this.state.currentPage = target
+        if (decision == MekuriTurnDecision.Commit) {
+            this.state.currentPage = target
+            this.onHaptic(MekuriHaptic.Land)
+        }
     }
 
     /** Cancels the running settle and continues from the presented progress. */
@@ -285,6 +302,7 @@ internal class MekuriPagerController(
             MekuriTurnDecision.Commit -> current.targetIndex ?: current.fromIndex
             MekuriTurnDecision.Revert -> current.fromIndex
         }
+        if (decision == MekuriTurnDecision.Commit && current.targetIndex != null) this.onHaptic(MekuriHaptic.Land)
         this.state.currentPage = landed
         this.pending?.complete(landed)
         this.pending = null

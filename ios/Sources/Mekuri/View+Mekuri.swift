@@ -58,6 +58,13 @@ public extension View {
     func mekuriReducedMotion(_ reduced: Bool?) -> some View {
         self.environment(\.mekuriReducedMotion, reduced)
     }
+
+    /// Whether turns play haptics: a tap as the page lifts, a tick as a drag
+    /// crosses the point where releasing completes the turn, and a thump as
+    /// the page lands. Defaults to true.
+    func mekuriHaptics(_ enabled: Bool) -> some View {
+        self.environment(\.mekuriHaptics, enabled)
+    }
 }
 
 public extension View {

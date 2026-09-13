@@ -6,6 +6,7 @@ struct DemoReaderView: View {
     @State private var direction: MekuriDirection = .leftToRight
     @State private var pagingEnabled = true
     @State private var slowTurns = false
+    @State private var haptics = true
     @State private var spread: MekuriSpread = .automatic
     @State private var coverStandsAlone = true
     @State private var presentation = false
@@ -57,6 +58,7 @@ struct DemoReaderView: View {
             .mekuriDirection(self.direction)
             .mekuriPagingEnabled(self.pagingEnabled)
             .mekuriSettleAnimation(self.settleAnimation)
+            .mekuriHaptics(self.haptics)
             .mekuriSpread(self.spread)
             .mekuriCoverStandsAlone(self.coverStandsAlone)
             .mekuriPageAspectRatio(2.0 / 3.0)
@@ -72,6 +74,7 @@ struct DemoReaderView: View {
                     direction: self.$direction,
                     pagingEnabled: self.$pagingEnabled,
                     slowTurns: self.$slowTurns,
+                    haptics: self.$haptics,
                     spread: self.$spread,
                     coverStandsAlone: self.$coverStandsAlone,
                     presentation: self.presentationBinding,
