@@ -64,6 +64,7 @@ internal fun Modifier.mekuriGestures(
                         controller.dragEnded(
                             translation = (last.position - down.position) / this.density,
                             velocity = tracker.calculateVelocity().x / this.density,
+                            grabY = down.position.y / this.density,
                         )
                     }
                     else -> {

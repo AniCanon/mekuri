@@ -40,6 +40,11 @@ internal data class MekuriTurnState(
      * a takeover keeps it.
      */
     val liftsFromBottom: Boolean = false,
+    /**
+     * Container height, in dp, a finger grabbed the turn at; null for a turn no
+     * finger started, which tracks the page's midline. A takeover keeps it.
+     */
+    val grabY: Float? = null,
 ) {
     val isBlocked: Boolean get() = this.targetIndex == null
 

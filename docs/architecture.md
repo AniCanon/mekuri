@@ -89,12 +89,15 @@ renderer reads `1 − progress` for it and the face roles swap. Single-page mode
 is the degenerate spread: no leading slot, no back face, and the leaf's
 reverse is its own front mirrored.
 
-A drag is divided by the distance the free edge travels across a whole turn,
-so the edge stays under the finger. For a spread that is both slots. For a
-single page it is twice the container, because the edge crosses the page and
-as far again past the spine; a drag across the screen reaches half a turn and
-the settle finishes it. The release is judged on progress divided by that
-reach, so the snap threshold is the same distance in both modes.
+A drag moves the sheet's free edge, not the fold axis. On the row the finger
+grabbed, `MekuriFoldGeometry.freeEdge` places the edge where the shader draws
+it: on the roll while the flap is shorter than half a turn, flat past the
+crest beyond. `MekuriEdgeTrack` inverts that by bisection, so a drag of any
+length lands the edge under the finger; early in a turn a short pull raises
+a wide arch, as paper does. The release is judged on how far the edge has
+moved as a share of the finger's range, the container for a single page and
+both slots for a spread, so the snap threshold is the same distance in both
+modes.
 
 Phases: `dragging` follows every sample; `armed` inserts the leaf at rest and
 starts the settle the moment the layer appears; `settling` animates progress

@@ -44,19 +44,18 @@ enum MekuriDrag {
         return self.turn(translation: translation.width, direction: direction)
     }
 
-    /// Progress after `translation` from a drag that took over at `start`.
-    /// Clamped to 0...1; a blocked turn keeps `blockedDamping` of its travel.
+    /// Progress after `translation` from a drag that took over at `start`,
+    /// keeping the free edge under the finger. A blocked turn keeps
+    /// `blockedDamping` of its travel.
     static func progress(
         start: CGFloat,
         translation: CGFloat,
-        width: CGFloat,
         axis: CGFloat,
-        isBlocked: Bool
+        isBlocked: Bool,
+        track: MekuriEdgeTrack
     ) -> CGFloat {
-        guard width > 0 else { return start }
         let damping = isBlocked ? self.blockedDamping : 1
-        let raw = start + translation * axis / width * damping
-        return min(max(raw, 0), 1)
+        return track.progress(travel: track.travel(progress: start) + translation * axis * damping)
     }
 
     /// Velocity measured along the turn, positive toward completion.

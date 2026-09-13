@@ -65,8 +65,14 @@ internal class MekuriPagerController(
 
     val settledPage: Int get() = this.state.currentPage
 
-    /** Distance the free edge travels across a whole turn, in dp. */
-    val turnWidth: Float get() = this.arrangement.turnWidth(this.containerSize.width)
+    /** A turn no finger started tracks the page's midline. */
+    private fun edgeTrack(turn: MekuriTurnState): MekuriEdgeTrack = this.arrangement.edgeTrack(
+        turn = turn.turn,
+        containerSize = this.containerSize,
+        grabY = turn.grabY ?: (this.containerSize.height / 2f),
+        liftsFromBottom = turn.liftsFromBottom,
+        configuration = this.configuration,
+    )
 
     fun foldProgress(): Float = this.turn?.turn?.fold(this.progress) ?: 0f
 
@@ -81,13 +87,13 @@ internal class MekuriPagerController(
             return
         }
         if (!pagingEnabled) return
-        this.perform(turn, MekuriDrag.liftsFromBottom(y, this.containerSize.height))
+        this.perform(turn, MekuriDrag.liftsFromBottom(y, this.containerSize.height), grabY = y)
     }
 
     /** Does nothing at the ends or while another turn is in flight. */
-    fun perform(turn: MekuriTurn, liftsFromBottom: Boolean = false) {
+    fun perform(turn: MekuriTurn, liftsFromBottom: Boolean = false, grabY: Float? = null) {
         if (this.turn != null) return
-        val begun = this.begin(turn).copy(liftsFromBottom = liftsFromBottom)
+        val begun = this.begin(turn).copy(liftsFromBottom = liftsFromBottom, grabY = grabY)
         val target = begun.targetIndex ?: return
         if (this.reducesMotion) {
             this.state.currentPage = target
@@ -164,7 +170,6 @@ internal class MekuriPagerController(
      */
     fun dragChanged(translation: Offset, grabY: Float) {
         if (this.ignoresCurrentDrag || this.reducesMotion) return
-        val width = this.turnWidth
         val current = this.turn
         if (current != null) {
             var moving = current
@@ -173,44 +178,46 @@ internal class MekuriPagerController(
                 if (MekuriDrag.turn(translation, this.direction) == null) return
                 moving = this.takeOver(current)
             }
+            val track = this.edgeTrack(moving)
             this.progress = MekuriDrag.progress(
                 start = moving.startProgress,
                 translation = translation.x,
-                width = width,
                 axis = MekuriDrag.axis(moving.turn, this.direction),
                 isBlocked = moving.isBlocked,
+                track = track,
             )
-            if (!moving.isBlocked && this.crossesSnap(before, this.progress)) this.onHaptic(MekuriHaptic.Detent)
+            val crossed = MekuriHaptic.crossesThreshold(
+                from = track.releaseProgress(before),
+                to = track.releaseProgress(this.progress),
+                threshold = this.configuration.snapThreshold,
+            )
+            if (!moving.isBlocked && crossed) this.onHaptic(MekuriHaptic.Detent)
             return
         }
         val turn = MekuriDrag.turn(translation, this.direction) ?: return
-        val begun = this.begin(turn)
-            .copy(liftsFromBottom = MekuriDrag.liftsFromBottom(grabY, this.containerSize.height))
+        val begun = this.begin(turn).copy(
+            liftsFromBottom = MekuriDrag.liftsFromBottom(grabY, this.containerSize.height),
+            grabY = grabY,
+        )
         if (!begun.hasLeaf) return
         this.turn = begun
         this.progress = MekuriDrag.progress(
             start = 0f,
             translation = translation.x,
-            width = width,
             axis = MekuriDrag.axis(turn, this.direction),
             isBlocked = begun.isBlocked,
+            track = this.edgeTrack(begun),
         )
         this.onHaptic(MekuriHaptic.Lift)
     }
 
-    private fun crossesSnap(from: Float, to: Float): Boolean = MekuriHaptic.crossesThreshold(
-        from = this.arrangement.releaseProgress(from),
-        to = this.arrangement.releaseProgress(to),
-        threshold = this.configuration.snapThreshold,
-    )
-
-    /** `velocity` is the horizontal drag velocity in dp per second. */
-    fun dragEnded(translation: Offset, velocity: Float) {
+    /** `velocity` is the horizontal drag velocity in dp per second; [grabY] as for [dragChanged]. */
+    fun dragEnded(translation: Offset, velocity: Float, grabY: Float) {
         val ignored = this.ignoresCurrentDrag
         this.ignoresCurrentDrag = false
         if (ignored) return
         if (this.reducesMotion) {
-            this.commitReducedMotionDrag(translation, velocity)
+            this.commitReducedMotionDrag(translation, velocity, grabY)
             return
         }
         val current = this.turn ?: return
@@ -222,7 +229,7 @@ internal class MekuriPagerController(
         val axis = MekuriDrag.axis(current.turn, this.direction)
         this.settle(
             MekuriTurnDecision.resolve(
-                progress = this.arrangement.releaseProgress(this.progress),
+                progress = this.edgeTrack(current).releaseProgress(this.progress),
                 velocity = MekuriDrag.projectedVelocity(velocity, axis),
                 configuration = this.configuration,
             ),
@@ -234,13 +241,20 @@ internal class MekuriPagerController(
         if (this.turn?.phase == MekuriTurnPhase.Dragging) this.settle(MekuriTurnDecision.Revert)
     }
 
-    private fun commitReducedMotionDrag(translation: Offset, velocity: Float) {
+    private fun commitReducedMotionDrag(translation: Offset, velocity: Float, grabY: Float) {
         val turn = MekuriDrag.turn(translation, this.direction) ?: return
         val target = this.arrangement.turnState(0, turn, this.settledPage).targetIndex ?: return
         val axis = MekuriDrag.axis(turn, this.direction)
+        val track = this.arrangement.edgeTrack(
+            turn = turn,
+            containerSize = this.containerSize,
+            grabY = grabY,
+            liftsFromBottom = MekuriDrag.liftsFromBottom(grabY, this.containerSize.height),
+            configuration = this.configuration,
+        )
         val decision = MekuriTurnDecision.resolve(
-            progress = this.arrangement.releaseProgress(
-                MekuriDrag.progress(0f, translation.x, this.turnWidth, axis, isBlocked = false),
+            progress = track.releaseProgress(
+                MekuriDrag.progress(0f, translation.x, axis, isBlocked = false, track = track),
             ),
             velocity = MekuriDrag.projectedVelocity(velocity, axis),
             configuration = this.configuration,

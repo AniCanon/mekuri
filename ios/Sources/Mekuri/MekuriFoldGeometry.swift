@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 
 /// Pure fold arithmetic in page space. Progress runs 0 (flat) to 1 (turned);
 /// the fold axis travels from the trailing edge to the leading edge. Fold
@@ -69,6 +70,41 @@ struct MekuriFoldGeometry: Equatable, Sendable {
         let width = self.pageWidth * self.configuration.creaseShadowWidthRatio
         let axis = self.foldAxisOffset(progress: progress)
         return CGRect(x: axis - width / 2, y: 0, width: width, height: pageSize.height)
+    }
+
+    /// Bisection steps when inverting `freeEdge`; fixed so every platform
+    /// lands on the same value.
+    static let edgeSearchSteps = 32
+
+    /// Horizontal position of the sheet's free edge at row `y` of the
+    /// shader's frame, as the shader draws it: on the roll while the flap is
+    /// shorter than half a turn, lying flat past the crest beyond. Radius and
+    /// shear land with the turn.
+    func freeEdge(progress: CGFloat, y: CGFloat, pageHeight: CGFloat) -> CGFloat {
+        let landing = self.landingRadiusScale(progress: progress)
+        let held = 1 - y / pageHeight
+        let shear = self.configuration.cornerShear * landing * (y - pageHeight / 2)
+        let axis = self.foldAxisOffset(progress: progress) + shear - self.bowLead(progress: progress) * held * held
+        let flap = self.pageWidth - axis
+        let radius = self.radius(atFoldDistance: pageHeight - y) * landing
+        let halfTurn = CGFloat.pi * radius
+        return flap <= halfTurn ? axis + radius * sin(flap / radius) : axis - (flap - halfTurn)
+    }
+
+    /// Progress at which `freeEdge` at row `y` reaches `edge`. The edge only
+    /// moves toward the spine as progress grows.
+    func progress(forFreeEdge edge: CGFloat, y: CGFloat, pageHeight: CGFloat) -> CGFloat {
+        var low: CGFloat = 0
+        var high: CGFloat = 1
+        for _ in 0..<Self.edgeSearchSteps {
+            let mid = (low + high) / 2
+            if self.freeEdge(progress: mid, y: y, pageHeight: pageHeight) > edge {
+                low = mid
+            } else {
+                high = mid
+            }
+        }
+        return (low + high) / 2
     }
 
     private func clamped(_ progress: CGFloat) -> CGFloat {

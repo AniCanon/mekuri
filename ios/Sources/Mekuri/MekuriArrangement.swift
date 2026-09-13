@@ -23,28 +23,36 @@ enum MekuriArrangement: Equatable {
         )
     }
 
-    /// Distance the free edge travels across a whole turn, so the edge stays
-    /// under the finger. A single page's edge crosses the container and as far
-    /// again past the spine, beyond any drag; a spread's crosses both slots.
+    /// The finger's full range across a turn, against which a release is
+    /// judged: the container for a single page, both slots for a spread.
     func turnWidth(containerWidth: CGFloat) -> CGFloat {
         switch self {
-        case .single: containerWidth * 2
+        case .single: containerWidth
         case .spread(_, let pageSize): pageSize.width * 2
         }
     }
 
-    /// Share of a turn a drag across the whole page or spread reaches.
-    var dragReach: CGFloat {
-        switch self {
-        case .single: 0.5
-        case .spread: 1
+    /// The drag mapping for a turn grabbed at `grabY` in the container. Pages
+    /// are centred vertically; the grab clamps to the page.
+    func edgeTrack(
+        turn: MekuriTurn,
+        containerSize: CGSize,
+        grabY: CGFloat,
+        liftsFromBottom: Bool,
+        configuration: MekuriConfiguration
+    ) -> MekuriEdgeTrack {
+        let page = switch self {
+        case .single: containerSize
+        case .spread(_, let pageSize): pageSize
         }
-    }
-
-    /// Progress as a release is judged: the share of the travel a drag can
-    /// reach, so the snap threshold means the same distance in either mode.
-    func releaseProgress(_ progress: CGFloat) -> CGFloat {
-        progress / self.dragReach
+        let y = min(max(grabY - (containerSize.height - page.height) / 2, 0), page.height)
+        return MekuriEdgeTrack(
+            turn: turn,
+            geometry: MekuriFoldGeometry(pageWidth: page.width, configuration: configuration),
+            pageHeight: page.height,
+            row: liftsFromBottom ? page.height - y : y,
+            reach: self.turnWidth(containerWidth: containerSize.width)
+        )
     }
 
     func turnState(id: Int, turn: MekuriTurn, from page: Int) -> MekuriTurnState {

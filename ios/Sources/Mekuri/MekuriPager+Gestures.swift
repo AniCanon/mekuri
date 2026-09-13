@@ -1,23 +1,19 @@
 import SwiftUI
 
 extension MekuriPager {
-    /// `width` is the distance the free edge travels across a whole turn; `height` is
-    /// the container's, against which the grab picks the lifting corner.
-    func dragGesture(width: CGFloat, height: CGFloat, arrangement: MekuriArrangement) -> some Gesture {
+    /// `size` is the container's; the grab's height picks the lifting corner
+    /// and the row whose free edge follows the finger.
+    func dragGesture(size: CGSize, arrangement: MekuriArrangement) -> some Gesture {
         DragGesture(minimumDistance: MekuriDrag.minimumDistance, coordinateSpace: .local)
             .onChanged { value in
-                self.dragChanged(
-                    translation: value.translation,
-                    liftsFromBottom: MekuriDrag.liftsFromBottom(y: value.startLocation.y, height: height),
-                    width: width,
-                    in: arrangement
-                )
+                self.dragChanged(translation: value.translation, grabY: value.startLocation.y, size: size, in: arrangement)
             }
             .onEnded { value in
                 self.dragEnded(
                     translation: value.translation,
                     velocity: value.velocity.width,
-                    width: width,
+                    grabY: value.startLocation.y,
+                    size: size,
                     in: arrangement
                 )
             }
@@ -28,6 +24,7 @@ extension MekuriPager {
             .onEnded { value in
                 self.tapped(
                     x: value.location.x,
+                    y: value.location.y,
                     liftsFromBottom: MekuriDrag.liftsFromBottom(y: value.location.y, height: height),
                     width: width,
                     in: arrangement
@@ -35,22 +32,23 @@ extension MekuriPager {
             }
     }
 
-    func tapped(x: CGFloat, liftsFromBottom: Bool, width: CGFloat, in arrangement: MekuriArrangement) {
+    func tapped(x: CGFloat, y: CGFloat, liftsFromBottom: Bool, width: CGFloat, in arrangement: MekuriArrangement) {
         let zone = MekuriZone.resolve(x: x, width: width, configuration: self.configuration)
         guard let turn = MekuriTurn.from(zone: zone, direction: self.direction) else {
             self.onCenterTap?()
             return
         }
         guard self.pagingEnabled else { return }
-        self.perform(turn, liftsFromBottom: liftsFromBottom, in: arrangement)
+        self.perform(turn, liftsFromBottom: liftsFromBottom, grabY: y, in: arrangement)
     }
 
     /// Turns one page or spread with a full animated curl. Does nothing at
     /// the ends or while another turn is in flight.
-    func perform(_ turn: MekuriTurn, liftsFromBottom: Bool = false, in arrangement: MekuriArrangement) {
+    func perform(_ turn: MekuriTurn, liftsFromBottom: Bool = false, grabY: CGFloat? = nil, in arrangement: MekuriArrangement) {
         guard self.turn == nil else { return }
         var state = self.beginTurn(turn, in: arrangement)
         state.liftsFromBottom = liftsFromBottom
+        state.grabY = grabY
         guard let target = state.targetIndex else { return }
         if self.reducesMotion {
             self.commit(to: target)
@@ -63,24 +61,30 @@ extension MekuriPager {
 
     /// A drag that is not horizontally dominant neither locks nor takes over
     /// a turn; a locked turn follows every later sample.
-    func dragChanged(translation: CGSize, liftsFromBottom: Bool, width: CGFloat, in arrangement: MekuriArrangement) {
+    func dragChanged(translation: CGSize, grabY: CGFloat, size: CGSize, in arrangement: MekuriArrangement) {
         guard !self.ignoresCurrentDrag, !self.reducesMotion else { return }
         if var turn = self.turn {
             if turn.isSettling {
                 guard MekuriDrag.turn(translation: translation, direction: self.direction) != nil else { return }
                 self.takeOver(&turn)
             }
+            let track = self.edgeTrack(for: turn, size: size, in: arrangement)
             let before = turn.progress
             turn.progress = MekuriDrag.progress(
                 start: turn.startProgress,
                 translation: translation.width,
-                width: width,
                 axis: MekuriDrag.axis(turn: turn.turn, direction: self.direction),
-                isBlocked: turn.isBlocked
+                isBlocked: turn.isBlocked,
+                track: track
             )
             self.presented.value = turn.progress
             self.turn = turn
-            if !turn.isBlocked, self.crossesSnap(from: before, to: turn.progress, in: arrangement) {
+            let crossed = MekuriHaptic.crossesThreshold(
+                from: track.releaseProgress(before),
+                to: track.releaseProgress(turn.progress),
+                threshold: self.configuration.snapThreshold
+            )
+            if !turn.isBlocked, crossed {
                 self.play(.detent)
             }
             return
@@ -88,24 +92,25 @@ extension MekuriPager {
         guard let direction = MekuriDrag.turn(translation: translation, direction: self.direction) else { return }
         var turn = self.beginTurn(direction, in: arrangement)
         guard turn.hasLeaf else { return }
-        turn.liftsFromBottom = liftsFromBottom
+        turn.liftsFromBottom = MekuriDrag.liftsFromBottom(y: grabY, height: size.height)
+        turn.grabY = grabY
         turn.progress = MekuriDrag.progress(
             start: 0,
             translation: translation.width,
-            width: width,
             axis: MekuriDrag.axis(turn: direction, direction: self.direction),
-            isBlocked: turn.isBlocked
+            isBlocked: turn.isBlocked,
+            track: self.edgeTrack(for: turn, size: size, in: arrangement)
         )
         self.presented.value = turn.progress
         self.turn = turn
         self.play(.lift)
     }
 
-    func dragEnded(translation: CGSize, velocity: CGFloat, width: CGFloat, in arrangement: MekuriArrangement) {
+    func dragEnded(translation: CGSize, velocity: CGFloat, grabY: CGFloat, size: CGSize, in arrangement: MekuriArrangement) {
         defer { self.ignoresCurrentDrag = false }
         guard !self.ignoresCurrentDrag else { return }
         if self.reducesMotion {
-            self.commitReducedMotionDrag(translation: translation, velocity: velocity, width: width, in: arrangement)
+            self.commitReducedMotionDrag(translation: translation, velocity: velocity, grabY: grabY, size: size, in: arrangement)
             return
         }
         guard let turn = self.turn, turn.phase == .dragging else { return }
@@ -115,21 +120,34 @@ extension MekuriPager {
         }
         let axis = MekuriDrag.axis(turn: turn.turn, direction: self.direction)
         let decision = MekuriTurnDecision.resolve(
-            progress: arrangement.releaseProgress(turn.progress),
+            progress: self.edgeTrack(for: turn, size: size, in: arrangement).releaseProgress(turn.progress),
             velocity: MekuriDrag.projectedVelocity(velocity, axis: axis),
             configuration: self.configuration
         )
         self.settle(decision: decision)
     }
 
-    private func commitReducedMotionDrag(translation: CGSize, velocity: CGFloat, width: CGFloat, in arrangement: MekuriArrangement) {
+    private func commitReducedMotionDrag(
+        translation: CGSize,
+        velocity: CGFloat,
+        grabY: CGFloat,
+        size: CGSize,
+        in arrangement: MekuriArrangement
+    ) {
         guard let direction = MekuriDrag.turn(translation: translation, direction: self.direction),
               let target = arrangement.turnState(id: 0, turn: direction, from: self.settledPage).targetIndex
         else { return }
         let axis = MekuriDrag.axis(turn: direction, direction: self.direction)
-        let progress = MekuriDrag.progress(start: 0, translation: translation.width, width: width, axis: axis, isBlocked: false)
+        let track = arrangement.edgeTrack(
+            turn: direction,
+            containerSize: size,
+            grabY: grabY,
+            liftsFromBottom: MekuriDrag.liftsFromBottom(y: grabY, height: size.height),
+            configuration: self.configuration
+        )
+        let progress = MekuriDrag.progress(start: 0, translation: translation.width, axis: axis, isBlocked: false, track: track)
         let decision = MekuriTurnDecision.resolve(
-            progress: arrangement.releaseProgress(progress),
+            progress: track.releaseProgress(progress),
             velocity: MekuriDrag.projectedVelocity(velocity, axis: axis),
             configuration: self.configuration
         )
@@ -137,6 +155,17 @@ extension MekuriPager {
             self.commit(to: target)
             self.play(.land)
         }
+    }
+
+    /// A turn no finger started tracks the page's midline.
+    private func edgeTrack(for turn: MekuriTurnState, size: CGSize, in arrangement: MekuriArrangement) -> MekuriEdgeTrack {
+        arrangement.edgeTrack(
+            turn: turn.turn,
+            containerSize: size,
+            grabY: turn.grabY ?? size.height / 2,
+            liftsFromBottom: turn.liftsFromBottom,
+            configuration: self.configuration
+        )
     }
 
     func beginTurn(_ turn: MekuriTurn, in arrangement: MekuriArrangement) -> MekuriTurnState {
@@ -217,14 +246,6 @@ extension MekuriPager {
     func play(_ haptic: MekuriHaptic) {
         guard self.hapticsEnabled else { return }
         self.haptic = MekuriHapticEvent(id: (self.haptic?.id ?? 0) + 1, haptic: haptic)
-    }
-
-    private func crossesSnap(from old: CGFloat, to new: CGFloat, in arrangement: MekuriArrangement) -> Bool {
-        MekuriHaptic.crossesThreshold(
-            from: arrangement.releaseProgress(old),
-            to: arrangement.releaseProgress(new),
-            threshold: self.configuration.snapThreshold
-        )
     }
 
     /// Removes the turn, never animated; the rest of a drag in progress is

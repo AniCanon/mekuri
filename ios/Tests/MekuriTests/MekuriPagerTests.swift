@@ -47,18 +47,37 @@ extension MekuriPagerTests {
         #expect(MekuriDrag.turn(translation: CGSize(width: 0, height: 0), direction: .leftToRight) == nil)
     }
 
+    private static func edgeTrack() -> MekuriEdgeTrack {
+        MekuriEdgeTrack(
+            turn: .forward,
+            geometry: MekuriFoldGeometry(pageWidth: 400, configuration: .default),
+            pageHeight: 800,
+            row: 400,
+            reach: 400
+        )
+    }
+
     @Test func aBlockedDragKeepsAThirdOfItsTravel() {
-        let free = MekuriDrag.progress(start: 0, translation: -300, width: 400, axis: -1, isBlocked: false)
-        let blocked = MekuriDrag.progress(start: 0, translation: -300, width: 400, axis: -1, isBlocked: true)
-        #expect(free == 0.75)
-        #expect(blocked == 0.25)
+        let track = Self.edgeTrack()
+        let free = MekuriDrag.progress(start: 0, translation: -300, axis: -1, isBlocked: false, track: track)
+        let blocked = MekuriDrag.progress(start: 0, translation: -300, axis: -1, isBlocked: true, track: track)
+        #expect(abs(track.travel(progress: free) - 300) < 0.05)
+        #expect(abs(track.travel(progress: blocked) - 100) < 0.05)
     }
 
     @Test func dragProgressClampsAndResumesFromATakeover() {
-        #expect(MekuriDrag.progress(start: 0, translation: -800, width: 400, axis: -1, isBlocked: false) == 1)
-        #expect(MekuriDrag.progress(start: 0.6, translation: 400, width: 400, axis: -1, isBlocked: false) == 0)
-        #expect(MekuriDrag.progress(start: 0.5, translation: -100, width: 400, axis: -1, isBlocked: false) == 0.75)
-        #expect(MekuriDrag.progress(start: 0.5, translation: -100, width: 0, axis: -1, isBlocked: false) == 0.5)
+        let track = Self.edgeTrack()
+        #expect(MekuriDrag.progress(start: 0, translation: -2000, axis: -1, isBlocked: false, track: track) == 1)
+        #expect(MekuriDrag.progress(start: 0.6, translation: 2000, axis: -1, isBlocked: false, track: track) == 0)
+        let resumed = MekuriDrag.progress(start: 0.5, translation: -100, axis: -1, isBlocked: false, track: track)
+        #expect(abs(track.travel(progress: resumed) - track.travel(progress: 0.5) - 100) < 0.05)
+    }
+
+    @Test func theFreeEdgeStaysUnderTheFinger() {
+        let track = Self.edgeTrack()
+        for distance: CGFloat in [10, 60, 140, 300, 600] {
+            #expect(abs(track.travel(progress: track.progress(travel: distance)) - distance) < 0.05)
+        }
     }
 
     @Test func aForwardTurnCurlsTheCurrentPageOverTheNext() {
@@ -166,14 +185,12 @@ extension MekuriPagerTests {
         let aspect: CGFloat = 2.0 / 3.0
         let phone = MekuriArrangement.resolve(containerSize: CGSize(width: 402, height: 874), pageCount: 6, spread: .automatic, coverStandsAlone: true, pageAspectRatio: aspect)
         #expect(phone == .single(pageCount: 6))
-        #expect(phone.turnWidth(containerWidth: 402) == 804)
-        #expect(phone.dragReach == 0.5)
+        #expect(phone.turnWidth(containerWidth: 402) == 402)
         #expect(phone.slots(showing: 3) == (nil, 3))
 
         let pad = MekuriArrangement.resolve(containerSize: CGSize(width: 1194, height: 834), pageCount: 6, spread: .automatic, coverStandsAlone: true, pageAspectRatio: aspect)
         #expect(pad == .spread(MekuriSpreadLayout(pageCount: 6, coverStandsAlone: true), pageSize: CGSize(width: 556, height: 834)))
         #expect(pad.turnWidth(containerWidth: 1194) == 1112)
-        #expect(pad.dragReach == 1)
         #expect(pad.slots(showing: 4) == (3, 4))
         #expect(pad.transition(from: 3, to: 4) == .none)
     }

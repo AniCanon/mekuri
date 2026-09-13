@@ -364,27 +364,27 @@ class MekuriParityTest {
             MekuriDrag.axis(MekuriTurn.Forward, MekuriDirection.RightToLeft),
             TOLERANCE,
         )
-        assertEquals(
-            0.4f,
-            MekuriDrag.progress(0.2f, -80f, 400f, -1f, isBlocked = false),
-            TOLERANCE,
-        )
-        assertEquals(
-            0.2666667f,
-            MekuriDrag.progress(0.2f, -80f, 400f, -1f, isBlocked = true),
-            TOLERANCE,
-        )
-        assertEquals(
-            1f,
-            MekuriDrag.progress(0.9f, -80f, 400f, -1f, isBlocked = false),
-            TOLERANCE,
-        )
-        assertEquals(
-            0f,
-            MekuriDrag.progress(0.1f, 80f, 400f, -1f, isBlocked = false),
-            TOLERANCE,
-        )
+        val track = MekuriEdgeTrack(MekuriTurn.Forward, geometry, 800f, 400f, 402f)
+        val back = MekuriEdgeTrack(MekuriTurn.Backward, geometry, 800f, 400f, 402f)
+        assertEquals(0.61062f, MekuriDrag.progress(0f, -140f, -1f, isBlocked = false, track = track), TOLERANCE)
+        assertEquals(0.40049f, MekuriDrag.progress(0f, -140f, -1f, isBlocked = true, track = track), TOLERANCE)
+        assertEquals(0.5049f, MekuriDrag.progress(0.2f, -80f, -1f, isBlocked = false, track = track), TOLERANCE)
+        assertEquals(1f, MekuriDrag.progress(0.9f, -2000f, -1f, isBlocked = false, track = track), TOLERANCE)
+        assertEquals(0f, MekuriDrag.progress(0.1f, 80f, -1f, isBlocked = false, track = track), TOLERANCE)
+        assertEquals(0.07042f, MekuriDrag.progress(0f, 140f, 1f, isBlocked = false, track = back), TOLERANCE)
+        assertEquals(0.35f, track.releaseProgress(track.progress(140.7f)), TOLERANCE)
         assertEquals(900f, MekuriDrag.projectedVelocity(-900f, -1f), TOLERANCE)
+    }
+
+    @Test
+    fun `the free edge matches the swift implementation`() {
+        assertEquals(400f, geometry.freeEdge(0f, 400f, 800f), TOLERANCE)
+        assertEquals(269.8602f, geometry.freeEdge(0.5f, 0f, 800f), TOLERANCE)
+        assertEquals(315.6354f, geometry.freeEdge(0.5f, 400f, 800f), TOLERANCE)
+        assertEquals(339.9574f, geometry.freeEdge(0.5f, 800f, 800f), TOLERANCE)
+        assertEquals(-396.073f, geometry.freeEdge(1f, 400f, 800f), TOLERANCE)
+        val edge = geometry.freeEdge(0.3f, 400f, 800f)
+        assertEquals(0.3f, geometry.progressForFreeEdge(edge, 400f, 800f), TOLERANCE)
     }
 
     @Test
@@ -403,12 +403,26 @@ class MekuriParityTest {
             MekuriSpreadLayout(pageCount = 6, coverStandsAlone = true),
             androidx.compose.ui.geometry.Size(556f, 834f),
         )
-        assertEquals(804f, single.turnWidth(402f), TOLERANCE)
-        assertEquals(0.5f, single.dragReach, TOLERANCE)
-        assertEquals(0.35f, single.releaseProgress(0.175f), TOLERANCE)
+        assertEquals(402f, single.turnWidth(402f), TOLERANCE)
         assertEquals(1112f, spread.turnWidth(1194f), TOLERANCE)
-        assertEquals(1f, spread.dragReach, TOLERANCE)
-        assertEquals(0.35f, spread.releaseProgress(0.35f), TOLERANCE)
+        val grabbed = single.edgeTrack(
+            MekuriTurn.Forward,
+            androidx.compose.ui.geometry.Size(402f, 874f),
+            grabY = 700f,
+            liftsFromBottom = true,
+            configuration = MekuriConfiguration.Default,
+        )
+        assertEquals(174f, grabbed.row, TOLERANCE)
+        assertEquals(402f, grabbed.reach, TOLERANCE)
+        val slot = spread.edgeTrack(
+            MekuriTurn.Forward,
+            androidx.compose.ui.geometry.Size(1194f, 900f),
+            grabY = 20f,
+            liftsFromBottom = false,
+            configuration = MekuriConfiguration.Default,
+        )
+        assertEquals(0f, slot.row, TOLERANCE)
+        assertEquals(1112f, slot.reach, TOLERANCE)
     }
 
     @Test

@@ -36,6 +36,9 @@ struct MekuriTurnState: Equatable {
     /// The bottom corner lifts instead of the top. Decided when the turn
     /// begins; a takeover keeps it.
     var liftsFromBottom = false
+    /// Container height a finger grabbed the turn at; nil for a turn no
+    /// finger started, which tracks the page's midline. A takeover keeps it.
+    var grabY: CGFloat?
 
     var isBlocked: Bool { self.targetIndex == nil }
 

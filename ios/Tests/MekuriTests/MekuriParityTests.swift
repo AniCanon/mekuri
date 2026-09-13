@@ -336,23 +336,26 @@ import Testing
         #expect(self.close(MekuriDrag.axis(turn: .forward, direction: .leftToRight), -1))
         #expect(self.close(MekuriDrag.axis(turn: .backward, direction: .leftToRight), 1))
         #expect(self.close(MekuriDrag.axis(turn: .forward, direction: .rightToLeft), 1))
-        #expect(self.close(
-            MekuriDrag.progress(start: 0.2, translation: -80, width: 400, axis: -1, isBlocked: false),
-            0.4
-        ))
-        #expect(self.close(
-            MekuriDrag.progress(start: 0.2, translation: -80, width: 400, axis: -1, isBlocked: true),
-            0.2666667
-        ))
-        #expect(self.close(
-            MekuriDrag.progress(start: 0.9, translation: -80, width: 400, axis: -1, isBlocked: false),
-            1
-        ))
-        #expect(self.close(
-            MekuriDrag.progress(start: 0.1, translation: 80, width: 400, axis: -1, isBlocked: false),
-            0
-        ))
+        let track = MekuriEdgeTrack(turn: .forward, geometry: self.geometry, pageHeight: 800, row: 400, reach: 402)
+        let back = MekuriEdgeTrack(turn: .backward, geometry: self.geometry, pageHeight: 800, row: 400, reach: 402)
+        #expect(self.close(MekuriDrag.progress(start: 0, translation: -140, axis: -1, isBlocked: false, track: track), 0.61062))
+        #expect(self.close(MekuriDrag.progress(start: 0, translation: -140, axis: -1, isBlocked: true, track: track), 0.40049))
+        #expect(self.close(MekuriDrag.progress(start: 0.2, translation: -80, axis: -1, isBlocked: false, track: track), 0.5049))
+        #expect(self.close(MekuriDrag.progress(start: 0.9, translation: -2000, axis: -1, isBlocked: false, track: track), 1))
+        #expect(self.close(MekuriDrag.progress(start: 0.1, translation: 80, axis: -1, isBlocked: false, track: track), 0))
+        #expect(self.close(MekuriDrag.progress(start: 0, translation: 140, axis: 1, isBlocked: false, track: back), 0.07042))
+        #expect(self.close(track.releaseProgress(track.progress(travel: 140.7)), 0.35))
         #expect(self.close(MekuriDrag.projectedVelocity(-900, axis: -1), 900))
+    }
+
+    @Test func theFreeEdgeMatchesTheKotlinImplementation() {
+        #expect(self.close(self.geometry.freeEdge(progress: 0, y: 400, pageHeight: 800), 400))
+        #expect(self.close(self.geometry.freeEdge(progress: 0.5, y: 0, pageHeight: 800), 269.8602))
+        #expect(self.close(self.geometry.freeEdge(progress: 0.5, y: 400, pageHeight: 800), 315.6354))
+        #expect(self.close(self.geometry.freeEdge(progress: 0.5, y: 800, pageHeight: 800), 339.9574))
+        #expect(self.close(self.geometry.freeEdge(progress: 1, y: 400, pageHeight: 800), -396.073))
+        let edge = self.geometry.freeEdge(progress: 0.3, y: 400, pageHeight: 800)
+        #expect(self.close(self.geometry.progress(forFreeEdge: edge, y: 400, pageHeight: 800), 0.3))
     }
 
     @Test func theLiftingCornerMatchesTheKotlinImplementation() {
@@ -369,12 +372,26 @@ import Testing
             MekuriSpreadLayout(pageCount: 6, coverStandsAlone: true),
             pageSize: CGSize(width: 556, height: 834)
         )
-        #expect(self.close(single.turnWidth(containerWidth: 402), 804))
-        #expect(self.close(single.dragReach, 0.5))
-        #expect(self.close(single.releaseProgress(0.175), 0.35))
+        #expect(self.close(single.turnWidth(containerWidth: 402), 402))
         #expect(self.close(spread.turnWidth(containerWidth: 1194), 1112))
-        #expect(self.close(spread.dragReach, 1))
-        #expect(self.close(spread.releaseProgress(0.35), 0.35))
+        let grabbed = single.edgeTrack(
+            turn: .forward,
+            containerSize: CGSize(width: 402, height: 874),
+            grabY: 700,
+            liftsFromBottom: true,
+            configuration: .default
+        )
+        #expect(self.close(grabbed.row, 174))
+        #expect(self.close(grabbed.reach, 402))
+        let slot = spread.edgeTrack(
+            turn: .forward,
+            containerSize: CGSize(width: 1194, height: 900),
+            grabY: 20,
+            liftsFromBottom: false,
+            configuration: .default
+        )
+        #expect(self.close(slot.row, 0))
+        #expect(self.close(slot.reach, 1112))
     }
 
     @Test func theReleaseDecisionMatchesTheKotlinImplementation() {

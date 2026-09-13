@@ -13,27 +13,38 @@ internal sealed interface MekuriArrangement {
     data class Spread(val layout: MekuriSpreadLayout, val pageSize: Size) : MekuriArrangement
 
     /**
-     * Distance the free edge travels across a whole turn, so the edge stays under
-     * the finger. A single page's edge crosses the container and as far again
-     * past the spine, beyond any drag; a spread's crosses both slots.
+     * The finger's full range across a turn, against which a release is judged:
+     * the container for a single page, both slots for a spread.
      */
     fun turnWidth(containerWidth: Float): Float = when (this) {
-        is Single -> containerWidth * 2f
+        is Single -> containerWidth
         is Spread -> this.pageSize.width * 2f
     }
 
-    /** Share of a turn a drag across the whole page or spread reaches. */
-    val dragReach: Float
-        get() = when (this) {
-            is Single -> 0.5f
-            is Spread -> 1f
-        }
-
     /**
-     * Progress as a release is judged: the share of the travel a drag can reach,
-     * so the snap threshold means the same distance in either mode.
+     * The drag mapping for a turn grabbed at [grabY] in the container. Pages are
+     * centred vertically; the grab clamps to the page.
      */
-    fun releaseProgress(progress: Float): Float = progress / this.dragReach
+    fun edgeTrack(
+        turn: MekuriTurn,
+        containerSize: Size,
+        grabY: Float,
+        liftsFromBottom: Boolean,
+        configuration: MekuriConfiguration,
+    ): MekuriEdgeTrack {
+        val page = when (this) {
+            is Single -> containerSize
+            is Spread -> this.pageSize
+        }
+        val y = (grabY - (containerSize.height - page.height) / 2f).coerceIn(0f, page.height)
+        return MekuriEdgeTrack(
+            turn = turn,
+            geometry = MekuriFoldGeometry(page.width, configuration),
+            pageHeight = page.height,
+            row = if (liftsFromBottom) page.height - y else y,
+            reach = this.turnWidth(containerSize.width),
+        )
+    }
 
     fun turnState(id: Int, turn: MekuriTurn, from: Int): MekuriTurnState = when (this) {
         is Single -> MekuriTurnState.begin(id, turn, from, this.pageCount)

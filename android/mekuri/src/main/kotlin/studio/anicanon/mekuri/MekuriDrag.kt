@@ -49,21 +49,19 @@ internal object MekuriDrag {
     }
 
     /**
-     * Progress after `translation` from a drag that took over at `start`.
-     * Clamped to 0..1, so reversing past the origin flattens the page rather
-     * than starting the opposite turn; a blocked turn keeps [BlockedDamping] of
+     * Progress after `translation` from a drag that took over at `start`, keeping
+     * the free edge under the finger. A blocked turn keeps [BlockedDamping] of
      * its travel.
      */
     fun progress(
         start: Float,
         translation: Float,
-        width: Float,
         axis: Float,
         isBlocked: Boolean,
+        track: MekuriEdgeTrack,
     ): Float {
-        if (width <= 0f) return start
         val damping = if (isBlocked) BlockedDamping else 1f
-        return (start + translation * axis / width * damping).coerceIn(0f, 1f)
+        return track.progress(track.travel(start) + translation * axis * damping)
     }
 
     /** Velocity measured along the turn, positive toward completion. */

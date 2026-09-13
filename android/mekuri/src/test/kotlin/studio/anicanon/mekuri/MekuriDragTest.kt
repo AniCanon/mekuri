@@ -56,18 +56,35 @@ class MekuriDragTest {
         assertEquals(true, MekuriDrag.isHorizontallyDominant(Offset(-11f, -10f)))
     }
 
+    private val track = MekuriEdgeTrack(
+        turn = MekuriTurn.Forward,
+        geometry = MekuriFoldGeometry(400f, MekuriConfiguration.Default),
+        pageHeight = 800f,
+        row = 400f,
+        reach = 400f,
+    )
+
     @Test
     fun `a blocked drag keeps a third of its travel`() {
-        assertEquals(0.75f, MekuriDrag.progress(0f, -300f, 400f, -1f, isBlocked = false), TOLERANCE)
-        assertEquals(0.25f, MekuriDrag.progress(0f, -300f, 400f, -1f, isBlocked = true), TOLERANCE)
+        val free = MekuriDrag.progress(0f, -300f, -1f, isBlocked = false, track = this.track)
+        val blocked = MekuriDrag.progress(0f, -300f, -1f, isBlocked = true, track = this.track)
+        assertEquals(300f, this.track.travel(free), 0.05f)
+        assertEquals(100f, this.track.travel(blocked), 0.05f)
     }
 
     @Test
     fun `drag progress clamps and resumes from a takeover`() {
-        assertEquals(1f, MekuriDrag.progress(0f, -800f, 400f, -1f, isBlocked = false), TOLERANCE)
-        assertEquals(0f, MekuriDrag.progress(0.6f, 400f, 400f, -1f, isBlocked = false), TOLERANCE)
-        assertEquals(0.75f, MekuriDrag.progress(0.5f, -100f, 400f, -1f, isBlocked = false), TOLERANCE)
-        assertEquals(0.5f, MekuriDrag.progress(0.5f, -100f, 0f, -1f, isBlocked = false), TOLERANCE)
+        assertEquals(1f, MekuriDrag.progress(0f, -2000f, -1f, isBlocked = false, track = this.track), TOLERANCE)
+        assertEquals(0f, MekuriDrag.progress(0.6f, 2000f, -1f, isBlocked = false, track = this.track), TOLERANCE)
+        val resumed = MekuriDrag.progress(0.5f, -100f, -1f, isBlocked = false, track = this.track)
+        assertEquals(this.track.travel(0.5f) + 100f, this.track.travel(resumed), 0.05f)
+    }
+
+    @Test
+    fun `the free edge stays under the finger`() {
+        for (distance in listOf(10f, 60f, 140f, 300f, 600f)) {
+            assertEquals(distance, this.track.travel(this.track.progress(distance)), 0.05f)
+        }
     }
 
     private companion object {

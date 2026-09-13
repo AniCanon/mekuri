@@ -2,8 +2,10 @@ package studio.anicanon.mekuri
 
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sin
 
 /**
  * Pure fold arithmetic in page space. Progress runs 0 (flat) to 1 (turned); the
@@ -71,9 +73,43 @@ internal data class MekuriFoldGeometry(
         )
     }
 
+    /**
+     * Horizontal position of the sheet's free edge at row [y] of the shader's
+     * frame, as the shader draws it: on the roll while the flap is shorter than
+     * half a turn, lying flat past the crest beyond. Radius and shear land with
+     * the turn.
+     */
+    fun freeEdge(progress: Float, y: Float, pageHeight: Float): Float {
+        val landing = landingRadiusScale(progress)
+        val held = 1 - y / pageHeight
+        val shear = configuration.cornerShear * landing * (y - pageHeight / 2)
+        val axis = foldAxisOffset(progress) + shear - bowLead(progress) * held * held
+        val flap = pageWidth - axis
+        val radius = radius(pageHeight - y) * landing
+        val halfTurn = PI.toFloat() * radius
+        return if (flap <= halfTurn) axis + radius * sin(flap / radius) else axis - (flap - halfTurn)
+    }
+
+    /**
+     * Progress at which [freeEdge] at row [y] reaches [edge]. The edge only moves
+     * toward the spine as progress grows.
+     */
+    fun progressForFreeEdge(edge: Float, y: Float, pageHeight: Float): Float {
+        var low = 0f
+        var high = 1f
+        repeat(EdgeSearchSteps) {
+            val mid = (low + high) / 2
+            if (freeEdge(mid, y, pageHeight) > edge) low = mid else high = mid
+        }
+        return (low + high) / 2
+    }
+
     private fun clamped(progress: Float): Float = min(max(progress, 0f), 1f)
 
     companion object {
+        /** Bisection steps when inverting [freeEdge]; fixed so every platform lands on the same value. */
+        const val EdgeSearchSteps = 32
+
         /** Share of the turn over which the roll flattens. */
         const val LandingFraction = 0.3f
 
