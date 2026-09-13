@@ -56,7 +56,7 @@ Every pixel is classified by its signed distance `d` from the fold axis: past
 the roll it shows the page beneath and the contact shadow; on the roll it
 samples the front or the mirrored back at the unrolled distance, darkens the
 front toward the crest and shades the back by its normal against a fixed light; short of the crease it shows the
-flat front, dimmed by the crease shadow. `MekuriFoldGeometry` holds the same
+flat front, dimmed only near the edge of a flap lying flat over it. `MekuriFoldGeometry` holds the same
 formulas in Swift and is what the tests exercise; the shader must match it.
 
 | Constant | Value |

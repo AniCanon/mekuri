@@ -65,8 +65,9 @@ half4 mekuriContactShadow(float d, float extent, float radius, float heldRadius,
     return half4(0.0, 0.0, 0.0, half(alpha));
 }
 
-// Shadow the crease casts on the page beneath the leaf, `d` (negative) short
-// of the crease. Same ramp as the whole-face dimming of the flat front.
+// Shadow the sheet's flat-lying edge casts on the page beneath, `d` past
+// that edge (negative short of it). Same ramp as the whole-face dimming of
+// the flat front.
 half4 mekuriCreaseShadow(float d, float width, float opacity) {
     half reach = half(saturate(1.0 + d / width));
     return half4(0.0, 0.0, 0.0, half(opacity) * reach * reach);
@@ -80,6 +81,7 @@ half4 main(float2 position) {
     float d = position.x - axis;
     float radius = heldRadius + radiusSlope * (size.y - position.y);
     float halfTurn = mekuriPi * radius;
+    float lip = halfTurn - flap;
     float extent = flap < 0.5 * halfTurn ? radius * sin(max(flap, 0.0) / radius) : radius;
 
     if (d > radius) {
@@ -131,14 +133,14 @@ half4 main(float2 position) {
         return mekuriClear;
     }
     if (face == mekuriFaceShadow) {
-        return mekuriCreaseShadow(d, shadowWidth, shadowOpacity);
+        return mekuriCreaseShadow(d - lip, shadowWidth, shadowOpacity);
     }
     if (face == mekuriFaceFront) {
         return layer.eval(position);
     }
 
     half4 sheet = layer.eval(position);
-    float reach = saturate(1.0 + d / shadowWidth);
+    float reach = saturate(1.0 + (d - lip) / shadowWidth);
     float shade = shadowOpacity * reach * reach;
     return half4(sheet.rgb * (1.0 - half(shade)), sheet.a);
 }
