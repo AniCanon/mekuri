@@ -20,9 +20,10 @@ static half mekuriFrontShade(float u, float dim) {
 }
 
 // Shadow the lifted sheet casts on the page beneath, `d` past the crease.
-// Darkest where the roll is tightest; reaches two radii past the rim.
-static half4 mekuriContactShadow(float d, float radius, float heldRadius, float opacity) {
-    float reach = 1.0 - saturate((d - radius) / (2.0 * radius));
+// Starts at `extent`, how far the sheet reaches past the crease, darkest
+// where the roll is tightest, and fades over twice that reach.
+static half4 mekuriContactShadow(float d, float extent, float radius, float heldRadius, float opacity) {
+    float reach = 1.0 - saturate((d - extent) / (2.0 * max(extent, 1.0)));
     float alpha = opacity * (heldRadius / radius) * reach * reach;
     return half4(0.0h, 0.0h, 0.0h, half(alpha));
 }
@@ -72,12 +73,13 @@ constant half4 mekuriClear = half4(0.0h);
     float d = position.x - axis;
     float radius = heldRadius + radiusSlope * (size.y - position.y);
     float halfTurn = M_PI_F * radius;
+    float extent = flap < 0.5 * halfTurn ? radius * sin(max(flap, 0.0) / radius) : radius;
 
     if (d > radius) {
         if (face == mekuriFaceFront || face == mekuriFaceBack) {
             return mekuriClear;
         }
-        return mekuriContactShadow(d, radius, heldRadius, shadowOpacity);
+        return mekuriContactShadow(d, extent, radius, heldRadius, shadowOpacity);
     }
 
     if (d >= 0.0) {
@@ -106,7 +108,7 @@ constant half4 mekuriClear = half4(0.0h);
         if (face == mekuriFaceFront) {
             return mekuriClear;
         }
-        return mekuriContactShadow(d, radius, heldRadius, shadowOpacity);
+        return mekuriContactShadow(d, extent, radius, heldRadius, shadowOpacity);
     }
 
     float behind = halfTurn - d;
