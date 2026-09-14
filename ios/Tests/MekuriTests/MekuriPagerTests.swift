@@ -73,6 +73,20 @@ extension MekuriPagerTests {
         #expect(abs(track.travel(progress: resumed) - track.travel(progress: 0.5) - 100) < 0.05)
     }
 
+    @Test func aSlidingStackStillLandsTheEdgeUnderTheFinger() {
+        let track = MekuriEdgeTrack(
+            turn: .forward,
+            geometry: MekuriFoldGeometry(pageWidth: 400, configuration: .default),
+            pageHeight: 800,
+            row: 400,
+            reach: 800,
+            stackTravel: -200
+        )
+        for distance: CGFloat in [10, 140, 500] {
+            #expect(abs(track.travel(progress: track.progress(travel: distance)) - distance) < 0.05)
+        }
+    }
+
     @Test func theFreeEdgeStaysUnderTheFinger() {
         let track = Self.edgeTrack()
         for distance: CGFloat in [10, 60, 140, 300, 600] {

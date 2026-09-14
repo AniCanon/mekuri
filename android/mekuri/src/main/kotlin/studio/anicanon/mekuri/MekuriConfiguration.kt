@@ -34,8 +34,8 @@ public class MekuriConfiguration internal constructor(
      *   0..1. The crease is straight again at both ends of the turn.
      * @param tapZone width of each tap-to-turn edge zone as a ratio of the
      *   container width.
-     * @param snapThreshold turn progress, 0..1, past which a released drag
-     *   completes the turn.
+     * @param snapThreshold share of the finger's range, 0..1, a drag must cover
+     *   before its release completes the turn.
      * @param settleAnimation animation used to settle a released turn.
      * @param reducedMotionOverride overrides the system reduce-motion setting
      *   when non-null.

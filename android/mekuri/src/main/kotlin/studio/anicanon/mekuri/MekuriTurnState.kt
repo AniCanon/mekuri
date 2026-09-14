@@ -45,6 +45,11 @@ internal data class MekuriTurnState(
      * finger started, which tracks the page's midline. A takeover keeps it.
      */
     val grabY: Float? = null,
+    /**
+     * A finger or an accessibility action started or took over the turn; a turn
+     * driven by the selection stays silent.
+     */
+    val playsHaptics: Boolean = false,
 ) {
     val isBlocked: Boolean get() = this.targetIndex == null
 

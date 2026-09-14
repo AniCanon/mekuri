@@ -82,10 +82,10 @@ Under `.automatic` two pages are laid out at whatever size actually fits, and th
 | `mekuriCornerLift(_:)` | `0.10` | Fold-line travel per unit of vertical distance from the page centre |
 | `mekuriCreaseBow(_:)` | `0.35` | How far the free corner runs ahead of a straight crease, 0…1 |
 | `mekuriTapZone(_:)` | `0.25` | Width of each edge tap zone as a ratio of page width |
-| `mekuriSnapThreshold(_:)` | `0.35` | Progress past which a release completes the turn |
+| `mekuriSnapThreshold(_:)` | `0.35` | Share of the finger's range a drag must cover before its release completes the turn |
 | `mekuriSettleAnimation(_:)` | `nil` | Settle animation; `nil` is the package curve |
 | `mekuriReducedMotion(_:)` | `nil` | Override the system setting either way; `nil` follows it |
-| `mekuriHaptics(_:)` | `true` | A tap as the page lifts, a tick as a drag crosses the commit point, a thump as it lands |
+| `mekuriHaptics(_:)` | `true` | A tap as the page lifts, a tick as a drag crosses the commit point, a thump as it lands; turns driven by the selection stay silent |
 
 ## Working against a checkout
 

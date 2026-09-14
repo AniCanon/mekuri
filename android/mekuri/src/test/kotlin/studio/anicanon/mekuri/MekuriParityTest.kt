@@ -383,8 +383,10 @@ class MekuriParityTest {
         assertEquals(315.6354f, geometry.freeEdge(0.5f, 400f, 800f), TOLERANCE)
         assertEquals(339.9574f, geometry.freeEdge(0.5f, 800f, 800f), TOLERANCE)
         assertEquals(-396.073f, geometry.freeEdge(1f, 400f, 800f), TOLERANCE)
-        val edge = geometry.freeEdge(0.3f, 400f, 800f)
-        assertEquals(0.3f, geometry.progressForFreeEdge(edge, 400f, 800f), TOLERANCE)
+        val track = MekuriEdgeTrack(MekuriTurn.Forward, geometry, 800f, 400f, 400f)
+        assertEquals(0.3f, track.progress(track.travel(0.3f)), TOLERANCE)
+        val sliding = MekuriEdgeTrack(MekuriTurn.Forward, geometry, 800f, 400f, 800f, stackTravel = -200f)
+        assertEquals(track.travel(0.6f) - 120f, sliding.travel(0.6f), TOLERANCE)
     }
 
     @Test

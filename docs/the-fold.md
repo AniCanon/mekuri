@@ -11,7 +11,7 @@ The sheet bends around a cylinder whose axis is parallel to the spine and travel
 | `backFaceDim` | `0.86` | Darkest brightness of the lit reverse of the sheet |
 | `creaseShadowWidth` | `0.10 × pageWidth` | Shadow band cast along the fold onto the page below |
 | `creaseShadowOpacity` | `0.35` | Peak opacity of that band |
-| `snapThreshold` | `0.35` | Progress past which a release completes the turn |
+| `snapThreshold` | `0.35` | Share of the finger's range a drag must cover before its release completes the turn |
 | `flingVelocity` | `600 pt/s` | Velocity past which a release completes regardless of progress |
 | `settleAnimation` | timing curve `(0.35, 0.1, 0.75, 0.85)`, `0.42 s` | Completion and fall-back; slow off the grab, quick into the landing |
 | `tapZoneWidth` | `0.25 × pageWidth` | Outer zone on each side; the middle half is the centre zone |

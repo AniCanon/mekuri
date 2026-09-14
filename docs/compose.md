@@ -62,7 +62,7 @@ val state = MekuriPagerState(pageCount = { book.pages.size })
 
 The fold and gesture knobs live on `MekuriConfiguration`, whose public constructor takes `foldRadius`, `cornerLift`, `creaseBow`, `tapZone`, `snapThreshold`, `settleAnimation` and `reducedMotionOverride` — the same seven the SwiftUI modifiers expose. `settleAnimation` is a Compose `AnimationSpec` and uses the same easing and duration as iOS, but the two animation systems have no shared representation, so the parity is not asserted.
 
-`MekuriPager` also takes `haptics`, true by default: a tap as the page lifts, a tick as a drag crosses the commit point and a thump as the page lands, played through the view so the system touch-feedback setting applies.
+`MekuriPager` also takes `haptics`, true by default: a tap as the page lifts, a tick as a drag crosses the commit point and a thump as the page lands, played through the view so the system touch-feedback setting applies. Turns driven by the pager state stay silent.
 
 ## Working against a checkout
 

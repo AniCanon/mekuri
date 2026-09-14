@@ -90,26 +90,9 @@ internal data class MekuriFoldGeometry(
         return if (flap <= halfTurn) axis + radius * sin(flap / radius) else axis - (flap - halfTurn)
     }
 
-    /**
-     * Progress at which [freeEdge] at row [y] reaches [edge]. The edge only moves
-     * toward the spine as progress grows.
-     */
-    fun progressForFreeEdge(edge: Float, y: Float, pageHeight: Float): Float {
-        var low = 0f
-        var high = 1f
-        repeat(EdgeSearchSteps) {
-            val mid = (low + high) / 2
-            if (freeEdge(mid, y, pageHeight) > edge) low = mid else high = mid
-        }
-        return (low + high) / 2
-    }
-
     private fun clamped(progress: Float): Float = min(max(progress, 0f), 1f)
 
     companion object {
-        /** Bisection steps when inverting [freeEdge]; fixed so every platform lands on the same value. */
-        const val EdgeSearchSteps = 32
-
         /** Share of the turn over which the roll flattens. */
         const val LandingFraction = 0.3f
 

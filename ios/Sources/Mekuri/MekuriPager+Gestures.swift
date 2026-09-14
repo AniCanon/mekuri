@@ -49,6 +49,7 @@ extension MekuriPager {
         var state = self.beginTurn(turn, in: arrangement)
         state.liftsFromBottom = liftsFromBottom
         state.grabY = grabY
+        state.playsHaptics = true
         guard let target = state.targetIndex else { return }
         if self.reducesMotion {
             self.commit(to: target)
@@ -94,6 +95,7 @@ extension MekuriPager {
         guard turn.hasLeaf else { return }
         turn.liftsFromBottom = MekuriDrag.liftsFromBottom(y: grabY, height: size.height)
         turn.grabY = grabY
+        turn.playsHaptics = true
         turn.progress = MekuriDrag.progress(
             start: 0,
             translation: translation.width,
@@ -159,12 +161,14 @@ extension MekuriPager {
 
     /// A turn no finger started tracks the page's midline.
     private func edgeTrack(for turn: MekuriTurnState, size: CGSize, in arrangement: MekuriArrangement) -> MekuriEdgeTrack {
-        arrangement.edgeTrack(
+        let span = arrangement.shiftSpan(showing: self.settledPage, turn: turn, direction: self.direction)
+        return arrangement.edgeTrack(
             turn: turn.turn,
             containerSize: size,
             grabY: turn.grabY ?? size.height / 2,
             liftsFromBottom: turn.liftsFromBottom,
-            configuration: self.configuration
+            configuration: self.configuration,
+            stackTravel: MekuriDrag.axis(turn: turn.turn, direction: self.direction) * (span.end - span.start)
         )
     }
 
@@ -200,6 +204,7 @@ extension MekuriPager {
         turn.startProgress = self.presented.value
         turn.progress = turn.startProgress
         turn.phase = .dragging
+        turn.playsHaptics = true
         self.withoutAnimation {
             self.turn = turn
         }
@@ -225,7 +230,9 @@ extension MekuriPager {
         case .commit:
             if let target = turn.targetIndex {
                 self.commit(to: target)
-                self.play(.land)
+                if turn.playsHaptics {
+                    self.play(.land)
+                }
             }
         case .revert:
             if self.currentPage != self.settledPage {

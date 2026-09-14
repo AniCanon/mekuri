@@ -66,13 +66,17 @@ internal class MekuriPagerController(
     val settledPage: Int get() = this.state.currentPage
 
     /** A turn no finger started tracks the page's midline. */
-    private fun edgeTrack(turn: MekuriTurnState): MekuriEdgeTrack = this.arrangement.edgeTrack(
-        turn = turn.turn,
-        containerSize = this.containerSize,
-        grabY = turn.grabY ?: (this.containerSize.height / 2f),
-        liftsFromBottom = turn.liftsFromBottom,
-        configuration = this.configuration,
-    )
+    private fun edgeTrack(turn: MekuriTurnState): MekuriEdgeTrack {
+        val span = this.arrangement.shiftSpan(this.settledPage, turn, this.direction)
+        return this.arrangement.edgeTrack(
+            turn = turn.turn,
+            containerSize = this.containerSize,
+            grabY = turn.grabY ?: (this.containerSize.height / 2f),
+            liftsFromBottom = turn.liftsFromBottom,
+            configuration = this.configuration,
+            stackTravel = MekuriDrag.axis(turn.turn, this.direction) * (span.end - span.start),
+        )
+    }
 
     fun foldProgress(): Float = this.turn?.turn?.fold(this.progress) ?: 0f
 
@@ -93,7 +97,7 @@ internal class MekuriPagerController(
     /** Does nothing at the ends or while another turn is in flight. */
     fun perform(turn: MekuriTurn, liftsFromBottom: Boolean = false, grabY: Float? = null) {
         if (this.turn != null) return
-        val begun = this.begin(turn).copy(liftsFromBottom = liftsFromBottom, grabY = grabY)
+        val begun = this.begin(turn).copy(liftsFromBottom = liftsFromBottom, grabY = grabY, playsHaptics = true)
         val target = begun.targetIndex ?: return
         if (this.reducesMotion) {
             this.state.currentPage = target
@@ -198,6 +202,7 @@ internal class MekuriPagerController(
         val begun = this.begin(turn).copy(
             liftsFromBottom = MekuriDrag.liftsFromBottom(grabY, this.containerSize.height),
             grabY = grabY,
+            playsHaptics = true,
         )
         if (!begun.hasLeaf) return
         this.turn = begun
@@ -269,7 +274,7 @@ internal class MekuriPagerController(
     private fun takeOver(turn: MekuriTurnState): MekuriTurnState {
         this.settleJob?.cancel()
         this.settleJob = null
-        val taken = turn.copy(startProgress = this.progress, phase = MekuriTurnPhase.Dragging)
+        val taken = turn.copy(startProgress = this.progress, phase = MekuriTurnPhase.Dragging, playsHaptics = true)
         this.turn = taken
         return taken
     }
@@ -316,7 +321,9 @@ internal class MekuriPagerController(
             MekuriTurnDecision.Commit -> current.targetIndex ?: current.fromIndex
             MekuriTurnDecision.Revert -> current.fromIndex
         }
-        if (decision == MekuriTurnDecision.Commit && current.targetIndex != null) this.onHaptic(MekuriHaptic.Land)
+        if (decision == MekuriTurnDecision.Commit && current.targetIndex != null && current.playsHaptics) {
+            this.onHaptic(MekuriHaptic.Land)
+        }
         this.state.currentPage = landed
         this.pending?.complete(landed)
         this.pending = null

@@ -47,16 +47,21 @@ halfTurn = π × radius
 
 - `d > radius`: past the roll. The page beneath shows through, darkened by the
   contact shadow, `alpha = opacity × (heldRadius / radius) × reach²` with
-  `reach` falling from 1 at the rim to 0 two radii past it.
+  `reach` falling from 1 at `extent`, how far the sheet reaches past the crease
+  (`radius × sin(flap / radius)` while `flap < halfTurn / 2`, `radius` beyond),
+  to 0 half that reach further.
 - `0 ≤ d ≤ radius`: on the roll. `front = radius × asin(d / radius)`,
   `back = halfTurn − front`. If `back ≤ flap` the back of the sheet is visible
   here, sampled at `axis + back` and shaded; otherwise if `front ≤ flap` the
-  rising front is visible, sampled at `axis + front`; otherwise nothing has
+  rising front is visible, sampled at `axis + front` and darkened toward the
+  crest by `mix(1, backFaceDim, 1 − √(1 − (d / radius)²))`; otherwise nothing has
   reached this pixel and it is contact shadow.
 - `d < 0`: short of the crease. If `halfTurn − d ≤ flap` the landed back lies
   here, sampled at `axis + (halfTurn − d)`; otherwise it is the flat, unlifted
   front, sampled in place and dimmed by the crease ramp
-  `opacity × saturate(1 + d / shadowWidth)²`.
+  `opacity × saturate(1 + (d − lip) / shadowWidth)²` with `lip = halfTurn − flap`,
+  so it darkens only beside a flap lying flat; while the sheet is still on the
+  roll `lip` is positive and the ramp fades out.
 
 The back face is lit by a fixed unit light `(0.45, 0.893)` in the x/z plane.
 On the roll the normal is `(d / r, √(1 − (d / r)²))`; on the flat landed back
@@ -529,12 +534,19 @@ reverts it, under every consumer that scrolls.
 
 Once locked, the turn's direction comes from the sign of the horizontal
 translation against the forward axis, and it stays locked for the drag;
-progress is `clamp(start + dx × axis / width × damping, 0, 1)` with damping
-1/3 when the turn is blocked and 1 otherwise, so reversing past the origin
-flattens the page rather than starting the opposite turn. `width` is the
-distance a drag travels to complete a turn: the container width in single
-mode, twice the page width in a spread. A drag can start anywhere on the
-page, not only in an edge zone.
+progress follows the sheet's free edge rather than the axis. On the grabbed
+row, in page space and mirrored when the bottom corner lifts, `freeEdge(p)`
+is where the shader draws the edge: `axis + radius × sin(flap / radius)` while
+`flap ≤ halfTurn`, `axis − (flap − halfTurn)` beyond, with radius and shear
+scaled by the landing. `travel(p)` is how far that edge has moved along the
+drag since the turn began, plus the spread stack's own slide over the same
+progress. A drag asks for `travel(start) + dx × axis × damping`, damping 1/3
+when the turn is blocked and 1 otherwise, and progress is the `p` whose
+travel matches, found by 32 fixed bisection steps and clamped to 0…1, so
+reversing past the origin flattens the page rather than starting the
+opposite turn. A release is judged on `travel / reach`, where `reach` is the
+container width in single mode and twice the page width in a spread. A drag
+can start anywhere on the page, not only in an edge zone.
 
 A drag that arrives while a turn is settling (or armed and not yet settled)
 takes it over, but only if the sample is horizontally dominant; a vertical

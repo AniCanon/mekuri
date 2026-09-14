@@ -81,6 +81,14 @@ class MekuriDragTest {
     }
 
     @Test
+    fun `a sliding stack still lands the edge under the finger`() {
+        val sliding = this.track.copy(reach = 800f, stackTravel = -200f)
+        for (distance in listOf(10f, 140f, 500f)) {
+            assertEquals(distance, sliding.travel(sliding.progress(distance)), 0.05f)
+        }
+    }
+
+    @Test
     fun `the free edge stays under the finger`() {
         for (distance in listOf(10f, 60f, 140f, 300f, 600f)) {
             assertEquals(distance, this.track.travel(this.track.progress(distance)), 0.05f)

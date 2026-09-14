@@ -23,7 +23,8 @@ internal sealed interface MekuriArrangement {
 
     /**
      * The drag mapping for a turn grabbed at [grabY] in the container. Pages are
-     * centred vertically; the grab clamps to the page.
+     * centred vertically; the grab clamps to the page. [stackTravel] is the spread
+     * stack's slide along the drag across the whole turn.
      */
     fun edgeTrack(
         turn: MekuriTurn,
@@ -31,6 +32,7 @@ internal sealed interface MekuriArrangement {
         grabY: Float,
         liftsFromBottom: Boolean,
         configuration: MekuriConfiguration,
+        stackTravel: Float = 0f,
     ): MekuriEdgeTrack {
         val page = when (this) {
             is Single -> containerSize
@@ -43,6 +45,7 @@ internal sealed interface MekuriArrangement {
             pageHeight = page.height,
             row = if (liftsFromBottom) page.height - y else y,
             reach = this.turnWidth(containerSize.width),
+            stackTravel = stackTravel,
         )
     }
 

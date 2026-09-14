@@ -33,13 +33,15 @@ enum MekuriArrangement: Equatable {
     }
 
     /// The drag mapping for a turn grabbed at `grabY` in the container. Pages
-    /// are centred vertically; the grab clamps to the page.
+    /// are centred vertically; the grab clamps to the page. `stackTravel` is
+    /// the spread stack's slide along the drag across the whole turn.
     func edgeTrack(
         turn: MekuriTurn,
         containerSize: CGSize,
         grabY: CGFloat,
         liftsFromBottom: Bool,
-        configuration: MekuriConfiguration
+        configuration: MekuriConfiguration,
+        stackTravel: CGFloat = 0
     ) -> MekuriEdgeTrack {
         let page = switch self {
         case .single: containerSize
@@ -51,7 +53,8 @@ enum MekuriArrangement: Equatable {
             geometry: MekuriFoldGeometry(pageWidth: page.width, configuration: configuration),
             pageHeight: page.height,
             row: liftsFromBottom ? page.height - y : y,
-            reach: self.turnWidth(containerWidth: containerSize.width)
+            reach: self.turnWidth(containerWidth: containerSize.width),
+            stackTravel: stackTravel
         )
     }
 

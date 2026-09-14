@@ -354,8 +354,10 @@ import Testing
         #expect(self.close(self.geometry.freeEdge(progress: 0.5, y: 400, pageHeight: 800), 315.6354))
         #expect(self.close(self.geometry.freeEdge(progress: 0.5, y: 800, pageHeight: 800), 339.9574))
         #expect(self.close(self.geometry.freeEdge(progress: 1, y: 400, pageHeight: 800), -396.073))
-        let edge = self.geometry.freeEdge(progress: 0.3, y: 400, pageHeight: 800)
-        #expect(self.close(self.geometry.progress(forFreeEdge: edge, y: 400, pageHeight: 800), 0.3))
+        let track = MekuriEdgeTrack(turn: .forward, geometry: self.geometry, pageHeight: 800, row: 400, reach: 400)
+        #expect(self.close(track.progress(travel: track.travel(progress: 0.3)), 0.3))
+        let sliding = MekuriEdgeTrack(turn: .forward, geometry: self.geometry, pageHeight: 800, row: 400, reach: 800, stackTravel: -200)
+        #expect(self.close(sliding.travel(progress: 0.6), track.travel(progress: 0.6) - 120))
     }
 
     @Test func theLiftingCornerMatchesTheKotlinImplementation() {

@@ -31,7 +31,8 @@ struct MekuriConfiguration: Equatable, Sendable {
     /// Peak opacity of the crease shadow, 0...1.
     var creaseShadowOpacity: CGFloat
 
-    /// Turn progress, 0...1, past which a released drag completes the turn.
+    /// Share of the finger's range, 0...1, a drag must cover before its
+    /// release completes the turn.
     var snapThreshold: CGFloat
 
     /// Horizontal velocity in points per second at which a release completes

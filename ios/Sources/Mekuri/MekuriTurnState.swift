@@ -39,6 +39,9 @@ struct MekuriTurnState: Equatable {
     /// Container height a finger grabbed the turn at; nil for a turn no
     /// finger started, which tracks the page's midline. A takeover keeps it.
     var grabY: CGFloat?
+    /// A finger or an accessibility action started or took over the turn;
+    /// a turn driven by the selection stays silent.
+    var playsHaptics = false
 
     var isBlocked: Bool { self.targetIndex == nil }
 

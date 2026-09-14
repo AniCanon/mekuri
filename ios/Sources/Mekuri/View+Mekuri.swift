@@ -41,8 +41,8 @@ public extension View {
         self.environment(\.mekuriTapZone, ratio)
     }
 
-    /// Turn progress, 0...1, past which a released drag completes the turn.
-    /// Defaults to 0.35.
+    /// Share of the finger's range, 0...1, a drag must cover before its
+    /// release completes the turn. Defaults to 0.35.
     func mekuriSnapThreshold(_ progress: CGFloat) -> some View {
         self.environment(\.mekuriSnapThreshold, progress)
     }
