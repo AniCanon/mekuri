@@ -1,8 +1,5 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/mekuri-dark.png">
-    <img src="assets/mekuri-light.png" alt="Mekuri" width="220">
-  </picture>
+  <img src="assets/mekuri-logo.png" alt="Mekuri" width="220">
 </p>
 
 <p align="center">
