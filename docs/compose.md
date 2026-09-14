@@ -26,7 +26,7 @@ dependencyResolutionManagement {
 ```kotlin
 // build.gradle.kts
 dependencies {
-    implementation("studio.anicanon.mekuri:mekuri:0.2.0")
+    implementation("studio.anicanon.mekuri:mekuri:0.3.0")
 }
 ```
 

@@ -197,7 +197,7 @@ Mekuri/
 ├── LICENSE
 ├── README.md
 ├── docs/             # the guides, this document and the porting notes
-├── assets/           # the mark, light and dark
+├── assets/           # the mark and the demo recording
 ├── ios/
 │   ├── Sources/Mekuri/
 │   ├── Tests/MekuriTests/

@@ -6,7 +6,7 @@ How to install the pager, how a page learns it is being turned, and every modifi
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/AniCanon/mekuri.git", from: "0.2.0")
+    .package(url: "https://github.com/AniCanon/mekuri.git", from: "0.3.0")
 ]
 ```
 
